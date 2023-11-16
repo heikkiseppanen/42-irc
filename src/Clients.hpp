@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 18:40:24 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/16 13:01:52 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/16 13:05:10 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ class Clients
 
         int     add_client(std::string const& nick);
         void    remove_client(int id);
-        void    print_clients();
+        void    print_clients() const;
 
     private:
         std::vector<ClientInfo> m_clients;
 
-        bool    is_empty(ClientInfo const& info);
+        bool    is_empty(ClientInfo const& info) const;
         void    empty_client(ClientInfo& info);
         int     find_next_id();
 };
