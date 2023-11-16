@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 18:40:24 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/16 13:05:10 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/16 13:27:37 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <string>
+#include <stack>
 
 struct ClientInfo
 {
@@ -34,10 +35,11 @@ class Clients
 
     private:
         std::vector<ClientInfo> m_clients;
+        std::stack<int>         m_free_ids;
+
 
         bool    is_empty(ClientInfo const& info) const;
         void    empty_client(ClientInfo& info);
-        int     find_next_id();
 };
 
 #endif
