@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 18:40:29 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/15 20:45:43 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/16 13:02:11 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,32 +15,58 @@
 #include <vector>
 #include <string>
 
-void    Clients::add_user(std::string const& nick)
+int    Clients::add_client(std::string const& nick)
 {
     int id = find_next_id();
     if (id == -1)
-        m_nicknames.push_back(nick);
+    {
+        id = m_clients.size();
+        m_clients.push_back(ClientInfo(id, nick));
+    }
     else
-        m_nicknames[id] = nick;
+    {
+        m_clients[id].m_nickname = nick;
+        m_clients[id].m_id = id;
+    }
+    return (id);
 }
 
-void    Clients::print_users()
+void    Clients::print_clients()
 {
-    for (std::vector<std::string>::iterator it = m_nicknames.begin(); it != m_nicknames.end(); it++)
+    for (std::vector<ClientInfo>::iterator it = m_clients.begin(); it != m_clients.end(); it++)
     {
-        if (it->empty())
+        if (is_empty(*it))
             std::cout << "Empty\n";
         else
-            std::cout << *it << "\n";
+            std::cout << "| " << it->m_id << " | " << it->m_nickname << " |\n";
     }
 }
 
 int Clients::find_next_id()
 {
-    for (std::vector<std::string>::iterator it = m_nicknames.begin(); it != m_nicknames.end(); it++)
+    for (std::vector<ClientInfo>::iterator it = m_clients.begin(); it != m_clients.end(); it++)
     {
-        if (it->empty())
-            return it - m_nicknames.begin();
+        if (is_empty(*it))
+            return it - m_clients.begin();
     }
     return -1;
+}
+
+void    Clients::remove_client(int id)
+{
+    if (m_clients.back().m_id == id)
+        m_clients.pop_back();
+    else
+        empty_client(m_clients[id]);
+}
+
+void    Clients::empty_client(ClientInfo& info)
+{
+    info.m_id = -1;
+    info.m_nickname.clear();
+}
+
+bool    Clients::is_empty(ClientInfo const& info)
+{
+    return info.m_id == -1;
 }
