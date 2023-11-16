@@ -6,14 +6,12 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/15 18:40:29 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/16 13:27:35 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/16 13:32:13 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Clients.hpp"
 #include <iostream>
-#include <vector>
-#include <string>
 
 int    Clients::add_client(std::string const& nick)
 {
