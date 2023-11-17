@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 16:33:48 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/17 16:46:57 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,9 @@ class CommandParser
         CommandParser();
 
         command get_command_type(std::string const& message);
+        void    parser(std::string const& message);
 
     private:
 
-         std::map<std::string, command> m_commands;
+        std::map<std::string, command> m_commands;
 };

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 16:30:05 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/17 16:47:11 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,4 +39,51 @@ command CommandParser::get_command_type(std::string const& message)
     if (it == m_commands.end())
         return ERR_NO_CMD;
     return it->second;
+}
+
+void    CommandParser::parser(std::string const& message)
+{
+    command cmd = get_command_type(message);
+    switch (cmd)
+    {
+        case ERR_NO_CMD:
+            //TODO
+            break;
+        case PRIVMSG:
+            //TODO
+            break;
+        case JOIN:
+            //TODO
+            break;
+        case NICK:
+            //TODO
+            break;
+        case USER:
+            //TODO
+            break;
+        case PASS:
+            //TODO
+            break;
+        case QUIT:
+            //TODO
+            break;
+        case KICK:
+            //TODO
+            break;
+        case INVITE:
+            //TODO
+            break;
+        case TOPIC:
+            //TODO
+            break;
+        case MODE:
+            //TODO
+            break;
+        case PING:
+            //TODO
+            break;
+        case PONG:
+            //TODO
+            break;
+    }
 }
