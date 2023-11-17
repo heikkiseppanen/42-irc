@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 16:10:27 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/17 16:30:05 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ CommandParser::CommandParser()
     m_commands["INVITE"] = INVITE;
     m_commands["TOPIC"] = TOPIC;
     m_commands["MODE"] = MODE;
+    m_commands["PING"] = PING;
+    m_commands["PONG"] = PONG;
 }
 
 command CommandParser::get_command_type(std::string const& message)

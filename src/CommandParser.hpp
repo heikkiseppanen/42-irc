@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 15:52:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/17 16:33:48 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@ enum command
     KICK,
     INVITE,
     TOPIC,
-    MODE
+    MODE,
+    PING,
+    PONG
 };
 
 class CommandParser
