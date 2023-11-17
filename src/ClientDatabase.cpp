@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/16 13:53:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/17 17:05:26 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "ClientDatabase.hpp"
 #include <iostream>
 
-int    ClientDatabase::add_client(std::string const& nick)
+unsigned int    ClientDatabase::add_client(std::string const& nick)
 {
     int id;
     if (m_free_ids.empty())
@@ -31,7 +31,7 @@ int    ClientDatabase::add_client(std::string const& nick)
     return (id);
 }
 
-void    ClientDatabase::remove_client(int id)
+void    ClientDatabase::remove_client(unsigned int id)
 {
     if (m_clients.size() - 1 == id)
     {
@@ -56,7 +56,7 @@ void    ClientDatabase::print_clients() const
 }
 
 //TODO input id validation
-std::string const& ClientDatabase::get_nickname(int id)
+std::string const& ClientDatabase::get_nickname(unsigned int id)
 {
     return m_clients[id].nickname;
 }
