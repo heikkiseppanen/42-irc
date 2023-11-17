@@ -8,6 +8,8 @@ OBJDIR := ./obj
 SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
+	Server.cpp \
+	ClientDatabase.cpp
 	ChannelDatabase.cpp\
 	Channel.cpp\
 	Client.cpp
