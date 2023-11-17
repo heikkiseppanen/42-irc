@@ -9,8 +9,6 @@ SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
 	Server.cpp \
-	EventSystem.cpp \
-	Socket.cpp \
 	ClientDatabase.cpp
 	ChannelDatabase.cpp\
 	Channel.cpp\
