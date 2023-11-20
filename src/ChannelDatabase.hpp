@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 18:04:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/20 12:34:51 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,13 @@ class ChannelDatabase
 {
     public:
 
-        void    add_channel();
+        void    add_channel(std::string const& channel_name, Channel& channel);
         void    join_channel(std::string const& channel_name, std::string const& password, unsigned int user_id);
-        void    invite(std::string const& channel_name, unsigned int user_id);
-        void    change_topic(std::string const& channel_name, std::string const& topic);
+        void    change_topic(std::string const& channel_name, std::string const& topic, unsigned int user_id);
+
+        //Operator only
+        void    kick(std::string const& channel_name, unsigned int user_id, unsigned int kick_id);
+        void    invite(std::string const& channel_name, unsigned int user_id, unsigned int invite_id);
 
     private:
 
@@ -49,4 +52,5 @@ class ChannelDatabase
         Channel get_channel(std::string const& channel_name);
         bool    is_invited(Channel channel, unsigned int user_id);
         bool    is_password_good(Channel channel, std::string const& password);
+        bool    is_operator(Channel channel, unsigned int user_id);
 };
