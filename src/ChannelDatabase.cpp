@@ -6,27 +6,43 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 12:46:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/20 13:19:47 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ChannelDatabase.hpp"
 #include <algorithm>
 
-void    ChannelDatabase::add_channel(std::string const& channel_name, Channel& channel)
+void    ChannelDatabase::add_channel(std::string const& channel_name, unsigned int user_id)
 {
+    Channel channel;
+
+    channel.users.push_back(user_id);
+    channel.operators.push_back(user_id);
+    channel.user_limit = 0;
+    channel.has_invite_only = false;
+    channel.has_topic_op_only = false;
+    channel.has_password = false;
     m_channels[channel_name] = channel;
+    //TODO RPL_TOPIC
 }
 
 void    ChannelDatabase::join_channel(std::string const& channel_name, std::string const& password, unsigned int user_id)
 {
-    Channel channel = get_channel(channel_name);
+    std::map<std::string, Channel>::iterator it = m_channels.find(channel_name);
+    if (it == m_channels.end())
+    {
+        add_channel(channel_name, user_id);
+        return;
+    }
 
+    Channel channel = it->second;
     if (!is_invited(channel, user_id))
         return;
 
     if (!is_password_good(channel, password))
         return;
+
     if (channel.user_limit != 0)
     {
         if (channel.users.size() == channel.user_limit)
