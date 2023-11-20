@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 13:34:32 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/20 13:53:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,15 @@
 #include <vector>
 #include <string>
 #include <map>
+
+//Channel modes
+
+#define INVITE_ONLY     0b1
+#define TOPIC_OP_ONLY   0b10
+#define PASSWORD        0b100
+#define OPERATOR        0b1000
+#define USER_LIMIT      0b10000
+#define ADD             0b100000
 
 struct Channel
 {
@@ -44,6 +53,7 @@ class ChannelDatabase
         //Operator only
         void    kick(std::string const& channel_name, unsigned int user_id, unsigned int kick_id);
         void    invite(std::string const& channel_name, unsigned int user_id, unsigned int invite_id);
+        void    mode(std::string const& channel_name, int mode, int user_limit, unsigned int user_id, std::string const& password);
 
     private:
 

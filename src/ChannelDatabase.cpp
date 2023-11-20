@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 13:19:47 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/20 14:00:39 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,51 @@ void    ChannelDatabase::invite(std::string const& channel_name, unsigned int us
     }
     //TODO remove from invite list or not?_?
     channel.invited.push_back(user_id);
+}
+
+void    ChannelDatabase::mode(std::string const& channel_name, int mode, int user_limit, unsigned int user_id, std::string const& password)
+{
+    Channel channel = get_channel(channel_name);
+    bool add = mode & ADD;
+    if (mode & INVITE_ONLY)
+        channel.has_invite_only = add;
+
+    if (mode & TOPIC_OP_ONLY)
+        channel.has_topic_op_only = add;
+
+    if (mode & PASSWORD)
+    {
+        channel.has_password = add;
+        if (add)
+            channel.password = password;
+    }
+
+    if (mode & OPERATOR)
+    {
+        std::vector<unsigned int>::iterator it = std::find(channel.operators.begin(), channel.operators.end(), user_id);
+        if (add)
+        {
+            if (it == channel.operators.end())
+                channel.operators.push_back(user_id);
+        }
+        else
+        {
+            if (it != channel.operators.end())
+                channel.operators.erase(it);
+        }
+    }
+
+    if (mode & USER_LIMIT)
+    {
+        if (add)
+        {
+            channel.user_limit = user_limit;
+        }
+        else
+        {
+            channel.user_limit = 0;
+        }
+    }
 }
 
 Channel ChannelDatabase::get_channel(std::string const& channel_name)
