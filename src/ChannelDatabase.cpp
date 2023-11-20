@@ -6,12 +6,13 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 14:00:39 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/20 15:04:29 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ChannelDatabase.hpp"
 #include <algorithm>
+#include <iostream>
 
 void    ChannelDatabase::add_channel(std::string const& channel_name, unsigned int user_id)
 {
@@ -36,7 +37,7 @@ void    ChannelDatabase::join_channel(std::string const& channel_name, std::stri
         return;
     }
 
-    Channel channel = it->second;
+    Channel& channel = it->second;
     if (!is_invited(channel, user_id))
         return;
 
@@ -51,13 +52,18 @@ void    ChannelDatabase::join_channel(std::string const& channel_name, std::stri
             return;
         }
     }
+    if (std::find(channel.users.begin(), channel.users.end(), user_id) != channel.users.end())
+    {
+        //TODO already on channel
+        return;
+    }
     //TODO tell everyone that user joined a channel
     channel.users.push_back(user_id);
 }
 
 void ChannelDatabase::change_topic(std::string const& channel_name, std::string const& topic, unsigned int user_id)
 {
-    Channel channel = get_channel(channel_name);
+    Channel& channel = get_channel(channel_name);
     if (channel.has_topic_op_only)
     {
         if (!is_operator(channel, user_id))
@@ -71,7 +77,7 @@ void ChannelDatabase::change_topic(std::string const& channel_name, std::string 
 
 void    ChannelDatabase::kick(std::string const& channel_name, unsigned int user_id, unsigned int kick_id)
 {
-    Channel channel = get_channel(channel_name);
+    Channel& channel = get_channel(channel_name);
     if (!is_operator(channel, user_id))
     {
         //TODO handle not op
@@ -96,19 +102,19 @@ void    ChannelDatabase::kick(std::string const& channel_name, unsigned int user
 
 void    ChannelDatabase::invite(std::string const& channel_name, unsigned int user_id, unsigned int invite_id)
 {
-    Channel channel = get_channel(channel_name);
+    Channel& channel = get_channel(channel_name);
     if (!is_operator(channel, user_id))
     {
         //TODO handle not op
         return;
     }
     //TODO remove from invite list or not?_?
-    channel.invited.push_back(user_id);
+    channel.invited.push_back(invite_id);
 }
 
-void    ChannelDatabase::mode(std::string const& channel_name, int mode, int user_limit, unsigned int user_id, std::string const& password)
+void    ChannelDatabase::mode(std::string const& channel_name, int mode, unsigned int user_limit, unsigned int user_id, std::string const& password)
 {
-    Channel channel = get_channel(channel_name);
+    Channel& channel = get_channel(channel_name);
     bool add = mode & ADD;
     if (mode & INVITE_ONLY)
         channel.has_invite_only = add;
@@ -129,7 +135,8 @@ void    ChannelDatabase::mode(std::string const& channel_name, int mode, int use
         if (add)
         {
             if (it == channel.operators.end())
-                channel.operators.push_back(user_id);
+                if (std::find(channel.users.begin(), channel.users.end(), user_id) != channel.users.end())
+                    channel.operators.push_back(user_id);
         }
         else
         {
@@ -151,18 +158,56 @@ void    ChannelDatabase::mode(std::string const& channel_name, int mode, int use
     }
 }
 
-Channel ChannelDatabase::get_channel(std::string const& channel_name)
+void    ChannelDatabase::print_all_channels()
+{
+    Channel channel;
+    for (std::map<std::string, Channel>::iterator it = m_channels.begin(); it != m_channels.end(); it++)
+    {
+        std::cout << it->first << "\n";
+        channel = it->second;
+        std::cout << "Users: ";
+        for (std::vector<unsigned int>::iterator it = channel.users.begin(); it != channel.users.end(); it++)
+        {
+            std::cout << *it << ", ";
+        }
+        std::cout << "\n";
+
+        std::cout << "Operators: ";
+        for (std::vector<unsigned int>::iterator it = channel.operators.begin(); it != channel.operators.end(); it++)
+        {
+            std::cout << *it << ", ";
+        }
+        std::cout << "\n";
+
+        std::cout << "invited: ";
+        for (std::vector<unsigned int>::iterator it = channel.invited.begin(); it != channel.invited.end(); it++)
+        {
+            std::cout << *it << ", ";
+        }
+        std::cout << "\n";
+
+        std::cout << "Topic: " << channel.topic << "\n";
+
+        std::cout << "Modes:\n";
+        std::cout << std::boolalpha;
+        std::cout << "\tInvite only: " << channel.has_invite_only << "\n";
+        std::cout << "\tTopic op only: " << channel.has_topic_op_only << "\n";
+        std::cout << "\tHas password: " << channel.has_password << " | " << channel.password << "\n";
+        std::cout << "\tUser limit: " << channel.user_limit << "\n\n";
+    }
+}
+
+Channel& ChannelDatabase::get_channel(std::string const& channel_name)
 {
     std::map<std::string, Channel>::iterator it = m_channels.find(channel_name);
     if (it == m_channels.end())
     {
         //TODO handle missing channel
-        return;
     }
     return it->second;
 }
 
-bool    ChannelDatabase::is_invited(Channel channel, unsigned int user_id)
+bool    ChannelDatabase::is_invited(Channel const& channel, unsigned int user_id) const
 {
     if (channel.has_invite_only)
     {
@@ -175,11 +220,11 @@ bool    ChannelDatabase::is_invited(Channel channel, unsigned int user_id)
     return true;
 }
 
-bool    ChannelDatabase::is_password_good(Channel channel, std::string const& password)
+bool    ChannelDatabase::is_password_good(Channel const& channel, std::string const& password) const
 {
     if (channel.has_password)
     {
-        if (channel.password == password)
+        if (channel.password != password)
         {
             //TODO incorrect password
             return false;
@@ -188,9 +233,9 @@ bool    ChannelDatabase::is_password_good(Channel channel, std::string const& pa
     return true;
 }
 
-bool    ChannelDatabase::is_operator(Channel channel, unsigned int user_id)
+bool    ChannelDatabase::is_operator(Channel const& channel, unsigned int user_id) const
 {
-    if (std::find(channel.operators.begin(), channel.operators.end(), user_id) == channel.invited.end())
+    if (std::find(channel.operators.begin(), channel.operators.end(), user_id) == channel.operators.end())
     {
         //TODO not operator
         return false;
