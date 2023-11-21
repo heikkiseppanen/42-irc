@@ -8,6 +8,26 @@
 
 #define IRC_ASSERT_THROW(COND, MSG) do { if (COND) { throw std::runtime_error(MSG); }} while(0);
 
+static int create_listening_socket(struct addrinfo const* address)
+{
+    int listener = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
+
+    if (listener >= 0)
+    {
+        // Remove "address already in use" error message
+        int option_value = true;
+        if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value)) < 0
+            || bind(listener, address->ai_addr, address->ai_addrlen) < 0
+            || listen(listener, 10) < 0)
+        {
+            close(listener);
+            return -1;
+        }
+    }
+
+    return listener;
+}
+
 Server::Server()
 {
     struct addrinfo hints = {};
@@ -27,11 +47,6 @@ Server::Server()
 
     for(struct addrinfo* it = address_list; it != NULL; it = it->ai_next)
     {
-        if (it->ai_protocol != IPPROTO_TCP)
-        {
-            continue;
-        }
-
         if (ipv4 == NULL && it->ai_family == AF_INET)
         {
             ipv4 = it;
@@ -42,31 +57,32 @@ Server::Server()
         }
     }
 
-    IRC_ASSERT_THROW(ipv6 == NULL && ipv4 == NULL, "No IPv4 or IPv6 supported socket found");
+    Socket listener = {};
+    listener.fd = -1;
+    listener.events = POLLIN;
 
-    struct addrinfo address = (ipv6 != NULL) ? *ipv6 : *ipv4;
+    if (ipv6 != NULL)
+    {
+        listener.fd = create_listening_socket(ipv6);
+
+        if (listener.fd < 0)
+        {
+            std::cerr << "IPv6 listening socket creation failure: " << std::strerror(errno) << '\n';
+        }
+    }
+    if (ipv4 != NULL && listener.fd < 0)
+    {
+        listener.fd = create_listening_socket(ipv4);
+
+        if (listener.fd < 0)
+        {
+            std::cerr << "IPv4 listening socket creation failure: " << std::strerror(errno) << '\n';
+        }
+    }
 
     freeaddrinfo(address_list);
 
-    Socket listener = {};
-
-    listener.fd = socket(address.ai_family, address.ai_socktype, address.ai_protocol);
-    listener.events = POLLIN;
-
-    IRC_ASSERT_THROW(listener.fd < 0, std::strerror(errno));
-
-    // Remove "address already in use" error message
-
-    int option_value = true;
-    setsockopt(listener.fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value));
-
-    std::cout << address.ai_family << ' ' << address.ai_protocol << "\n";
-    //IRC_ASSERT_THROW(bind(listener.fd, address.ai_addr, address.ai_addrlen) < 0, std::strerror(errno));
-    error = bind(listener.fd, address.ai_addr, address.ai_addrlen);
-    if (error < 0)
-        std::cout << errno << '\n';
-
-    IRC_ASSERT_THROW(listen(listener.fd, 10) < 0, std::strerror(errno));
+    IRC_ASSERT_THROW(listener.fd < 0, "No listening socket could be created.\n");
 
     m_socket_list.push_back(listener);
 }
@@ -110,8 +126,7 @@ void Server::run()
                 }
                 else if (read_bytes == 0)
                 {
-                    printf("socket %d hung up\n", client->fd);
-                    close(client->fd); // Bye!
+                    close(client->fd);
                     std::swap(*client, m_socket_list.back());
                     m_socket_list.pop_back();
                 }
@@ -136,9 +151,8 @@ void Server::run()
 
         if (listener.revents & POLLIN)
         {
-            struct sockaddr_storage address; // Client address
+            struct sockaddr_storage address;
             socklen_t address_size = sizeof(address);
-            // If listener is ready to read, handle new connection
             
             Socket client = {};
             client.fd = accept(listener.fd, (struct sockaddr *)&address, &address_size);
