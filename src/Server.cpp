@@ -2,6 +2,7 @@
 
 #include <netdb.h>
 #include <unistd.h>
+#include <arpa/inet.h> // inet_ntop
 
 #include <iostream>
 
@@ -21,11 +22,16 @@ Server::Server()
 
     IRC_ASSERT_THROW(error != 0, gai_strerror(error));
 
-    struct addrinfo* ipv4 = NULL;
     struct addrinfo* ipv6 = NULL;
+    struct addrinfo* ipv4 = NULL;
 
     for(struct addrinfo* it = address_list; it != NULL; it = it->ai_next)
     {
+        if (it->ai_protocol != IPPROTO_TCP)
+        {
+            continue;
+        }
+
         if (ipv4 == NULL && it->ai_family == AF_INET)
         {
             ipv4 = it;
@@ -36,7 +42,7 @@ Server::Server()
         }
     }
 
-    IRC_ASSERT_THROW(ipv4 == NULL && ipv6 == NULL, "No IPv4 or IPv6 supported socket found");
+    IRC_ASSERT_THROW(ipv6 == NULL && ipv4 == NULL, "No IPv4 or IPv6 supported socket found");
 
     struct addrinfo address = (ipv6 != NULL) ? *ipv6 : *ipv4;
 
@@ -54,7 +60,13 @@ Server::Server()
     int option_value = true;
     setsockopt(listener.fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value));
 
-    IRC_ASSERT_THROW(bind(listener.fd, address.ai_addr, address.ai_addrlen) < 0, std::strerror(errno));
+    std::cout << address.ai_family << ' ' << address.ai_protocol << "\n";
+    //IRC_ASSERT_THROW(bind(listener.fd, address.ai_addr, address.ai_addrlen) < 0, std::strerror(errno));
+    error = bind(listener.fd, address.ai_addr, address.ai_addrlen);
+    if (error < 0)
+        std::cout << errno << '\n';
+
+    IRC_ASSERT_THROW(listen(listener.fd, 10) < 0, std::strerror(errno));
 
     m_socket_list.push_back(listener);
 }
@@ -78,6 +90,7 @@ void Server::run()
     while(1)
     {
         int poll_count = poll(m_socket_list.data(), m_socket_list.size(), -1);
+
         if (poll_count == -1) { perror("poll"); }
 
         // Handle client events
@@ -93,7 +106,7 @@ void Server::run()
 
                 if (read_bytes < 0)
                 {
-                    perror("recv");
+                    perror("recv:");
                 }
                 else if (read_bytes == 0)
                 {
@@ -106,12 +119,13 @@ void Server::run()
                 {
                     for(std::vector<Socket>::iterator destination = m_socket_list.begin() + 1; destination != m_socket_list.end(); ++destination)
                     {
-                        if (destination->fd == client->fd)
+                        if (destination->fd == client->fd || (destination->revents & POLLOUT) == 0)
                         {
-                            if (send(destination->fd, socket_stream, read_bytes, 0) == -1)
-                            {
-                                perror("send");
-                            }
+                            continue;
+                        }
+                        if (send(destination->fd, socket_stream, read_bytes, 0) == -1)
+                        {
+                            perror("send:");
                         }
                     }
                 }
@@ -128,6 +142,7 @@ void Server::run()
             
             Socket client = {};
             client.fd = accept(listener.fd, (struct sockaddr *)&address, &address_size);
+            client.events = POLLIN | POLLOUT;
 
             if (client.fd == -1)
             {
@@ -137,12 +152,21 @@ void Server::run()
             {
                 m_socket_list.push_back(client);
 
-                printf("pollserver: new connection from %s on "
-                    "socket %d\n",
-                    inet_ntop(remoteaddr.ss_family,
-                        get_in_addr((struct sockaddr*)&remoteaddr),
-                        remoteIP, INET6_ADDRSTRLEN),
-                    newfd);
+                char buf[INET6_ADDRSTRLEN];
+
+                void *ip;
+
+                if (address.ss_family == AF_INET)
+                {
+                    ip = &(((struct sockaddr_in *)(&address))->sin_addr);
+                }
+                else
+                {
+                    ip = &(((struct sockaddr_in6 *)(&address))->sin6_addr);
+                }
+
+                printf("pollserver: new connection from %s on socket %d\n",
+                    inet_ntop(address.ss_family, ip, buf, INET6_ADDRSTRLEN), client.fd);
             }
         }
     }
