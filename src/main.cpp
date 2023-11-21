@@ -8,7 +8,10 @@ int main()
     channels.join_channel("Test", "", 1);
     channels.join_channel("Test", "", 2);
 
-    channels.mode("Test", ADD | OPERATOR | USER_LIMIT | PASSWORD, 5, 2, "pass");
+    Channel& channel = channels.get_channel("Test");
+    channels.set_user_limit(channel, ADD, 5);
+    channels.set_password(channel, ADD, "pass");
+    channels.set_op(channel, 1, 2);
 
     channels.print_all_channels();
 

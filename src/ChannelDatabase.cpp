@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 15:04:29 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/21 14:34:38 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,49 +112,60 @@ void    ChannelDatabase::invite(std::string const& channel_name, unsigned int us
     channel.invited.push_back(invite_id);
 }
 
-void    ChannelDatabase::mode(std::string const& channel_name, int mode, unsigned int user_limit, unsigned int user_id, std::string const& password)
+void    ChannelDatabase::set_invite_only(Channel& channel, bool mode)
 {
-    Channel& channel = get_channel(channel_name);
-    bool add = mode & ADD;
-    if (mode & INVITE_ONLY)
-        channel.has_invite_only = add;
+    channel.has_invite_only = mode;
+}
 
-    if (mode & TOPIC_OP_ONLY)
-        channel.has_topic_op_only = add;
+void    ChannelDatabase::set_op_topic(Channel& channel, bool mode)
+{
+    channel.has_invite_only = mode;
+}
 
-    if (mode & PASSWORD)
+void    ChannelDatabase::set_password(Channel& channel, bool mode, std::string const& pass)
+{
+    channel.has_password = mode;
+    if (mode == ADD)
     {
-        channel.has_password = add;
-        if (add)
-            channel.password = password;
+        channel.password = pass;
     }
-
-    if (mode & OPERATOR)
+    else
     {
-        std::vector<unsigned int>::iterator it = std::find(channel.operators.begin(), channel.operators.end(), user_id);
-        if (add)
+        channel.password.clear();
+    }
+}
+
+void    ChannelDatabase::set_op(Channel& channel, bool mode, unsigned int user_id)
+{
+    std::vector<unsigned int>::iterator it = std::find(channel.operators.begin(), channel.operators.end(), user_id);
+    if (mode == ADD)
+    {
+        if (it == channel.operators.end())
         {
-            if (it == channel.operators.end())
-                if (std::find(channel.users.begin(), channel.users.end(), user_id) != channel.users.end())
-                    channel.operators.push_back(user_id);
-        }
-        else
-        {
-            if (it != channel.operators.end())
-                channel.operators.erase(it);
+            if (std::find(channel.users.begin(), channel.users.end(), user_id) != channel.users.end())
+            {
+                channel.operators.push_back(user_id);
+            }
         }
     }
-
-    if (mode & USER_LIMIT)
+    else
     {
-        if (add)
+        if (it != channel.operators.end())
         {
-            channel.user_limit = user_limit;
+            channel.operators.erase(it);
         }
-        else
-        {
-            channel.user_limit = 0;
-        }
+    }
+}
+
+void    ChannelDatabase::set_user_limit(Channel& channel, bool mode, unsigned int user_limit)
+{
+    if (mode == ADD)
+    {
+        channel.user_limit = user_limit;
+    }
+    else
+    {
+        channel.user_limit = 0;
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/20 14:46:16 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/21 14:47:57 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,8 @@
 
 //Channel modes
 
-#define INVITE_ONLY     0b1
-#define TOPIC_OP_ONLY   0b10
-#define PASSWORD        0b100
-#define OPERATOR        0b1000
-#define USER_LIMIT      0b10000
-#define ADD             0b100000
+#define ADD     true
+#define REMOVE  false
 
 struct Channel
 {
@@ -45,23 +41,29 @@ class ChannelDatabase
 {
     public:
 
-        void    add_channel(std::string const& channel_name, unsigned int user_id);
-        void    join_channel(std::string const& channel_name, std::string const& password, unsigned int user_id);
-        void    change_topic(std::string const& channel_name, std::string const& topic, unsigned int user_id);
+        Channel& get_channel(std::string const& channel_name);
+        void add_channel(std::string const& channel_name, unsigned int user_id);
+        void join_channel(std::string const& channel_name, std::string const& password, unsigned int user_id);
+        void change_topic(std::string const& channel_name, std::string const& topic, unsigned int user_id);
 
         //Operator only
-        void    kick(std::string const& channel_name, unsigned int user_id, unsigned int kick_id);
-        void    invite(std::string const& channel_name, unsigned int user_id, unsigned int invite_id);
-        void    mode(std::string const& channel_name, int mode, unsigned int user_limit, unsigned int user_id, std::string const& password);
+        void kick(std::string const& channel_name, unsigned int user_id, unsigned int kick_id);
+        void invite(std::string const& channel_name, unsigned int user_id, unsigned int invite_id);
 
-        void    print_all_channels();
+        //Channel modes
+        void set_invite_only(Channel& channel, bool mode);
+        void set_op_topic(Channel& channel, bool mode);
+        void set_password(Channel& channel, bool mode, std::string const& pass);
+        void set_op(Channel& channel, bool mode, unsigned int user_id);
+        void set_user_limit(Channel& channel, bool mode, unsigned int user_limit);
+
+        void print_all_channels();
 
     private:
 
         std::map<std::string, Channel>    m_channels;
 
-        Channel& get_channel(std::string const& channel_name);
-        bool    is_invited(Channel const& channel, unsigned int user_id) const;
-        bool    is_password_good(Channel const& channel, std::string const& password) const;
-        bool    is_operator(Channel const& channel, unsigned int user_id) const;
+        bool is_invited(Channel const& channel, unsigned int user_id) const;
+        bool is_password_good(Channel const& channel, std::string const& password) const;
+        bool is_operator(Channel const& channel, unsigned int user_id) const;
 };
