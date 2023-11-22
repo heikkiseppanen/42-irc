@@ -3,17 +3,34 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 16:47:11 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 16:53:22 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandParser.hpp"
 #include <iostream>
 
-CommandParser::CommandParser()
+// CommandParser::CommandParser()
+// {
+//     m_commands["PRIVMSG"] = PRIVMSG;
+//     m_commands["JOIN"] = JOIN;
+//     m_commands["NICK"] = NICK;
+//     m_commands["USER"] = USER;
+//     m_commands["PASS"] = PASS;
+//     m_commands["QUIT"] = QUIT;
+//     m_commands["KICK"] = KICK;
+//     m_commands["INVITE"] = INVITE;
+//     m_commands["TOPIC"] = TOPIC;
+//     m_commands["MODE"] = MODE;
+//     m_commands["PING"] = PING;
+//     m_commands["PONG"] = PONG;
+// }
+
+CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
+: m_ClData(ClData), m_ChData(ChData)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -41,8 +58,8 @@ command CommandParser::get_command_type(std::string const& message)
     return it->second;
 }
 
-void    CommandParser::parser(std::string const& message)
-{
+void    CommandParser::parser(std::string const& message, unsigned int user_id)
+{ 
     command cmd = get_command_type(message);
     switch (cmd)
     {
@@ -50,7 +67,7 @@ void    CommandParser::parser(std::string const& message)
             //TODO
             break;
         case PRIVMSG:
-            //TODO
+            // send_privmsg(message, user_id);
             break;
         case JOIN:
             //TODO
@@ -80,10 +97,29 @@ void    CommandParser::parser(std::string const& message)
             //TODO
             break;
         case PING:
-            //TODO
+            send_ping(message, user_id);
             break;
         case PONG:
-            //TODO
+            // send_pong(message, user_id);
             break;
     }
+}
+
+void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
+{
+    if (message[6] != ' ')
+        std::cout << "FAIL\n";
+    std::cout << "SUCCESS\n";
+}
+
+void CommandParser::send_ping(std::string const& message, unsigned int user_id)
+{
+    std::string target = message.substr(5, message.length() - 5);
+    /*TODO IF TARGET EXISTS IN DATABASE*/
+}
+
+void send_pong(std::string const& message, unsigned int user_id)
+{
+    std::string target = message.substr(5, message.length() - 5);
+    /*TODO IF TARGET EXISTS IN DATABASE*/
 }
