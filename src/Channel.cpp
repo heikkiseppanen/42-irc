@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 13:39:08 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 16:19:54 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int Channel::join_channel(unsigned int user_id, std::string const& password)
         return -1;
     }
 
-    if (!is_password_good(password))
+    if (!is_valid_password(password))
     {
         //TODO return ERR_bad_password
         return -1;
@@ -267,7 +267,7 @@ bool Channel::is_invited(unsigned int user_id) const
     return true;
 }
 
-bool Channel::is_password_good(std::string const& password) const
+bool Channel::is_valid_password(std::string const& password) const
 {
     if (m_has_password)
     {
