@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 11:26:59 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 10:38:25 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,12 @@ class Channel
         void set_op(bool mode, unsigned int user_id);
         void set_user_limit(bool mode, unsigned int user_limit);
 
+        //Getters
+        inline std::vector<unsigned int> const& get_users() const { return m_users; }
+
         void print_channel();
 
+        //
         bool is_invited(unsigned int user_id) const;
         bool is_password_good(std::string const& password) const;
         bool is_operator(unsigned int user_id) const;
