@@ -10,9 +10,9 @@ int main()
     channel.join_channel(1, "");
     channel.join_channel(2, "");
 
-    channel.set_user_limit(ADD, 5);
-    channel.set_password(ADD, "pass");
-    channel.set_op(ADD, 2);
+    channel.set_user_limit(1, ADD, 5);
+    channel.set_password(1, ADD, "pass");
+    channel.set_op(1, ADD, 2);
 
     channels.print_all_channels();
 
@@ -20,9 +20,9 @@ int main()
     channel.join_channel(4, "pass");
     channel.join_channel(5, "pass");
 
-    channel.kick(5);
+    channel.kick(2, 5);
 
-    channel.change_topic("Good topic");
+    channel.change_topic(1, "Good topic");
 
     channels.print_all_channels();
 
@@ -33,7 +33,7 @@ int main()
 
     channels.print_all_channels();
 
-    channel.change_topic("Bad topic");
+    channel.change_topic(3, "Bad topic");
 
     channels.print_all_channels();
     return 0;
