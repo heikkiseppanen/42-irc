@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/21 16:57:06 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 10:25:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void Channel::change_topic(std::string const& topic)
     m_topic = topic;
 }
 
-void Channel::kick(unsigned int user_id)
+unsigned int Channel::kick(unsigned int user_id)
 {
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), user_id);
     if (it == m_users.end())
@@ -74,6 +74,7 @@ void Channel::kick(unsigned int user_id)
         m_operators.erase(it);
     }
     //TODO remove channel if empty
+    return m_users.size();
 }
 
 void Channel::invite(unsigned int user_id)

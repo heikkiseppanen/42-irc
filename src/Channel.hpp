@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/21 16:57:20 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 10:25:09 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Channel
         void change_topic(std::string const& topic);
 
         //Operator only
-        void kick(unsigned int user_id);
+        unsigned int kick(unsigned int user_id);
         void invite(unsigned int user_id);
 
         //Channel modes
@@ -39,7 +39,15 @@ class Channel
         void set_op(bool mode, unsigned int user_id);
         void set_user_limit(bool mode, unsigned int user_limit);
 
+        //Getters
+        inline std::vector<unsigned int> const& get_users() const { return m_users; }
+
         void print_channel();
+
+        //
+        bool is_invited(unsigned int user_id) const;
+        bool is_password_good(std::string const& password) const;
+        bool is_operator(unsigned int user_id) const;
 
     private: 
 
@@ -56,7 +64,4 @@ class Channel
         bool m_has_topic_op_only;
         bool m_has_password;
 
-        bool is_invited(unsigned int user_id) const;
-        bool is_password_good(std::string const& password) const;
-        bool is_operator(unsigned int user_id) const;
 };
