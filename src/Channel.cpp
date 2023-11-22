@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 10:42:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 13:39:08 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,74 +19,133 @@ Channel::Channel(unsigned int user_id)
     m_operators.push_back(user_id);
     m_user_limit = 0;
     m_has_invite_only = false;
-    m_has_topic_op_only = false;
+    m_has_op_topic = false;
     m_has_password = false;
 }
 
-void Channel::join_channel(unsigned int user_id, std::string const& password)
+int Channel::join_channel(unsigned int user_id, std::string const& password)
 {
+    if (!is_invited(user_id))
+    {
+        //TODO return ERR_not_invited
+        return -1;
+    }
+
+    if (!is_password_good(password))
+    {
+        //TODO return ERR_bad_password
+        return -1;
+    }
+
+    if (!is_not_full())
+    {
+        //TODO return ERR_channel_full
+        return -1;
+    }
+
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
     {
-        //TODO already on channel
-        return;
+        //TODO ERR_already_on_channel
+        return -1;
     }
     //TODO remove from invite list ?_?
 
-    //TODO tell everyone that user joined a channel
     m_users.push_back(user_id);
+    //TODO return RPL_user_joined_channel
+    return 0;
 }
 
-void Channel::change_topic(std::string const& topic)
+int Channel::change_topic(unsigned int user_id, std::string const& topic)
 {
-    //TODO tell everyone that topic changed
+    if (m_has_op_topic && !is_operator(user_id))
+    {
+        //TODO return ERR_op_topic
+        return -1;
+    }
     m_topic = topic;
+    //TODO return RPL_TOPIC
+    return 0;
 }
 
-unsigned int Channel::kick(unsigned int user_id)
+int Channel::kick(unsigned int user_id, unsigned int kick_id)
 {
-    std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), user_id);
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
+
+    std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), kick_id);
     if (it == m_users.end())
     {
-        //TODO user not found
-        return;
+        //TODO ERR_user_not_found
+        return -1;
     }
-    //TODO tell everyone user was kicked from the channel
     m_users.erase(it);
 
-    it = std::find(m_operators.begin(), m_operators.end(), user_id);
+    it = std::find(m_operators.begin(), m_operators.end(), kick_id);
     if (it != m_operators.end())
     {
         m_operators.erase(it);
     }
+    //TODO return RPL_user_left
     //TODO remove channel if empty
     return m_users.size();
 }
 
-void Channel::invite(unsigned int user_id)
+int Channel::invite(unsigned int user_id, unsigned int invite_id)
 {
-    std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), user_id);
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
+
+    std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), invite_id);
     if (it == m_invited.end())
     {
-        m_invited.push_back(user_id);
+        m_invited.push_back(invite_id);
     }
     else
     {
-        //TODO already invited
+        //TODO return ERR_already_invited
     }
+    //TODO return RPL_invited
+    return 0;
 }
 
-void Channel::set_invite_only(bool mode)
+int Channel::set_invite_only(unsigned int user_id, bool mode)
 {
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
     m_has_invite_only = mode;
+    //TODO return RPL_mode
+    return 0;
 }
 
-void Channel::set_op_topic(bool mode)
+int Channel::set_op_topic(unsigned int user_id, bool mode)
 {
-    m_has_invite_only = mode;
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
+    m_has_op_topic = mode;
+    //TODO return RPL_mode
+    return 0;
 }
 
-void Channel::set_password(bool mode, std::string const& pass)
+int Channel::set_password(unsigned int user_id, bool mode, std::string const& pass)
 {
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
+
     m_has_password = mode;
     if (mode == ADD)
     {
@@ -96,23 +155,36 @@ void Channel::set_password(bool mode, std::string const& pass)
     {
         m_password.clear();
     }
+    return 0;
 }
 
-void Channel::set_op(bool mode, unsigned int user_id)
+int Channel::set_op(unsigned int user_id, bool mode, unsigned int affect_id)
 {
-    std::vector<unsigned int>::iterator it = std::find(m_operators.begin(), m_operators.end(), user_id);
+    if (!is_operator(user_id))
+    {
+        //TODO return ERR_not_op
+        return -1;
+    }
+
+    std::vector<unsigned int>::iterator it = std::find(m_operators.begin(), m_operators.end(), affect_id);
     if (mode == ADD)
     {
         if (it == m_operators.end())
         {
-            if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
+            if (std::find(m_users.begin(), m_users.end(), affect_id) != m_users.end())
             {
-                m_operators.push_back(user_id);
+                m_operators.push_back(affect_id);
             }
             else
             {
-                //Todo already op
+                //TODO ERR_user_not_found
+                return -1;
             }
+        }
+        else
+        {
+            //TODO ERR_user_already_op
+            return -1;
         }
     }
     else
@@ -123,13 +195,21 @@ void Channel::set_op(bool mode, unsigned int user_id)
         }
         else
         {
-            //Todo already not op
+            //TODO ERR_user_already_not_op
         }
     }
+    //TODO RPL_name_list
+    return 0;
 }
 
-void Channel::set_user_limit(bool mode, unsigned int user_limit)
+int Channel::set_user_limit(unsigned int user_id, bool mode, unsigned int user_limit)
 {
+    if (!is_operator(user_id))
+    {
+        //TODO ERR_not_op
+        return -1;
+    }
+
     if (mode == ADD)
     {
         m_user_limit = user_limit;
@@ -138,6 +218,8 @@ void Channel::set_user_limit(bool mode, unsigned int user_limit)
     {
         m_user_limit = 0;
     }
+    //TODO RPL_mode
+    return 0;
 }
 
 void Channel::print_channel()
@@ -168,7 +250,7 @@ void Channel::print_channel()
     std::cout << "Modes:\n";
     std::cout << std::boolalpha;
     std::cout << "\tInvite only: " << m_has_invite_only << "\n";
-    std::cout << "\tTopic op only: " << m_has_topic_op_only << "\n";
+    std::cout << "\tTopic op only: " << m_has_op_topic << "\n";
     std::cout << "\tHas password: " << m_has_password << " | " << m_password << "\n";
     std::cout << "\tUser limit: " << m_user_limit << "\n\n";
 }
@@ -179,7 +261,6 @@ bool Channel::is_invited(unsigned int user_id) const
     {
         if (std::find(m_invited.begin(), m_invited.end(), user_id) == m_invited.end())
         {
-            //TODO handle not invited
             return false;
         }
     }
@@ -192,7 +273,6 @@ bool Channel::is_password_good(std::string const& password) const
     {
         if (m_password != password)
         {
-            //TODO incorrect password
             return false;
         }
     }
@@ -203,7 +283,6 @@ bool Channel::is_operator(unsigned int user_id) const
 {
     if (std::find(m_operators.begin(), m_operators.end(), user_id) == m_operators.end())
     {
-        //TODO not operator
         return false;
     }
     return true;
@@ -215,7 +294,6 @@ bool Channel::is_not_full() const
     {
         if (m_users.size() == m_user_limit)
         {
-            //TODO handle full channel
             return false;
         }
     }
