@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 10:25:14 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 10:42:51 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,21 +25,6 @@ Channel::Channel(unsigned int user_id)
 
 void Channel::join_channel(unsigned int user_id, std::string const& password)
 {
-    if (!is_invited(user_id))
-        return;
-
-    if (!is_password_good(password))
-        return;
-
-    if (m_user_limit != 0)
-    {
-        if (m_users.size() == m_user_limit)
-        {
-            //TODO handle full channel
-            return;
-        }
-    }
-
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
     {
         //TODO already on channel
@@ -79,7 +64,15 @@ unsigned int Channel::kick(unsigned int user_id)
 
 void Channel::invite(unsigned int user_id)
 {
-    m_invited.push_back(user_id);
+    std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), user_id);
+    if (it == m_invited.end())
+    {
+        m_invited.push_back(user_id);
+    }
+    else
+    {
+        //TODO already invited
+    }
 }
 
 void Channel::set_invite_only(bool mode)
@@ -212,6 +205,19 @@ bool Channel::is_operator(unsigned int user_id) const
     {
         //TODO not operator
         return false;
+    }
+    return true;
+}
+
+bool Channel::is_not_full() const
+{
+    if (m_user_limit != 0)
+    {
+        if (m_users.size() == m_user_limit)
+        {
+            //TODO handle full channel
+            return false;
+        }
     }
     return true;
 }

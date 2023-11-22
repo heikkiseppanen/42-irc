@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 10:25:09 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/22 10:38:25 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Channel
         bool is_invited(unsigned int user_id) const;
         bool is_password_good(std::string const& password) const;
         bool is_operator(unsigned int user_id) const;
+        bool is_not_full() const;
 
     private: 
 
