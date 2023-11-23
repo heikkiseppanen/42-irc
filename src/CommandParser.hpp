@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 16:53:34 by jole             ###   ########.fr       */
+/*   Updated: 2023/11/23 13:55:20 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,15 @@ class CommandParser
         CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData);
 
         command get_command_type(std::string const& message);
-        void    parser(std::string const& message, unsigned int user_id);
+        void parser(std::string const& message, unsigned int user_id);
 
     private:
     
         std::map<std::string, command> m_commands;
-        ClientDatabase& m_ClData;
-        ChannelDatabase& m_ChData;
+        ClientDatabase& m_ClientData;
+        ChannelDatabase& m_ChannelData;
         
+
         void send_privmsg(std::string const& message, unsigned int user_id);
         void send_ping(std::string const& message, unsigned int user_id);
         void send_pong(std::string const& message, unsigned int user_id);

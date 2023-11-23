@@ -6,12 +6,13 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 16:53:22 by jole             ###   ########.fr       */
+/*   Updated: 2023/11/23 14:47:13 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandParser.hpp"
 #include <iostream>
+#include <vector>
 
 // CommandParser::CommandParser()
 // {
@@ -30,7 +31,7 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClData(ClData), m_ChData(ChData)
+: m_ClientData(ClData), m_ChannelData(ChData)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -67,7 +68,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case PRIVMSG:
-            // send_privmsg(message, user_id);
+            send_privmsg(message, user_id);
             break;
         case JOIN:
             //TODO
@@ -100,26 +101,57 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             send_ping(message, user_id);
             break;
         case PONG:
-            // send_pong(message, user_id);
+            send_pong(message, user_id);
             break;
     }
 }
 
+//"PRIVMSG aaa,bbb,ccc :message to be sent"
+std::vector<std::string> get_targets(std::string const& message, unsigned int skip)
+{
+    std::string::size_type pos = message.find(":");
+    if (std::string::npos == pos)
+        std::cout << "not found";
+    std::cout << "found:" << message.substr(skip, pos);
+    std::vector<std::string> vec;
+    return vec;
+}
+
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
-    if (message[6] != ' ')
-        std::cout << "FAIL\n";
-    std::cout << "SUCCESS\n";
+    user_id++; // delete
+    std::cout << "TYPE: PRIVMSG | ORIGIN:" << user_id << '\n';
+    std::vector<std::string> targets = get_targets(message, 7);
+    //TODO IF CHANNEL EXISTS
+        //return (ERR_CANNOTSENDTOCHAN);
+    //TODO IF TARGET EXISTS IN DATABASE
+        //return (ERR_NORECIPIENT);
+    //TODO IF NICK EXISTS IN DATABASE
+        //return (ERR_NOSUCHNICK);
+    //TODO IF NO TEXT TO SEND
+        // return (ERR_NOTEXTTOSEND);
+    //TODO IF TOO MANY TARGETS
+        // return (ERR_TOOMANYTARGETS);
+    //ERR_WILDTOPLEVEL
+    //ERR_NOTOPLEVEL
+    //RPL_AWAY
 }
 
 void CommandParser::send_ping(std::string const& message, unsigned int user_id)
 {
+    user_id++; // delete
     std::string target = message.substr(5, message.length() - 5);
-    /*TODO IF TARGET EXISTS IN DATABASE*/
+    std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
+    //ERR_NOORIGIN
+    //ERR_NOSUCHSERVER
 }
 
-void send_pong(std::string const& message, unsigned int user_id)
+void CommandParser::send_pong(std::string const& message, unsigned int user_id)
 {
+    user_id++; // delete
     std::string target = message.substr(5, message.length() - 5);
+    std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
     /*TODO IF TARGET EXISTS IN DATABASE*/
+    //ERR_NOORIGIN
+    //ERR_NOSUCHSERVER
 }
