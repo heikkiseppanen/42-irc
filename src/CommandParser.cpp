@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/23 14:47:13 by jole             ###   ########.fr       */
+/*   Updated: 2023/11/23 15:19:04 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,10 @@ command CommandParser::get_command_type(std::string const& message)
 }
 
 void    CommandParser::parser(std::string const& message, unsigned int user_id)
-{ 
+{
+    (void)m_ClientData; //delete
+    (void)m_ChannelData; //delete
+    
     command cmd = get_command_type(message);
     switch (cmd)
     {
@@ -112,7 +115,12 @@ std::vector<std::string> get_targets(std::string const& message, unsigned int sk
     std::string::size_type pos = message.find(":");
     if (std::string::npos == pos)
         std::cout << "not found";
-    std::cout << "found:" << message.substr(skip, pos);
+    std::cout << "found:" << message.substr(skip + 1, pos);
+    std::string substr = message.substr(skip + 1, pos);
+    pos = substr.find(":");
+    if (std::string::npos == pos)
+        std::cout << "not found";
+    std::cout << "\nfound:" << substr.substr(0, pos - 1); 
     std::vector<std::string> vec;
     return vec;
 }
