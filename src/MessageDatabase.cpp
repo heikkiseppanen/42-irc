@@ -6,12 +6,12 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 14:04:51 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 17:57:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/23 13:04:03 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "MessageDatabase.hpp"
-#include "algorithm"
+#include <algorithm>
 
 void    MessageDatabase::message_add(std::string const& message, unsigned int reference_count)
 {
