@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientDatabase.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 15:21:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 17:26:10 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ unsigned int ClientDatabase::add_client()
         id = m_free_ids.top();
         m_free_ids.pop();
     }
-    return (id);
+    return id;
 }
 
 void ClientDatabase::remove_client(unsigned int id)

@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/23 15:19:04 by jole             ###   ########.fr       */
+/*   Updated: 2023/11/23 19:22:18by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClientData(ClData), m_ChannelData(ChData)
+: m_ClientDatabase(ClData), m_ChannelDatabase(ChData)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -61,8 +61,7 @@ command CommandParser::get_command_type(std::string const& message)
 
 void    CommandParser::parser(std::string const& message, unsigned int user_id)
 {
-    (void)m_ClientData; //delete
-    (void)m_ChannelData; //delete
+    (void)m_ClientDatabase; //delete
     
     command cmd = get_command_type(message);
     switch (cmd)
@@ -109,40 +108,85 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
     }
 }
 
-//"PRIVMSG aaa,bbb,ccc :message to be sent"
 std::vector<std::string> get_targets(std::string const& message, unsigned int skip)
 {
     std::string::size_type pos = message.find(":");
-    if (std::string::npos == pos)
-        std::cout << "not found";
-    std::cout << "found:" << message.substr(skip + 1, pos);
     std::string substr = message.substr(skip + 1, pos);
-    pos = substr.find(":");
-    if (std::string::npos == pos)
-        std::cout << "not found";
-    std::cout << "\nfound:" << substr.substr(0, pos - 1); 
+    pos = substr.find(" ");
+    substr = substr.substr(0, pos);
     std::vector<std::string> vec;
-    return vec;
+    pos = substr.find(",");
+    while (pos != std::string::npos)
+    {
+        vec.push_back(substr.substr(0, pos));     
+        substr.erase(0, substr.find(",") + 1);
+        pos = substr.find(",");
+    }
+    vec.push_back(substr);
+    return (vec);
+}
+
+int check_if_channel(std::vector<std::string> targets)
+{
+    for (unsigned int i = 0; i < targets.size(); i++)
+    {
+        if (targets[i][0] == '#')
+        {
+            if (i + 1 == targets.size())
+                return (1);
+            continue;
+        }
+    }
+    return 0;
+}
+
+int create_text(std::string const& message, std::string &text)
+{
+    std::string::size_type pos = message.find(" ");
+    text = message.substr(pos + 1, message.length() - pos);
+    pos = text.find(" ");
+    text = text.substr(pos + 1, text.length() - pos);
+    if (text[0] == ':')
+        text = text.substr(1, text.length() - 1);
+    if (text[0] == '\0')
+        return (0);
+    return (1);
 }
 
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
-    std::cout << "TYPE: PRIVMSG | ORIGIN:" << user_id << '\n';
+    std::cout << "MESSAGE:" << message << '\n';
     std::vector<std::string> targets = get_targets(message, 7);
-    //TODO IF CHANNEL EXISTS
-        //return (ERR_CANNOTSENDTOCHAN);
-    //TODO IF TARGET EXISTS IN DATABASE
-        //return (ERR_NORECIPIENT);
-    //TODO IF NICK EXISTS IN DATABASE
-        //return (ERR_NOSUCHNICK);
-    //TODO IF NO TEXT TO SEND
-        // return (ERR_NOTEXTTOSEND);
-    //TODO IF TOO MANY TARGETS
-        // return (ERR_TOOMANYTARGETS);
+    
+    if (check_if_channel(targets) == 1)
+    {
+        for (unsigned int i = 0; i < targets.size(); i++)
+        {
+            if (m_ChannelDatabase.is_channel(targets[i]))
+            {
+                if (i == targets.size())
+                    std::cout << "SEND MSG TO CHANNELS\n"; //TODO SEND MSG TO CHANNEL
+                continue;            
+            }
+        }
+        std::cout << "ERR_CANNOTSENDTOCHAN\n"; //return (ERR_CANNOTSENDTOCHAN);
+    } 
+    else
+    {
+        //TODO IF TARGET(S) EXISTS IN DATABASE
+            //return (ERR_NORECIPIENT);
+        //TODO IF NICK EXISTS IN DATABASE
+            //return (ERR_NOSUCHNICK);
+    std::string text;
+    if (!create_text(message, text))
+            std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
+    std::cout << "TEXT:[" << text << "]\n";
+        //TODO IF TOO MANY TARGETS
+            // return (ERR_TOOMANYTARGETS);
     //ERR_WILDTOPLEVEL
     //ERR_NOTOPLEVEL
-    //RPL_AWAY
+    }
 }
 
 void CommandParser::send_ping(std::string const& message, unsigned int user_id)
