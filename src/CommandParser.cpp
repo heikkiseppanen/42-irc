@@ -97,7 +97,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case MODE:
-            //TODO
+            change_mode(message, user_id);
             break;
         case PING:
             send_ping(message, user_id);
@@ -156,7 +156,7 @@ int create_text(std::string const& message, std::string &text)
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
-    std::cout << "MESSAGE:" << message << '\n';
+    std::cout << "MESSAGE:" << message << '\n'; //delete
     std::vector<std::string> targets = get_targets(message, 7);
     
     if (check_if_channel(targets) == 1)
@@ -181,7 +181,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     std::string text;
     if (!create_text(message, text))
             std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
-    std::cout << "TEXT:[" << text << "]\n";
+    std::cout << "TEXT:[" << text << "]\n";  //delete
         //TODO IF TOO MANY TARGETS
             // return (ERR_TOOMANYTARGETS);
     //ERR_WILDTOPLEVEL
@@ -189,11 +189,20 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     }
 }
 
+void CommandParser::change_mode(std::string const& message, unsigned int user_id)
+{
+    // i set/remove invite only
+    // t set/remove restrictions of topic command to operaators
+    // k set/remove channel password
+    // o give/take channel operator priviledge
+}
+
 void CommandParser::send_ping(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
     std::string target = message.substr(5, message.length() - 5);
     std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
+    /*TODO IF TARGET EXISTS IN DATABASE*/
     //ERR_NOORIGIN
     //ERR_NOSUCHSERVER
 }
