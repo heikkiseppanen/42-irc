@@ -12,6 +12,7 @@
 
 #include "CommandParser.hpp"
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 // CommandParser::CommandParser()
@@ -188,13 +189,14 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //ERR_NOTOPLEVEL
     }
 }
+
 //MODE #Finnish +il 100 Wiz
 /* 
 i - invite-only channel flag;
 t - topic settable by channel operator only flag;
+k - set a channel key (password).
 o - give/take channel operator privileges
 l - set the user limit to channel;
-k - set a channel key (password).
 */
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
@@ -220,28 +222,48 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     vec.push_back(split.substr(0, pos));
     for (unsigned int i = 0; i < vec.size(); i++)
         std::cout << "ARG" << i << ":[" << vec[i] << "]\n";
-    if (m_ChannelDatabase.is_channel(channel))
+    if (1 || m_ChannelDatabase.is_channel(channel))
     {
         Channel& ref = m_ChannelDatabase.get_channel(channel);
-        int i, mode = 0;
-        while (i < flags.size()) 
+        (void)ref;
+        int mode = 0;
+        for (unsigned int i = 0; i < flags.size(); i++)
         {
             switch (flags[i])
             {
                 case '+':
                     mode = 1;
+                    std::cout << "SETTING MODE TO 1\n";
+                    break;
                 case '-':
                     mode = -1;
+                    std::cout << "SETTING MODE TO -1\n";
+                    break;
                 case 'i':
-                    ref.set_invite_only(user_id, mode);
+                    // ref.set_invite_only(user_id, mode);
+                    std::cout << "SETTING INVITE ONLY TO MODE:" << mode << '\n';
+                    break;
                 case 't':
-                    ref.set_op_topic(user_id, mode);
-                // case 'o':
-                //     ref.set_op(user_id, mode, vec[i]); //affect_id instead of vec[i]
+                    // ref.set_op_topic(user_id, mode);
+                    std::cout << "SETTING OP_TOPIC TO MODE:" << mode << '\n';
+                    break;
+                case 'k':
+                    std::cout << "SETTING KEY MODE TO:" << mode << "\nKEY WILL BE:" << vec[i - 1] << '\n';
+                    // ref.set_password(user_id, mode, vec[i]);
+                    break;
+                case 'o':
+                    std::cout << "SETTING OPERATOR TO:" << vec[i - 1] << '\n';
+                    // ref.set_op(user_id, mode, vec[i]); //affect_id instead of vec[i]
+                    break;
                 case 'l':
                 {
-                    std::basic_stringstream<unsigned int> str = vec[i];
-                    ref.set_user_limit(user_id, mode, );
+                    std::stringstream ss;
+                    unsigned int user_limit;
+                    ss << vec[i - 1];
+                    ss >> user_limit;
+                    std::cout << "SETTING USER LIMIT MODE:" << mode << "\nLIMIT:" << user_limit << "\n";
+                    // ref.set_user_limit(user_id, mode, user_limit);
+                    break;
                 }
             }
         }
