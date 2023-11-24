@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 13:56:06 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/24 16:14:58 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/24 16:27:27 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,9 @@ class SharedPointer
                 clear();
         }
 
-        T const& get() const
+        T* get()
         {
-            return *m_object;
+            return m_object;
         }
 
         void    clear()
