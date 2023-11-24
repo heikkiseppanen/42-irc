@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 13:56:06 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/24 16:27:27 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/24 16:45:30 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,16 @@ class SharedPointer
                 (*m_ref_count)++;
             }
             return (*this);
+        }
+
+        T& operator*()
+        {
+            return *m_object;
+        }
+
+        T* operator->()
+        {
+            return m_object;
         }
 
         ~SharedPointer()
