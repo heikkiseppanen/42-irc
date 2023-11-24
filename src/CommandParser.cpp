@@ -95,7 +95,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case TOPIC:
-            //TODO
+            change_topic(message, user_id);
             break;
         case MODE:
             change_mode(message, user_id);
@@ -188,6 +188,20 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //ERR_WILDTOPLEVEL
     //ERR_NOTOPLEVEL
     }
+}
+
+void CommandParser::change_topic(std::string const& message, unsigned int user_id)
+{
+    std::string::size_type pos = message.find(" ");
+    std::string channel = message.substr(pos + 1, message.length() - (pos + 1));
+    pos = channel.find(" ");
+    std::string topic = channel.substr(pos + 1, channel.length() - (pos + 1));
+    channel = channel.substr(0, pos);
+    Channel& ref = m_ChannelDatabase.get_channel(channel);
+    (void)ref; //delete
+    user_id++; // delete
+    // if (ref)
+    // ref.change_topic(user_id, topic);
 }
 
 //MODE #Finnish +il 100 Wiz
