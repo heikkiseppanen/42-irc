@@ -188,13 +188,64 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //ERR_NOTOPLEVEL
     }
 }
-
+//MODE #Finnish +il 100 Wiz
+/* 
+i - invite-only channel flag;
+t - topic settable by channel operator only flag;
+o - give/take channel operator privileges
+l - set the user limit to channel;
+k - set a channel key (password).
+*/
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
-    // i set/remove invite only
-    // t set/remove restrictions of topic command to operaators
-    // k set/remove channel password
-    // o give/take channel operator priviledge
+    user_id++; // delete
+    std::string::size_type pos = message.find(" ");
+    std::string split = message.substr(pos + 1, message.length() - (pos + 1));
+    pos = split.find(" ");
+    std::string channel = split.substr(0, pos);
+    std::cout << "CHANNEL:[" << channel << "]\n";
+    split.erase(0, split.find(" ") + 1);
+    pos = split.find(" ");
+    std::string flags = split.substr(0, pos);
+    std::cout << "FLAGS:[" << flags << "]\n"; 
+    split.erase(0, split.find(" ") + 1);
+    std::vector<std::string> vec;
+    pos = split.find(" ");
+    while (pos != std::string::npos)
+    {
+        vec.push_back(split.substr(0, pos));
+        split.erase(0, split.find(" ") + 1);
+        pos = split.find(" ");
+    }
+    vec.push_back(split.substr(0, pos));
+    for (unsigned int i = 0; i < vec.size(); i++)
+        std::cout << "ARG" << i << ":[" << vec[i] << "]\n";
+    if (m_ChannelDatabase.is_channel(channel))
+    {
+        Channel& ref = m_ChannelDatabase.get_channel(channel);
+        int i, mode = 0;
+        while (i < flags.size()) 
+        {
+            switch (flags[i])
+            {
+                case '+':
+                    mode = 1;
+                case '-':
+                    mode = -1;
+                case 'i':
+                    ref.set_invite_only(user_id, mode);
+                case 't':
+                    ref.set_op_topic(user_id, mode);
+                // case 'o':
+                //     ref.set_op(user_id, mode, vec[i]); //affect_id instead of vec[i]
+                case 'l':
+                {
+                    std::basic_stringstream<unsigned int> str = vec[i];
+                    ref.set_user_limit(user_id, mode, );
+                }
+            }
+        }
+    }
 }
 
 void CommandParser::send_ping(std::string const& message, unsigned int user_id)
