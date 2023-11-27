@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/27 12:11:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/27 12:56:54 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class ClientDatabase
         inline void add_message(unsigned int id, SharedPointer<std::string> const& msg) { m_clients[id].message_queue.push_back(msg); }
         inline SharedPointer<std::string> const& get_message(unsigned int id) const { return m_clients[id].message_queue[0]; }
         inline void remove_message(unsigned int id) { m_clients[id].message_queue.erase(m_clients[id].message_queue.begin()); }
+        inline bool has_message(unsigned int id) { return m_clients[id].message_queue.size() != 0; }
 
     private:
         std::vector<Client> m_clients;

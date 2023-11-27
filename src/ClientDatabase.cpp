@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/27 12:06:24 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/27 12:52:13 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,22 @@ void    ClientDatabase::remove_client(unsigned int id)
 
 void    ClientDatabase::print_clients() const
 {
+    std::cout << "Clients:\n";
     for (std::vector<Client>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
     {
         if (it->nickname.empty())
             std::cout << "Empty\n";
         else
+        {
             std::cout << "| " << it->nickname << " |\n";
+            for (std::vector<SharedPointer<std::string> >::const_iterator msg = it->message_queue.begin(); msg != it->message_queue.end(); msg++)
+            {
+                std::cout << **msg << " | ";
+            }
+            std::cout << "\n";
+        }
     }
+    std::cout << "\n";
 }
 
 void    ClientDatabase::empty_client(Client& client)
