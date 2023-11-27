@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 14:04:38 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 17:28:18 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,4 +325,13 @@ bool Channel::is_subscribed(unsigned int user_id) const
         return false;
     }
     return true;
+}
+
+bool Channel::if_channel_topic_empty() const
+{
+    if (m_topic.empty())
+    {
+        return true;
+    }
+    return false;
 }

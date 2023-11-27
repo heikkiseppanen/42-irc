@@ -198,25 +198,36 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 void CommandParser::change_topic(std::string const& message, unsigned int user_id)
 {
     std::string::size_type pos = message.find(" ");
-    // if (pos == std::string::npos)
-    //     return ERR_NEEDMOREPARAMS
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "1ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        return;
+    }
     std::string channel = message.substr(pos + 1, message.length() - (pos + 1));
     pos = channel.find(" ");
-    // if (pos == std::string::npos)
-    //     TODO check if topic exists, if not RPL_NOTOPIC, else RPL_TOPIC
-    // if (!channel[pos + 1])
-    //     return ERR_NEEDMOREPARAMS
-    // if (TODO CHECK IF ON CHANNEL)
-    //     return ERR_NOTONCHANNEL
-    // if (TODO CHECK IF CHANNEL OP)
-    //     return ERR_CHANOPRIVSNEEDED
+    if (!channel[pos + 1])
+    {
+        std::cout << "2ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        return;
+    }
     std::string topic = channel.substr(pos + 1, channel.length() - (pos + 1));
     channel = channel.substr(0, pos);
+    if (channel.empty())
+    {
+        std::cout << "3ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        return;
+    }
+    std::cout << "CHANNEL:[" << channel << "]\n"; //delete
+    std::cout << "TOPIC:[" << topic << "]\n"; //delete
     Channel& ref = m_ChannelDatabase.get_channel(channel);
-    std::cout << topic << '\n';
-    (void)ref; //delete
-    user_id++; // delete
-    // if (ref)
+    if (!ref.is_subscribed(user_id))
+        std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
+    if (ref.if_channel_topic_empty())
+        std::cout << "RPL_NOTOPIC\n"; //TODO RPL
+    else if (!topic.empty())
+        std::cout << "RPL_TOPIC\n"; //TODO RPL
+    if (!ref.is_operator(user_id))
+        std::cout << "ERR_CHANOPRIVSNEEDED\n"; // TODO ERR
     // ref.change_topic(user_id, topic);
 }
 
