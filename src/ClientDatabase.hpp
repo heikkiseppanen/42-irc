@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/27 11:59:25 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/27 12:11:26 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include <stack>
 #include "SharedPointer.hpp"
 
-struct ClientInfo
+struct Client
 {
-    inline ClientInfo(std::string const& nick) : nickname(nick) {}
+    inline Client(std::string const& nick) : nickname(nick) {}
 
     std::string nickname;
     std::vector<SharedPointer<std::string> > message_queue;
@@ -33,16 +33,18 @@ class ClientDatabase
         void remove_client(unsigned int id);
         void print_clients() const;
 
-        std::string const& get_nickname(unsigned int id);
+        inline bool is_client(unsigned int id) const { return m_clients.size() < id && !m_clients[id].nickname.empty(); }
+
+        inline std::string const& get_nickname(unsigned int id) const { return m_clients[id].nickname; }
 
         //messages
         inline void add_message(unsigned int id, SharedPointer<std::string> const& msg) { m_clients[id].message_queue.push_back(msg); }
-        inline SharedPointer<std::string> const& get_message(unsigned int id) { return m_clients[id].message_queue[0]; }
+        inline SharedPointer<std::string> const& get_message(unsigned int id) const { return m_clients[id].message_queue[0]; }
         inline void remove_message(unsigned int id) { m_clients[id].message_queue.erase(m_clients[id].message_queue.begin()); }
 
     private:
-        std::vector<ClientInfo> m_clients;
+        std::vector<Client> m_clients;
         std::stack<unsigned int> m_free_ids;
 
-        void empty_client(ClientInfo& info);
+        void empty_client(Client& client);
 };
