@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 14:04:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 17:26:31 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Channel
 
         //
         bool is_invited(unsigned int user_id) const;
+        bool is_subsribed(unsigned int user_id) const;
         bool is_valid_password(std::string const& password) const;
         bool is_operator(unsigned int user_id) const;
         bool is_not_full() const;

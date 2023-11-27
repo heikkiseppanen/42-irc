@@ -190,14 +190,30 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     }
 }
 
+//ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
+//RPL_NOTOPIC "<channel> :No topic is set"
+//RPL_TOPIC "<channel> :<topic>"
+//ERR_CHANOPRIVSNEEDED "<channel> :You're not channel operator"
+//ERR_NOTONCHANNEL "<channel> :You're not on that channel"
 void CommandParser::change_topic(std::string const& message, unsigned int user_id)
 {
     std::string::size_type pos = message.find(" ");
+    // if (pos == std::string::npos)
+    //     return ERR_NEEDMOREPARAMS
     std::string channel = message.substr(pos + 1, message.length() - (pos + 1));
     pos = channel.find(" ");
+    // if (pos == std::string::npos)
+    //     TODO check if topic exists, if not RPL_NOTOPIC, else RPL_TOPIC
+    // if (!channel[pos + 1])
+    //     return ERR_NEEDMOREPARAMS
+    // if (TODO CHECK IF ON CHANNEL)
+    //     return ERR_NOTONCHANNEL
+    // if (TODO CHECK IF CHANNEL OP)
+    //     return ERR_CHANOPRIVSNEEDED
     std::string topic = channel.substr(pos + 1, channel.length() - (pos + 1));
     channel = channel.substr(0, pos);
     Channel& ref = m_ChannelDatabase.get_channel(channel);
+    std::cout << topic << '\n';
     (void)ref; //delete
     user_id++; // delete
     // if (ref)
