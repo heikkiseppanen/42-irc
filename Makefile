@@ -9,6 +9,8 @@ SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
 	Server.cpp \
+	EventSystem.cpp \
+	Socket.cpp \
 	ClientDatabase.cpp
 	ChannelDatabase.cpp\
 	Channel.cpp\
@@ -45,7 +47,7 @@ clean:
 	/bin/rm -rf $(OBJDIR)
 
 fclean: clean
-	/bin/rm $(NAME)
+	/bin/rm -f $(NAME)
 
 re: fclean all
 
