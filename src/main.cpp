@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <exception>
-#include <cstdlib>
 
 int main(int argc, char *argv[])
 {

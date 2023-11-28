@@ -17,6 +17,7 @@ static int create_listener_socket(struct addrinfo const* address)
             || bind(listener, address->ai_addr, address->ai_addrlen) < 0
             || listen(listener, 10) < 0)
         {
+            std::cerr << "Listening socket creation failure: " << std::strerror(errno) << '\n';
             close(listener);
             return -1;
         }
@@ -25,7 +26,7 @@ static int create_listener_socket(struct addrinfo const* address)
     return listener;
 }
 
-Socket Socket::listen(char const* address, char const* port)
+Socket::Socket(char const* ip, char const* port)
 {
     struct addrinfo hints = {};
     hints.ai_family   = AF_UNSPEC;
@@ -35,13 +36,12 @@ Socket Socket::listen(char const* address, char const* port)
 
     struct addrinfo *address_list = NULL;
 
-    int error = getaddrinfo(address, port, &hints, &address_list);
+    int error = getaddrinfo(ip, port, &hints, &address_list);
 
-    IRC_ASSERT_THROW(error != 0, gai_strerror(error));
+    IRC_ASSERT_THROW(error != 0, std::string("Getaddrinfo failed: ") + gai_strerror(error));
 
-    struct addrinfo* ipv6 = NULL;
     struct addrinfo* ipv4 = NULL;
-
+    struct addrinfo* ipv6 = NULL;
     for(struct addrinfo* it = address_list; it != NULL; it = it->ai_next)
     {
         if (ipv4 == NULL && it->ai_family == AF_INET)
@@ -52,41 +52,41 @@ Socket Socket::listen(char const* address, char const* port)
         {
             ipv6 = it;
         }
+        if (ipv4 && ipv6)
+        {
+            break;
+        }
     }
 
     Socket listener;
     if (ipv6 != NULL)
     {
-        listener.file_descriptor = create_listener_socket(ipv6);
-
-        if (listener.file_descriptor < 0)
-        {
-            std::cerr << "IPv6 listening socket creation failure: " << std::strerror(errno) << '\n';
-        }
+        std::cout << "Attempting to create IPv6 socket...\n";
+        file_descriptor = create_listener_socket(ipv6);
     }
-    if (ipv4 != NULL && listener.file_descriptor < 0)
+    if (ipv4 != NULL && !is_valid())
     {
-        listener = create_listener_socket(ipv4);
-
-        if (listener.file_descriptor < 0)
-        {
-            std::cerr << "IPv4 listening socket creation failure: " << std::strerror(errno) << '\n';
-        }
+        std::cout << "Attempting to create IPv4 socket...\n";
+        file_descriptor = create_listener_socket(ipv4);
     }
 
     freeaddrinfo(address_list);
 
-    IRC_ASSERT_THROW(listener.file_descriptor < 0, "No listening socket could be created.\n");
+    IRC_ASSERT_THROW(!is_valid(), "No listening socket could be created.\n");
 
-    return listener;
+    std::cout << "Socket " << file_descriptor << " listening to " << port << ".\n";
 }
 
-Socket Socket::accept(struct sockaddr_storage* address)
+Socket Socket::accept()
 {
-    static socklen_t address_size = sizeof(*address);
-    Socket inbound(::accept(file_descriptor, (struct sockaddr*)(address), &address_size));
+    //struct sockaddr_storage address;
+    //socklen_t address_size = sizeof(address);
 
-    IRC_ASSERT_THROW(inbound.file_descriptor < 0, std::string("Accepting incoming connection failed") + std::strerror(errno));
+    std::cout << file_descriptor << " accepting inbound connection.\n";
 
-    return inbound;
+    Socket client(::accept(file_descriptor, NULL, NULL));
+
+    IRC_ASSERT_THROW(!client.is_valid(), std::string("Accepting incoming connection failed: ") + std::strerror(errno) + '\n');
+
+    return client;
 }

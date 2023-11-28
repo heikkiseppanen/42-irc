@@ -1,30 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
+/*   EventLoop.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/16 11:56:39 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/28 13:07:30 by hseppane         ###   ########.fr       */
+/*   Created: 2023/11/22 14:17:49 by hseppane          #+#    #+#             */
+/*   Updated: 2023/11/28 12:38:46 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "EventSystem.hpp"
+#include "Socket.hpp"
 
-class Server
+#include <vector>
+#include <sys/event.h>
+
+class EventSystem
 {
     public:
-        Server();
-        ~Server();
+        EventSystem();
+        ~EventSystem() { close(m_kqueue); }
 
-        void run();
+        void handle(/* EventHandler? */);
 
     private:
-        Server(Server const& other);
-        Server& operator = (Server const& other);
+        int m_kqueue;
 
-        EventSystem m_eventloop;
+        Socket m_listener;
+        
+        std::vector<struct kevent> m_changelist;
+        std::vector<struct kevent> m_eventbuffer;
 };
