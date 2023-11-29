@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 12:07:46 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/28 14:36:24 by hseppane         ###   ########.fr       */
+/*   Updated: 2023/11/29 12:20:08 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,9 @@ struct Socket
 
     inline int get_file_descriptor() { return file_descriptor; }
 
-    template<typename T>
-    inline ssize_t send(T* data, size_t count) { return ::send(file_descriptor, data, count * sizeof(T), 0); }
+    inline ssize_t send(void* data, size_t size) { return ::send(file_descriptor, data, size, 0); }
 
-    template<typename T>
-    inline ssize_t receive(T* destination, size_t count) { return ::recv(file_descriptor, destination, count * sizeof(T), 0); }
+    inline ssize_t receive(void* destination, size_t size) { return ::recv(file_descriptor, destination, size, 0); }
 
     Socket accept();
 };
