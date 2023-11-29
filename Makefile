@@ -9,7 +9,8 @@ SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
 	ChannelDatabase.cpp\
-	Channel.cpp
+	Channel.cpp\
+	Client.cpp
 
 OBJ := $(addprefix $(OBJDIR)/,$(SRC:.cpp=.o))
 DEP := $(OBJ:%.o=%.d)
