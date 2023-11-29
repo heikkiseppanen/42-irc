@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/27 12:52:13 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/29 13:39:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ unsigned int    ClientDatabase::add_client(std::string const& nick)
     {
         id = m_free_ids.top();
         m_free_ids.pop();
-        m_clients[id].nickname = nick;
+        m_clients[id].set_nickname(nick);
     }
     return (id);
 }
@@ -49,23 +49,36 @@ void    ClientDatabase::print_clients() const
     std::cout << "Clients:\n";
     for (std::vector<Client>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
     {
-        if (it->nickname.empty())
+        if (it->is_empty())
             std::cout << "Empty\n";
         else
         {
-            std::cout << "| " << it->nickname << " |\n";
-            for (std::vector<SharedPointer<std::string> >::const_iterator msg = it->message_queue.begin(); msg != it->message_queue.end(); msg++)
-            {
-                std::cout << **msg << " | ";
-            }
-            std::cout << "\n";
+            std::cout << "| " << it->get_nickname() << " |\n";
+            it->print_messages();
         }
     }
     std::cout << "\n";
 }
 
+void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, SharedPointer<std::string> const& msg)
+{
+    for (std::vector<unsigned int>::const_iterator it = users.begin(); it != users.end(); it++)
+    {
+        if (*it == exclude)
+            continue;
+        if (is_client(*it))
+        {
+            Client& tmp = get_client(*it);
+            tmp.add_message(msg);
+        }
+        else
+        {
+            std::cerr << "ERROR: add_messages_to_group: User " << *it << " not found\n";
+        }
+    }
+}
+
 void    ClientDatabase::empty_client(Client& client)
 {
-    client.nickname.clear();
-    client.message_queue.clear();
+    client.empty_client();
 }
