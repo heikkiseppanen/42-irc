@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/17 17:05:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/27 12:52:13 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ unsigned int    ClientDatabase::add_client(std::string const& nick)
     if (m_free_ids.empty())
     {
         id = m_clients.size();
-        m_clients.push_back(ClientInfo(nick));
+        m_clients.push_back(Client(nick));
     }
     else
     {
@@ -46,22 +46,26 @@ void    ClientDatabase::remove_client(unsigned int id)
 
 void    ClientDatabase::print_clients() const
 {
-    for (std::vector<ClientInfo>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
+    std::cout << "Clients:\n";
+    for (std::vector<Client>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
     {
         if (it->nickname.empty())
             std::cout << "Empty\n";
         else
+        {
             std::cout << "| " << it->nickname << " |\n";
+            for (std::vector<SharedPointer<std::string> >::const_iterator msg = it->message_queue.begin(); msg != it->message_queue.end(); msg++)
+            {
+                std::cout << **msg << " | ";
+            }
+            std::cout << "\n";
+        }
     }
+    std::cout << "\n";
 }
 
-//TODO input id validation
-std::string const& ClientDatabase::get_nickname(unsigned int id)
+void    ClientDatabase::empty_client(Client& client)
 {
-    return m_clients[id].nickname;
-}
-
-void    ClientDatabase::empty_client(ClientInfo& info)
-{
-    info.nickname.clear();
+    client.nickname.clear();
+    client.message_queue.clear();
 }

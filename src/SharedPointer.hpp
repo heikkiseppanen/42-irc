@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 13:56:06 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/24 16:45:30 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/27 12:37:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,17 @@ class SharedPointer
             return *m_object;
         }
 
+        T const& operator*() const
+        {
+            return *m_object;
+        }
+
         T* operator->()
+        {
+            return m_object;
+        }
+
+        T const* operator->() const
         {
             return m_object;
         }
@@ -71,6 +81,11 @@ class SharedPointer
         }
 
         T* get()
+        {
+            return m_object;
+        }
+
+        T const* get() const
         {
             return m_object;
         }
