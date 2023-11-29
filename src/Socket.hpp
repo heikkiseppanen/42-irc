@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 12:07:46 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/29 12:20:08 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/29 18:42:07 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ struct Socket
     inline int get_file_descriptor() { return file_descriptor; }
 
     inline ssize_t send(void* data, size_t size) { return ::send(file_descriptor, data, size, 0); }
+    inline ssize_t send(void const* data, size_t size) { return ::send(file_descriptor, data, size, 0); }
 
     inline ssize_t receive(void* destination, size_t size) { return ::recv(file_descriptor, destination, size, 0); }
 
