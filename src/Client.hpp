@@ -28,7 +28,7 @@ class Client
 
         //messages
         inline void add_message(SharedPointer<std::string> const& msg) { message_queue.push_back(msg); }
-        inline SharedPointer<std::string> const& get_message() const { return message_queue[0]; }
+        inline std::string const& get_message() const { return *message_queue[0].get(); }
         inline void remove_message() { message_queue.erase(message_queue.begin()); }
         inline bool has_message() const { return message_queue.size() != 0; }
 
