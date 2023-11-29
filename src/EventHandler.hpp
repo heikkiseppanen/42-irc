@@ -6,24 +6,31 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/29 12:30:48 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/29 18:33:41 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Socket.hpp"
+#include "ClientDatabase.hpp"
 #include <map>
+#include <string>
 
 class EventHandler
 {
     public:
 
-        void on_client_connected(Socket client);
-        void on_client_readable(Socket client);
-        void on_client_writeable(Socket client);
+        EventHandler(ClientDatabase& clients) : m_clients(clients) {}
+
+        void on_client_connected(Socket socket);
+        void on_client_readable(Socket socket);
+        void on_client_writeable(Socket socket);
 
     private:
+        const int m_buffer_size = 512;
+        const std::string m_end = "\r\n";
 
-        std::map<int, unsigned int> socket_client_table;
+        std::map<int, unsigned int> m_socket_client_table;
+        ClientDatabase& m_clients;
 };
