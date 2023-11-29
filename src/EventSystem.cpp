@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventSystem.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/28 16:47:40 by hseppane         ###   ########.fr       */
+/*   Updated: 2023/11/29 16:13:46 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,9 @@ EventSystem::EventSystem()
     m_eventbuffer.resize(1);
 }
 
-void EventSystem::handle(EventHandler& handler)
+void EventSystem::handle(/*EventHandler& handler*/)
 {
+    static EventHandler handler; //TODO
     static struct timespec const timeout = {0, 1000};
 
     int events_polled = kevent(m_kqueue, m_changelist.data(), m_changelist.size(), m_eventbuffer.data(), m_eventbuffer.size(), &timeout);

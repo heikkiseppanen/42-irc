@@ -8,10 +8,10 @@ OBJDIR := ./obj
 SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
-	Server.cpp \
-	EventSystem.cpp \
-	Socket.cpp \
-	ClientDatabase.cpp
+	Server.cpp\
+	EventSystem.cpp\
+	EventHandler.cpp\
+	Socket.cpp\
 	ChannelDatabase.cpp\
 	Channel.cpp\
 	Client.cpp

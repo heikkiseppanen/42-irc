@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   EventLoop.hpp                                      :+:      :+:    :+:   */
+/*   EventSystem.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 14:17:49 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/28 12:38:46 by hseppane         ###   ########.fr       */
+/*   Updated: 2023/11/29 16:07:09 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <sys/event.h>
+#include "EventHandler.hpp"
 
 class EventSystem
 {
@@ -23,7 +24,7 @@ class EventSystem
         EventSystem();
         ~EventSystem() { close(m_kqueue); }
 
-        void handle(/* EventHandler? */);
+        void handle(/*EventHandler& handler*/);
 
     private:
         int m_kqueue;
