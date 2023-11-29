@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/29 18:47:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/29 19:27:04 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,14 @@ void EventHandler::on_client_readable(Socket socket)
 
     char buf[m_buffer_size + 1];
     unsigned int received = socket.receive(buf, m_buffer_size);
+    if (received == -1)
+    {
+        return;
+    }
+    else if (received == 0)
+    {
+        //Todo remove client from channels and channeldb
+    }
     buf[received] = '\0';
 
     client.add_to_buffer(buf);
