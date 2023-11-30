@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/29 19:27:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 13:03:42 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,13 @@
 
 void EventHandler::on_client_connected(Socket socket)
 {
-    m_socket_client_table[socket.file_descriptor] = m_clients.add_client("User1");
+    m_socket_client_table[socket.file_descriptor] = m_clients.add_client();
 }
 
 void EventHandler::on_client_readable(Socket socket)
 {
-    Client client = m_clients.get_client(m_socket_client_table[socket.file_descriptor]);
+    unsigned int id = m_socket_client_table[socket.file_descriptor];
+    Client client = m_clients.get_client(id);
 
     char buf[m_buffer_size + 1];
     unsigned int received = socket.receive(buf, m_buffer_size);
@@ -29,7 +30,10 @@ void EventHandler::on_client_readable(Socket socket)
     }
     else if (received == 0)
     {
-        //Todo remove client from channels and channeldb
+        m_socket_client_table.erase(socket.file_descriptor);
+        m_clients.remove_client(id);
+        m_channels.remove_user(id);
+        return;
     }
     buf[received] = '\0';
 
