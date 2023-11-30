@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/29 18:48:12 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:43:20 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class Client
 {
     public:
-        inline Client(std::string const& nick) : m_nickname(nick), m_sent_count(0) {}
+        inline Client(std::string const& nick) : m_nickname(nick), m_sent_count(0), m_registered(0) {}
 
         inline bool is_empty() const { return m_nickname.empty(); }
 
@@ -43,6 +43,11 @@ class Client
         inline unsigned int get_sent_count() const { return m_sent_count; }
         inline void set_sent_count(unsigned int count) { m_sent_count = count; }
 
+        //register
+        inline void nick_received() { m_registered = m_registered | 0x1; }
+        inline void user_received() { m_registered = m_registered | 0x2; }
+        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2; }
+
         void print_messages() const;
 
     private:
@@ -50,4 +55,5 @@ class Client
         std::vector<SharedPointer<std::string> > m_message_queue;
         std::string m_buffer;
         unsigned int m_sent_count;
+        int m_registered;
 };
