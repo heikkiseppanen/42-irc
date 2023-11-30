@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/29 13:39:14 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:42:51 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include "ClientDatabase.hpp"
 #include <iostream>
 
-unsigned int    ClientDatabase::add_client(std::string const& nick)
+unsigned int ClientDatabase::add_client(std::string const& nick)
 {
     int id;
     if (m_free_ids.empty())
@@ -31,7 +31,7 @@ unsigned int    ClientDatabase::add_client(std::string const& nick)
     return (id);
 }
 
-void    ClientDatabase::remove_client(unsigned int id)
+void ClientDatabase::remove_client(unsigned int id)
 {
     if (m_clients.size() - 1 == id)
     {
@@ -44,7 +44,7 @@ void    ClientDatabase::remove_client(unsigned int id)
     }
 }
 
-void    ClientDatabase::print_clients() const
+void ClientDatabase::print_clients() const
 {
     std::cout << "Clients:\n";
     for (std::vector<Client>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
@@ -78,7 +78,7 @@ void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& user
     }
 }
 
-void    ClientDatabase::empty_client(Client& client)
+void ClientDatabase::empty_client(Client& client)
 {
     client.empty_client();
 }
