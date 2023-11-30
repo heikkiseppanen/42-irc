@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 16:19:50 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:59:02 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Channel
 
         //Getters
         inline std::vector<unsigned int> const& get_users() const { return m_users; }
+        inline std::vector<unsigned int> const& get_operators() const { return m_operators; }
 
         void print_channel();
 
@@ -49,6 +50,7 @@ class Channel
         bool is_valid_password(std::string const& password) const;
         bool is_operator(unsigned int user_id) const;
         bool is_not_full() const;
+        bool is_subscribed(unsigned int user_id) const;
 
     private: 
 

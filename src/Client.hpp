@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:43:20 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:48:27 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class Client
 {
     public:
-        inline Client(std::string const& nick) : m_nickname(nick), m_sent_count(0), m_registered(0) {}
+        inline Client() : m_sent_count(0), m_registered(0) {}
 
         inline bool is_empty() const { return m_nickname.empty(); }
 

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:42:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:48:03 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,18 @@
 #include "ClientDatabase.hpp"
 #include <iostream>
 
-unsigned int ClientDatabase::add_client(std::string const& nick)
+unsigned int ClientDatabase::add_client()
 {
     int id;
     if (m_free_ids.empty())
     {
         id = m_clients.size();
-        m_clients.push_back(Client(nick));
+        m_clients.push_back(Client());
     }
     else
     {
         id = m_free_ids.top();
         m_free_ids.pop();
-        m_clients[id].set_nickname(nick);
     }
     return (id);
 }

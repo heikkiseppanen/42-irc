@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 16:19:54 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:57:57 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,6 +296,15 @@ bool Channel::is_not_full() const
         {
             return false;
         }
+    }
+    return true;
+}
+
+bool Channel::is_subscribed(unsigned int user_id) const
+{
+    if (std::find(m_users.begin(), m_users.end(), user_id) == m_users.end())
+    {
+        return false;
     }
     return true;
 }
