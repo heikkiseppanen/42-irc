@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 13:03:42 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/12/01 13:09:15 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ void EventHandler::on_client_readable(Socket socket)
     unsigned int id = m_socket_client_table[socket.file_descriptor];
     Client client = m_clients.get_client(id);
 
-    char buf[m_buffer_size + 1];
-    unsigned int received = socket.receive(buf, m_buffer_size);
+    char buf[INPUT_BUFFER_SIZE + 1];
+    ssize_t received = socket.receive(buf, INPUT_BUFFER_SIZE);
     if (received == -1)
     {
         return;
@@ -33,6 +33,7 @@ void EventHandler::on_client_readable(Socket socket)
         m_socket_client_table.erase(socket.file_descriptor);
         m_clients.remove_client(id);
         m_channels.remove_user(id);
+		socket.close();
         return;
     }
     buf[received] = '\0';
@@ -41,7 +42,7 @@ void EventHandler::on_client_readable(Socket socket)
     std::string const& buffer = client.get_buffer();
     for (std::string::const_iterator it = buffer.begin(); it != buffer.end() - 1; it++)
     {
-        if (*it == m_end[0] && *(it + 1) == m_end[1])
+        if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
         {
             it += 2;
             //TODO interpreter called here
