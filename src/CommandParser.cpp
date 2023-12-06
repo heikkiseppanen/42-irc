@@ -74,7 +74,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             send_privmsg(message, user_id);
             break;
         case JOIN:
-            //TODO
+            join_channel(message, user_id);
             break;
         case NICK:
             //TODO
@@ -159,7 +159,6 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     user_id++; // delete
     std::cout << "MESSAGE:" << message << '\n'; //delete
     std::vector<std::string> targets = get_targets(message, 7);
-    
     if (check_if_channel(targets) == 1)
     {
         for (unsigned int i = 0; i < targets.size(); i++)
@@ -190,6 +189,24 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     }
 }
 
+// ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
+// ERR_NOSUCHCHANNEL "<channel> :No such channel" 
+// ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
+// ERR_CHANNELISFULL  "<channel> :Cannot join channel (+l)"
+// ERR_INVITEONLYCHAN "<channel> :Cannot join channel (+i)"
+// ERR_BANNEDFROMCHAN "<channel> :Cannot join channel (+b)" PROBABLY DONT NEED?
+// RPL_TOPIC
+void CommandParser::join_channel(std::string const& message, unsigned int user_id)
+{
+    std::string::size_type pos = message.find(" ");
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n";
+        return;
+    }
+    
+}
+
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
 //RPL_NOTOPIC "<channel> :No topic is set"
 //RPL_TOPIC "<channel> :<topic>"
@@ -200,21 +217,21 @@ void CommandParser::change_topic(std::string const& message, unsigned int user_i
     std::string::size_type pos = message.find(" ");
     if (pos == std::string::npos || !message[pos + 1] || message.empty())
     {
-        std::cout << "1ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        std::cout << "1 ERR_NEEDMOREPARAMS\n"; //TODO ERR
         return;
     }
     std::string channel = message.substr(pos + 1, message.length() - (pos + 1));
     pos = channel.find(" ");
     if (!channel[pos + 1])
     {
-        std::cout << "2ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        std::cout << "2 ERR_NEEDMOREPARAMS\n"; //TODO ERR
         return;
     }
     std::string topic = channel.substr(pos + 1, channel.length() - (pos + 1));
     channel = channel.substr(0, pos);
     if (channel.empty())
     {
-        std::cout << "3ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        std::cout << "3 ERR_NEEDMOREPARAMS\n"; //TODO ERR
         return;
     }
     std::cout << "CHANNEL:[" << channel << "]\n"; //delete
