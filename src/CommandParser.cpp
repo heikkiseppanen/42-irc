@@ -191,20 +191,57 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 
 // ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
 // ERR_NOSUCHCHANNEL "<channel> :No such channel" 
-// ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
 // ERR_CHANNELISFULL  "<channel> :Cannot join channel (+l)"
 // ERR_INVITEONLYCHAN "<channel> :Cannot join channel (+i)"
-// ERR_BANNEDFROMCHAN "<channel> :Cannot join channel (+b)" PROBABLY DONT NEED?
+// ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
-    std::string::size_type pos = message.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    user_id++; // delete
+    std::string args = message.substr(5, message.length() - 5);
+    std::string::size_type pos = args.find(" ");
+    if (pos == std::string::npos || !args[pos + 1] || args.empty())
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
-    
+    std::string first_arg = args.substr(0, pos);
+    std::string second_arg = args.substr(pos + 1, args.length() - pos - 1);
+    std::vector<std::string> vec;
+    std::stringstream ss(first_arg);
+    std::string item;
+    while (getline (ss, item, ','))
+        vec.push_back(item);
+    std::stringstream ss2(second_arg);
+    std::vector<std::string> vec2;
+    while (getline (ss2, item, ','))
+        vec2.push_back(item);
+    if (vec.size() != vec2.size())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n";
+        return;
+    }
+    for (unsigned int i = 0; i < vec.size();)
+    {
+        if (!m_ChannelDatabase.is_channel(vec[i]))
+        {
+            std::cout << "Channel doesn't exist\n"; //ERR NOSUCHCHANNEL
+            i++;
+            continue;
+        }
+        try 
+        {
+            Channel& channel = m_ChannelDatabase.get_channel(vec[i]); //Check that emil fixed missing channel
+            channel.join_channel(user_id, vec2[i]);
+            i++;
+        }
+        catch (...)
+        {
+            std::cout << "Missing channel\n";
+            //ERR_NOSUCHCHANNEL
+            continue;
+        }
+    }
 }
 
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"

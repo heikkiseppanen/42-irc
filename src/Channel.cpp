@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:28:18 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:28:54 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,24 +27,28 @@ int Channel::join_channel(unsigned int user_id, std::string const& password)
 {
     if (!is_invited(user_id))
     {
+        std::cout << "User is not invited\n";
         //TODO return ERR_not_invited
         return -1;
     }
 
     if (!is_valid_password(password))
     {
+        std::cout << "Is not valid password\n";
         //TODO return ERR_bad_password
         return -1;
     }
 
     if (!is_not_full())
     {
+        std::cout << "Channel is full\n";
         //TODO return ERR_channel_full
         return -1;
     }
 
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
     {
+        std::cout << "User already on channel\n";
         //TODO ERR_already_on_channel
         return -1;
     }
