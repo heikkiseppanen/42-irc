@@ -6,13 +6,14 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:26:10 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:00 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "ClientDatabase.hpp"
 #include <iostream>
+#include <algorithm>
 
 unsigned int ClientDatabase::add_client()
 {
@@ -57,6 +58,16 @@ void ClientDatabase::print_clients() const
         }
     }
     std::cout << "\n";
+}
+
+bool ClientDatabase::is_nick_in_use(std::string const& nick)
+{
+    for (std::vector<Client>::iterator it = m_clients.begin(); it != m_clients.end(); it++)
+    {
+        if (it->get_nickname() == nick)
+            return (true);
+    }
+    return (false);
 }
 
 void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg)

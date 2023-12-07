@@ -77,7 +77,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             join_channel(message, user_id);
             break;
         case NICK:
-            //TODO
+            change_nick(message,user_id);
             break;
         case USER:
             //TODO
@@ -107,6 +107,12 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             send_pong(message, user_id);
             break;
     }
+}
+
+std::string remove_prefix(std::string const&message, unsigned int size)
+{
+    std::string args = message.substr(size + 1, message.length() - size - 1);
+    return (args);
 }
 
 std::vector<std::string> get_targets(std::string const& message, unsigned int skip)
@@ -197,8 +203,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
-    user_id++; // delete
-    std::string args = message.substr(5, message.length() - 5);
+    std::string args = remove_prefix(message, 4);
     std::string::size_type pos = args.find(" ");
     if (pos == std::string::npos || !args[pos + 1] || args.empty())
     {
@@ -232,7 +237,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         try 
         {
             Channel& channel = m_ChannelDatabase.get_channel(vec[i]); //Check that emil fixed missing channel
-            channel.join_channel(user_id, vec2[i]);
+            channel.join_channel(user_id, vec2[i]); // TODO in Channel.cpp
             i++;
         }
         catch (...)
@@ -242,6 +247,46 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             continue;
         }
     }
+}
+
+// ERR_NONICKNAMEGIVEN ":No nickname given"
+// ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname" ( letter / special ) *8( letter / digit / special / "-" )
+// ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
+
+// MAX 9 characters
+void CommandParser::change_nick(std::string const& message, unsigned int user_id)
+{
+    user_id++; //delete
+    user_id--; //delete
+    std::string nick = remove_prefix(message, 4);
+    std::cout << "nick:[" << nick << "]\n";
+    if (nick.empty())
+        std::cout << "No nickname given\n"; // ERR_NONICKNAMEGIVEN
+    if (nick.size() > 9)
+        std::cout << "Nickname too long\n"; // ERR_NICKNAMETOOLONG
+    std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
+    std::string second_set = "-0123456789" + first_set;
+    std::string::size_type pos;
+    for (unsigned int i = 0; i < nick.size(); i++)
+    {
+        if (i == 0)
+        {
+            pos = first_set.find(nick[i]);
+            if (pos == std::string::npos)
+                std::cout << "Illegal character found as the first character\n"; //ERR_ERRONEUSNICKNAME
+        }
+        else
+        {
+            pos = second_set.find(nick[i]);
+            if (pos == std::string::npos)
+                std::cout << "Illegal character found\n"; //ERR_ERRONEUSNICKNAME
+        }
+    }
+    Client& client = m_ClientDatabase.get_client(user_id);
+    if (m_ClientDatabase.is_nick_in_use(nick))
+        std::cout << "Nick already in use\n"; // ERR_NICKNAMEINUSE
+    if (nick == client.get_nickname())
+        std::cout << "nickname is the same\n";
 }
 
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
