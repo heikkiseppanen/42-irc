@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/07 13:46:25 by jole             ###   ########.fr       */
+/*   Updated: 2023/12/07 15:51:08 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class CommandParser
         void send_privmsg(std::string const& message, unsigned int user_id);
         void join_channel(std::string const& message, unsigned int user_id);
         void change_nick(std::string const& message, unsigned int user_id);
+        void invite_user(std::string const& message, unsigned int user_id);
         void change_topic(std::string const& message, unsigned int user_id);
         void change_mode(std::string const& message, unsigned int user_id);
         void send_ping(std::string const& message, unsigned int user_id);

@@ -80,7 +80,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             change_nick(message,user_id);
             break;
         case USER:
-            //TODO
+            // user_register(message, user_id);
             break;
         case PASS:
             //TODO
@@ -92,7 +92,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case INVITE:
-            //TODO
+            invite_user(message, user_id);
             break;
         case TOPIC:
             change_topic(message, user_id);
@@ -252,8 +252,6 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NONICKNAMEGIVEN ":No nickname given"
 // ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname" ( letter / special ) *8( letter / digit / special / "-" )
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
-
-// MAX 9 characters
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
     user_id++; //delete
@@ -261,9 +259,20 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     std::string nick = remove_prefix(message, 4);
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
+    {
         std::cout << "No nickname given\n"; // ERR_NONICKNAMEGIVEN
+        return;
+    }
     if (nick.size() > 9)
+    {
         std::cout << "Nickname too long\n"; // ERR_NICKNAMETOOLONG
+        return;
+    }
+    if (m_ClientDatabase.is_nick_in_use(nick))
+    {
+        std::cout << "Nick already in use\n"; // ERR_NICKNAMEINUSE
+        return;
+    }
     std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
     std::string second_set = "-0123456789" + first_set;
     std::string::size_type pos;
@@ -273,20 +282,46 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
         {
             pos = first_set.find(nick[i]);
             if (pos == std::string::npos)
+            {
                 std::cout << "Illegal character found as the first character\n"; //ERR_ERRONEUSNICKNAME
+                return;
+            }
         }
         else
         {
             pos = second_set.find(nick[i]);
             if (pos == std::string::npos)
+            {
                 std::cout << "Illegal character found\n"; //ERR_ERRONEUSNICKNAME
+                return;
+            }
         }
     }
     Client& client = m_ClientDatabase.get_client(user_id);
-    if (m_ClientDatabase.is_nick_in_use(nick))
-        std::cout << "Nick already in use\n"; // ERR_NICKNAMEINUSE
-    if (nick == client.get_nickname())
-        std::cout << "nickname is the same\n";
+    client.set_nickname(nick);
+}
+
+// ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
+// ERR_NOTONCHANNEL "<channel> :You're not on that channel"
+// ERR_CHANOPRIVSNEEDED "<channel> :You're not channel operator"
+// ERR_NOSUCHNICK "<nickname> :No such nick/channel"
+// ERR_USERONCHANNEL "<user> <channel> :is already on channel"
+// RPL_INVITING "<channel> <nick>"
+void CommandParser::invite_user(std::string const& message, unsigned int user_id)
+{
+    user_id++; //delete
+    user_id--; //delete
+    std::string args = remove_prefix(message, 6);
+    std::string::size_type pos = args.find(" ");
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        return;
+    }
+    std::string nick = args.substr(0, pos);
+    std::cout << "nick:[" << nick << "]\n";
+    std::string channel = args.substr(pos + 1, args.size() - pos - 1);
+    std::cout << "channel:[" << channel << "]\n";
 }
 
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
@@ -296,6 +331,8 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 //ERR_NOTONCHANNEL "<channel> :You're not on that channel"
 void CommandParser::change_topic(std::string const& message, unsigned int user_id)
 {
+    user_id++; //delete
+    user_id--; //delete
     std::string::size_type pos = message.find(" ");
     if (pos == std::string::npos || !message[pos + 1] || message.empty())
     {
