@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:31:29 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:10 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ class Channel
         bool is_subscribed(unsigned int user_id) const;
         bool if_channel_topic_empty() const;
 
+        bool m_has_invite_only;
     private: 
 
         std::vector<unsigned int> m_users;
@@ -67,7 +68,6 @@ class Channel
 
         unsigned int m_user_limit;
 
-        bool m_has_invite_only;
         bool m_has_op_topic;
         bool m_has_password;
 

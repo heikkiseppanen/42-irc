@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:33:00 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:19 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,14 @@ void ClientDatabase::print_clients() const
         }
     }
     std::cout << "\n";
+}
+
+unsigned int ClientDatabase::get_user_id(std::string const& nick)
+{
+    std::vector<Client>::iterator it = m_clients.begin();
+    while (it->get_nickname() != nick)
+        it++;
+    return (it - m_clients.begin());
 }
 
 bool ClientDatabase::is_nick_in_use(std::string const& nick)

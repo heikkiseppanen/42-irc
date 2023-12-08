@@ -301,11 +301,12 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     client.set_nickname(nick);
 }
 
-// ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
-// ERR_NOTONCHANNEL "<channel> :You're not on that channel"
-// ERR_CHANOPRIVSNEEDED "<channel> :You're not channel operator"
-// ERR_NOSUCHNICK "<nickname> :No such nick/channel"
-// ERR_USERONCHANNEL "<user> <channel> :is already on channel"
+// ERR_NEEDMOREPARAMS
+// ERR_NOSUCHNICK
+// ERR_NOTONCHANNEL
+// ERR_CHANOPRIVSNEEDED
+// ERR_USERONCHANNEL
+
 // RPL_INVITING "<channel> <nick>"
 void CommandParser::invite_user(std::string const& message, unsigned int user_id)
 {
@@ -319,9 +320,41 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
         return;
     }
     std::string nick = args.substr(0, pos);
+    std::string channel_name = args.substr(pos + 1, args.size() - pos - 1);
     std::cout << "nick:[" << nick << "]\n";
-    std::string channel = args.substr(pos + 1, args.size() - pos - 1);
-    std::cout << "channel:[" << channel << "]\n";
+    std::cout << "channel:[" << channel_name << "]\n";
+    if (!m_ClientDatabase.is_nick_in_use(nick))
+    {
+        std::cout << "Invited doesn't exist\n"; //TODO ERR
+        return;
+    }
+    try
+    {
+        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+        if (!channel.is_subscribed(m_ClientDatabase.get_user_id(nick)))
+        {
+            std::cout << "Invited already in channel\n"; //TODO ERR
+            return;
+        }
+        if (!channel.is_subscribed(user_id))
+        {
+            std::cout << "Not on channel\n"; //TODO ERR
+            return;
+        }
+        if (channel.m_has_invite_only == true && !channel.is_operator(user_id))
+        {
+            std::cout << "Channel operator priviledges needed\n"; //TODO ERR
+            return;
+        }
+        channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
+    }
+    catch (...)
+    {
+        std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO ERR
+        m_ChannelDatabase.add_channel(channel_name, user_id);
+        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+        channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
+    }
 }
 
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
