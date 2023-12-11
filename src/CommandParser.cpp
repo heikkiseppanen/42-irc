@@ -160,6 +160,20 @@ int create_text(std::string const& message, std::string &text)
     return (1);
 }
 
+std::vector<std::string> split_string_to_vector(std::string string, std::string delim)
+{
+    std::vector<std::string> vec;
+    std::string::size_type pos = string.find(delim);
+    while (pos != std::string::npos)
+    {
+        vec.push_back(string.substr(0, pos));
+        string.erase(0, string.find(delim) + 1);
+        pos = string.find(delim);
+    }
+    vec.push_back(string.substr(pos + 1, string.length() - pos - 1));
+    return (vec);
+}
+
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
@@ -299,14 +313,14 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     client.set_nickname(nick);
 }
 
+
 // ERR_NEEDMOREPARAMS
-// ERR_USERNOTINCHANNEL
-// ERR_NOSUCHCHANNEL
 // ERR_CHANOPRIVSNEEDED
+// ERR_NOSUCHCHANNEL
 // ERR_NOTONCHANNEL
+// ERR_USERNOTINCHANNEL
 
 // "KICK #finnish,#english heikki,crisplake :Bye noobs"
-
 void CommandParser::kick_user(std::string const& message, unsigned int user_id)
 {
     user_id++; //delete
@@ -319,25 +333,62 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
         return;
     }
     std::string channels = args.substr(0, pos);
-    std::cout << "Channels:[" << channels << "]\n"; // delete
+    // std::cout << "Channels:[" << channels << "]\n"; // delete
     args.erase(0, args.find(" ") + 1);
     pos = args.find(" ");
     std::string users = args.substr(0, pos);
-    std::cout << "Users:[" << users << "]\n"; //delete
+    // std::cout << "Users:[" << users << "]\n"; //delete
     args.erase(0, args.find(" ") + 1);
-    std::cout << "Args:[" << args << "]\n"; //delete
-    std::vector<std::string> channel_vec;
-    pos = channels.find(",");
-    while (pos != std::string::npos)
+    // std::cout << "Args:[" << args << "]\n"; //delete
+    std::vector<std::string> channel_vec = split_string_to_vector(channels, ",");
+    std::vector<std::string> users_vec = split_string_to_vector(users, ",");
+    // for (unsigned int i = 0; i < channel_vec.size(); i++) //delete
+    //     std::cout << "channel " << i << ":[" << channel_vec[i] << "]\n";  //delete
+    // for (unsigned int i = 0; i < users_vec.size(); i++) //delete
+    //     std::cout << "user " << i << ":[" << users_vec[i] << "]\n";  //delete
+    if (channel_vec.size() > 1 && channel_vec.size() != users_vec.size())
     {
-        std::cout << "PUSHBACKING\n";
-        channel_vec.push_back(channels.substr(0, pos));
-        channels.erase(0, channels.find(","));
-        pos = channels.find(",");
+        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        return;
     }
-    channel_vec.push_back(channels.substr(pos, channels.length() - pos));
     for (unsigned int i = 0; i < channel_vec.size(); i++)
-        std::cout << "channel " << i << ":[" << channel_vec[i] << "]\n"; 
+    {
+        try
+        {
+            Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[i]);
+            if (!channel_ref.is_subscribed(user_id))
+            {
+                std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
+                return;
+            }
+            if (!channel_ref.is_operator(user_id))
+            {
+                std::cout << "ERR_CHANOPRIVSNEEDED\n"; //TODO ERR
+                return;
+            }
+            // for (std::vector<std::string>::iterator user = users_vec.begin(); user != users_vec.end(); ++user)
+            // {
+            //     if (!channel_ref.is_subscribed(m_ClientDatabase.get_user_id(*user))) 
+            //     {
+            //         std::cout << "ERR_USERNOTINCHANNEL\n"; //TODO ERR
+            //         return;
+            //     }
+            // }
+            for (unsigned int j = 0; j < users_vec.size(); j++)
+            {
+                if (!channel_ref.is_subscribed(m_ClientDatabase.get_user_id(users_vec[j]))) 
+                {
+                    std::cout << "ERR_USERNOTINCHANNEL\n"; //TODO ERR
+                    return;
+                }
+            }
+        }
+        catch (...)
+        {
+            std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
+            return;
+        }
+    }
 }
 
 
