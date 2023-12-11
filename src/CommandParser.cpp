@@ -89,7 +89,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case KICK:
-            //TODO
+            kick_user(message,user_id);
             break;
         case INVITE:
             invite_user(message, user_id);
@@ -190,8 +190,6 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     std::cout << "TEXT:[" << text << "]\n";  //delete
         //TODO IF TOO MANY TARGETS
             // return (ERR_TOOMANYTARGETS);
-    //ERR_WILDTOPLEVEL
-    //ERR_NOTOPLEVEL
     }
 }
 
@@ -302,6 +300,48 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 }
 
 // ERR_NEEDMOREPARAMS
+// ERR_USERNOTINCHANNEL
+// ERR_NOSUCHCHANNEL
+// ERR_CHANOPRIVSNEEDED
+// ERR_NOTONCHANNEL
+
+// "KICK #finnish,#english heikki,crisplake :Bye noobs"
+
+void CommandParser::kick_user(std::string const& message, unsigned int user_id)
+{
+    user_id++; //delete
+    user_id--; //delete
+    std::string args = remove_prefix(message, 4);
+    std::string::size_type pos = args.find(" ");
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        return;
+    }
+    std::string channels = args.substr(0, pos);
+    std::cout << "Channels:[" << channels << "]\n"; // delete
+    args.erase(0, args.find(" ") + 1);
+    pos = args.find(" ");
+    std::string users = args.substr(0, pos);
+    std::cout << "Users:[" << users << "]\n"; //delete
+    args.erase(0, args.find(" ") + 1);
+    std::cout << "Args:[" << args << "]\n"; //delete
+    std::vector<std::string> channel_vec;
+    pos = channels.find(",");
+    while (pos != std::string::npos)
+    {
+        std::cout << "PUSHBACKING\n";
+        channel_vec.push_back(channels.substr(0, pos));
+        channels.erase(0, channels.find(","));
+        pos = channels.find(",");
+    }
+    channel_vec.push_back(channels.substr(pos, channels.length() - pos));
+    for (unsigned int i = 0; i < channel_vec.size(); i++)
+        std::cout << "channel " << i << ":[" << channel_vec[i] << "]\n"; 
+}
+
+
+// ERR_NEEDMOREPARAMS
 // ERR_NOSUCHNICK
 // ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
@@ -350,7 +390,7 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
     }
     catch (...)
     {
-        std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO ERR
+        std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO?
         m_ChannelDatabase.add_channel(channel_name, user_id);
         Channel& channel = m_ChannelDatabase.get_channel(channel_name);
         channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
@@ -472,6 +512,7 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
                     ss << vec[i - 1];
                     ss >> user_limit;
                     std::cout << "SETTING USER LIMIT MODE:" << mode << "\nLIMIT:" << user_limit << "\n";
+                    //check limit is int
                     // ref.set_user_limit(user_id, mode, user_limit);
                     break;
                 }
