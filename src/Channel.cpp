@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:32:07 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:26 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ int Channel::join_channel(unsigned int user_id, std::string const& password)
         return -1;
     }
     //TODO remove from invite list ?_?
-    std::cout << "Joined Channel\n";
     m_users.push_back(user_id);
     //TODO return RPL_user_joined_channel
     return 0;

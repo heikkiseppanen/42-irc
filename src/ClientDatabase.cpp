@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:33:19 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:31 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ void ClientDatabase::print_clients() const
     std::cout << "\n";
 }
 
+//To use: First check if nick is in use or it segfaults
 unsigned int ClientDatabase::get_user_id(std::string const& nick)
 {
     std::vector<Client>::iterator it = m_clients.begin();
