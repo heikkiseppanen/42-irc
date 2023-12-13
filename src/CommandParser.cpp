@@ -322,6 +322,7 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
     if (message.length() > 4)
         std::string args = remove_prefix(message, 4);
     // m_ChannelDatabase.remove_user(user_id);
+    std::cout << "QUITTING\n";
     // if (args.size() > 0)
         //TODO ERR_QUIT with quit message
     // else
