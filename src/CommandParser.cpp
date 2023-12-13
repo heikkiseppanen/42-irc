@@ -82,10 +82,10 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             change_nick(message,user_id);
             break;
         case USER:
-            // user_register(message, user_id);
+            user_register(message, user_id);
             break;
         case PASS:
-            //TODO
+            connection_password(message, user_id);
             break;
         case QUIT:
             quit_server(message, user_id);
@@ -113,8 +113,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
 
 std::string remove_prefix(std::string const&message, unsigned int size)
 {
-    std::string args = message.substr(size + 1, message.length() - size - 1);
-    return (args);
+    return (message.substr(size + 1, message.length() - size - 1));
 }
 
 std::vector<std::string> get_targets(std::string const& message, unsigned int skip)
@@ -270,6 +269,12 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 {
     user_id++; //delete
     user_id--; //delete
+    if (m_ClientDatabase.get_client(user_id).get_server_password_bool() == false )//&& server_password_exists
+    {
+        std::cout << "User has not used PASS message\n";
+        //TODO ERR
+        return;
+    }
     std::string nick = remove_prefix(message, 4);
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
@@ -315,18 +320,74 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     client.set_nickname(nick);
 }
 
+// ERR_NEEDMOREPARAMS
+// ERR_ALREADYREGISTERED
+void CommandParser::user_register(std::string const& message, unsigned int user_id)
+{
+    if (m_ClientDatabase.get_client(user_id).get_nickname().empty())
+    {
+        std::cout << "No nickname set yet\n";
+        //TODO ERR
+        return;
+    }
+    user_id++; //delete
+    user_id--; //delete
+    std::string args = remove_prefix(message, 4);
+    std::string::size_type pos = args.find(" ");
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        return;
+    }
+
+}
+
+// ERR_NEEDMOREPARAMS
+// ERR_ALREADYREGISTERED
+
+//NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
+void CommandParser::connection_password(std::string const& message, unsigned int user_id)
+{
+    user_id++; //delete
+    user_id--; //delete
+    std::string args = remove_prefix(message, 4);
+    std::string::size_type pos = args.find(" ");
+    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        return;
+    }
+    if (m_ClientDatabase.is_client(user_id))
+    {
+        std::cout << "ERR_ALREADYREGISTERED\n"; //TODO ERR
+        return;
+    }
+    //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
+    m_ClientDatabase.get_client(user_id).set_server_password_true();
+}
+
 void CommandParser::quit_server(std::string const& message, unsigned int user_id)
 {
     user_id++; //delete
     user_id--; //delete
+    std::string args;
     if (message.length() > 4)
-        std::string args = remove_prefix(message, 4);
+        args = remove_prefix(message, 4);
+    else
+        args = message.substr(0, 4);
     // m_ChannelDatabase.remove_user(user_id);
-    std::cout << "QUITTING\n";
-    // if (args.size() > 0)
-        //TODO ERR_QUIT with quit message
-    // else
-        //TODO ERR_QUIT
+    if (args.size() > 0)
+    {
+        std::cout << "QUITTING SERVER\n";
+        // TODO ERR_QUIT with quit message
+        return;
+    }
+    else
+    {
+        std::cout << "QUITTING SERVER\n";
+        // TODO ERR_QUIT
+        return;
+    }
 }
 
 // ERR_NEEDMOREPARAMS
@@ -444,7 +505,6 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
         }
     }
 }
-
 
 // ERR_NEEDMOREPARAMS
 // ERR_NOSUCHNICK
