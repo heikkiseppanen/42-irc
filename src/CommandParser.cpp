@@ -51,9 +51,11 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
 command CommandParser::get_command_type(std::string const& message)
 {
     std::size_t pos = message.find(" ");
+    std::string cmd;
     if (pos == std::string::npos)
-        return ERR_NO_CMD;
-    std::string cmd = message.substr(0, pos);
+        cmd = message.substr(0, message.length());
+    else
+        cmd = message.substr(0, pos);
     std::map<std::string, command>::iterator it = m_commands.find(cmd);
     if (it == m_commands.end())
         return ERR_NO_CMD;
@@ -86,10 +88,10 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             //TODO
             break;
         case QUIT:
-            //TODO
+            quit_server(message, user_id);
             break;
         case KICK:
-            kick_user(message,user_id);
+            kick_user(message, user_id);
             break;
         case INVITE:
             invite_user(message, user_id);
@@ -313,6 +315,18 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     client.set_nickname(nick);
 }
 
+void CommandParser::quit_server(std::string const& message, unsigned int user_id)
+{
+    user_id++; //delete
+    user_id--; //delete
+    if (message.length() > 4)
+        std::string args = remove_prefix(message, 4);
+    // m_ChannelDatabase.remove_user(user_id);
+    // if (args.size() > 0)
+        //TODO ERR_QUIT with quit message
+    // else
+        //TODO ERR_QUIT
+}
 
 // ERR_NEEDMOREPARAMS
 // ERR_CHANOPRIVSNEEDED
