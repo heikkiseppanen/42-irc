@@ -64,8 +64,6 @@ command CommandParser::get_command_type(std::string const& message)
 
 void    CommandParser::parser(std::string const& message, unsigned int user_id)
 {
-    (void)m_ClientDatabase; //delete
-    
     command cmd = get_command_type(message);
     switch (cmd)
     {
@@ -216,13 +214,13 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
-    std::string args = remove_prefix(message, 4);
-    std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !args[pos + 1] || args.empty())
+    if (message.length() <= 4)
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
+    std::string args = remove_prefix(message, 4);
+    std::string::size_type pos = args.find(" ");
     std::string first_arg = args.substr(0, pos);
     std::string second_arg = args.substr(pos + 1, args.length() - pos - 1);
     std::vector<std::string> vec;
@@ -330,16 +328,33 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         //TODO ERR
         return;
     }
-    user_id++; //delete
-    user_id--; //delete
-    std::string args = remove_prefix(message, 4);
-    std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    if (message.length() == 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
         return;
     }
-
+    std::string args = remove_prefix(message, 4);
+    std::vector<std::string> vec;
+    std::string::size_type pos = args.find(" ");
+    for (unsigned int i = 0; pos != std::string::npos && i < 3; i++)
+    {
+        vec.push_back(args.substr(0, pos));
+        args.erase(0, args.find(" ") + 1);
+        pos = args.find(" ");
+    }
+    vec.push_back(args);
+    for (unsigned int i = 0; i < vec.size(); i++)
+    {
+        std::cout << "arg " << i << ":[" << vec[i] << "]\n"; //delete
+    }
+    if (vec.size() < 4)
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        return;
+    }
+    //TODO if client is already registered
+    //TODO set client registered
+    //TODO RPL
 }
 
 // ERR_NEEDMOREPARAMS
@@ -348,15 +363,13 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& message, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
-    std::string args = remove_prefix(message, 4);
-    std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    if (message.length() <= 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
+    std::string args = remove_prefix(message, 4);
+    std::string::size_type pos = args.find(" ");
     if (m_ClientDatabase.is_client(user_id))
     {
         std::cout << "ERR_ALREADYREGISTERED\n"; //TODO ERR
@@ -378,7 +391,7 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
     // m_ChannelDatabase.remove_user(user_id);
     if (args.size() > 0)
     {
-        std::cout << "QUITTING SERVER\n";
+        std::cout << "QUITTING SERVER\nReason:[" << args << "]\n";
         // TODO ERR_QUIT with quit message
         return;
     }
@@ -399,8 +412,11 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
 // "KICK #finnish,#english heikki,crisplake :Bye noobs"
 void CommandParser::kick_user(std::string const& message, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
+    if (message.length() <= 4)
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n";
+        return;
+    }
     std::string args = remove_prefix(message, 4);
     std::string::size_type pos = args.find(" ");
     if (pos == std::string::npos || !message[pos + 1] || message.empty())
@@ -517,6 +533,11 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
 {
     user_id++; //delete
     user_id--; //delete
+    if (message.length() <= 4)
+    {
+        std::cout << "ERR_NEEDMOREPARAMS\n";
+        return;
+    }
     std::string args = remove_prefix(message, 6);
     std::string::size_type pos = args.find(" ");
     if (pos == std::string::npos || !message[pos + 1] || message.empty())
@@ -616,6 +637,7 @@ l - set the user limit to channel;
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
+    user_id--; // delete
     std::string::size_type pos = message.find(" ");
     std::string split = message.substr(pos + 1, message.length() - (pos + 1));
     pos = split.find(" ");
@@ -689,16 +711,26 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
 void CommandParser::send_ping(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
+    user_id--; // delete
     std::string target = message.substr(5, message.length() - 5);
     std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
     /*TODO IF TARGET EXISTS IN DATABASE*/
-    //ERR_NOORIGIN
-    //ERR_NOSUCHSERVER
+    if (!m_ClientDatabase.is_client(user_id))
+    {
+        std::cout << ":No origin specified\n"; //TODO ERR_NOORIGIN
+        return;
+    }
+    if (!m_ChannelDatabase.is_channel(target))
+    {
+        std::cout << "<server name> :No such server\n"; //TODO ERR_NOSUCHSERVER
+        return;
+    }
 }
 
 void CommandParser::send_pong(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
+    user_id--; // delete
     std::string target = message.substr(5, message.length() - 5);
     std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
     /*TODO IF TARGET EXISTS IN DATABASE*/
