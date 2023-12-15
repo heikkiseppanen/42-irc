@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/01 13:09:15 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/12/15 14:13:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,34 @@ void EventHandler::on_client_connected(Socket socket)
     m_socket_client_table[socket.file_descriptor] = m_clients.add_client();
 }
 
+bool find_command(std::string& command, Client& client)
+{
+    std::string const& buffer = client.get_buffer();
+    for (std::string::const_iterator it = buffer.begin(); it != buffer.end() - 1; it++)
+    {
+        if (it - buffer.begin() > 510)
+        {
+            client.remove_from_buffer(it - buffer.begin());
+            return false;
+        }
+        if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
+        {
+            it += 2;
+            command = buffer.substr(0, it - buffer.begin());
+            client.remove_from_buffer(it - buffer.begin());
+            return true;
+        }
+    }
+    return false;
+}
+
 void EventHandler::on_client_readable(Socket socket)
 {
     unsigned int id = m_socket_client_table[socket.file_descriptor];
     Client client = m_clients.get_client(id);
 
     char buf[INPUT_BUFFER_SIZE + 1];
-    ssize_t received = socket.receive(buf, INPUT_BUFFER_SIZE);
+    ssize_t received = socket.receive(buf, INPUT_BUFFER_SIZE - client.get_buffer().length());
     if (received == -1)
     {
         return;
@@ -33,22 +54,16 @@ void EventHandler::on_client_readable(Socket socket)
         m_socket_client_table.erase(socket.file_descriptor);
         m_clients.remove_client(id);
         m_channels.remove_user(id);
-		socket.close();
+        socket.close();
         return;
     }
     buf[received] = '\0';
 
     client.add_to_buffer(buf);
-    std::string const& buffer = client.get_buffer();
-    for (std::string::const_iterator it = buffer.begin(); it != buffer.end() - 1; it++)
+    std::string command;
+    while (find_command(command, client))
     {
-        if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
-        {
-            it += 2;
             //TODO interpreter called here
-            client.remove_from_buffer(it - buffer.begin());
-            break;
-        }
     }
 }
 
