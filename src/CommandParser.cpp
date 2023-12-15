@@ -101,10 +101,10 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             change_mode(message, user_id);
             break;
         case PING:
-            send_ping(message, user_id);
+            receive_ping(message, user_id);
             break;
         case PONG:
-            send_pong(message, user_id);
+            receive_pong(message, user_id);
             break;
     }
 }
@@ -368,13 +368,12 @@ void CommandParser::connection_password(std::string const& message, unsigned int
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
-    std::string args = remove_prefix(message, 4);
-    std::string::size_type pos = args.find(" ");
     if (m_ClientDatabase.is_client(user_id))
     {
         std::cout << "ERR_ALREADYREGISTERED\n"; //TODO ERR
         return;
     }
+    std::string args = remove_prefix(message, 4);
     //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
     m_ClientDatabase.get_client(user_id).set_server_password_true();
 }
@@ -634,6 +633,20 @@ k - set a channel key (password).
 o - give/take channel operator privileges
 l - set the user limit to channel;
 */
+
+// ERR_NEEDMOREPPARAMS
+// ERR_NOCHANMODES
+// ERR_USERNOTINCHANNEL
+// ERR_KEYSET
+// ERR_CHANOPRIVSNEEDED
+// ERR_UNKNOWNMODE
+// RPL_BANLIST
+// RPL_EXCEPTLIST
+// RPL_INVITELIST
+// RPL_UNIQOPIS
+// RPL_ENDOFBANLIST
+// RPL_ENDOFEXCEPTLIST
+// RPL_ENDOFINVITELIST
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
     user_id++; // delete
@@ -662,7 +675,7 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     if (1 || m_ChannelDatabase.is_channel(channel))
     {
         Channel& ref = m_ChannelDatabase.get_channel(channel);
-        (void)ref;
+        (void)ref; //delete
         int mode = 0;
         for (unsigned int i = 0; i < flags.size(); i++)
         {
@@ -708,31 +721,27 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     }
 }
 
-void CommandParser::send_ping(std::string const& message, unsigned int user_id)
+// ERR_NOORIGIN
+// ERR_NOSUCHSERVER
+void CommandParser::receive_ping(std::string const& message, unsigned int user_id)
 {
-    user_id++; // delete
-    user_id--; // delete
-    std::string target = message.substr(5, message.length() - 5);
-    std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
-    /*TODO IF TARGET EXISTS IN DATABASE*/
-    if (!m_ClientDatabase.is_client(user_id))
-    {
-        std::cout << ":No origin specified\n"; //TODO ERR_NOORIGIN
-        return;
-    }
-    if (!m_ChannelDatabase.is_channel(target))
-    {
-        std::cout << "<server name> :No such server\n"; //TODO ERR_NOSUCHSERVER
-        return;
-    }
+    // user_id++; // delete
+    // user_id--; // delete
+    // std::string target = remove_prefix(message, 4);
+    // std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
+    // if (!m_ClientDatabase.is_client(user_id))
+    // {
+    //     std::cout << ":No origin specified\n"; //TODO ERR_NOORIGIN
+    //     return;
+    // }
 }
 
-void CommandParser::send_pong(std::string const& message, unsigned int user_id)
+void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
 {
-    user_id++; // delete
-    user_id--; // delete
-    std::string target = message.substr(5, message.length() - 5);
-    std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
+    // user_id++; // delete
+    // user_id--; // delete
+    // std::string target = message.substr(5, message.length() - 5);
+    // std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
     /*TODO IF TARGET EXISTS IN DATABASE*/
     //ERR_NOORIGIN
     //ERR_NOSUCHSERVER
