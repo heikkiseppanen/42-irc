@@ -62,29 +62,47 @@ Socket::Socket(char const* ip, char const* port)
     if (ipv6 != NULL)
     {
         std::cout << "Attempting to create IPv6 socket...\n";
-        file_descriptor = create_listener_socket(ipv6);
+        m_file_descriptor = create_listener_socket(ipv6);
     }
     if (ipv4 != NULL && !is_valid())
     {
         std::cout << "Attempting to create IPv4 socket...\n";
-        file_descriptor = create_listener_socket(ipv4);
+        m_file_descriptor = create_listener_socket(ipv4);
     }
 
     freeaddrinfo(address_list);
 
     IRC_ASSERT_THROW(!is_valid(), "No listening socket could be created.\n");
 
-    std::cout << "Socket " << file_descriptor << " listening to " << port << ".\n";
+    std::cout << "Socket " << m_file_descriptor << " listening to " << port << ".\n";
 }
 
-Socket Socket::accept()
+ssize_t Socket::send(void const* source, size_t size) const
+{
+    ssize_t sent = ::send(m_file_descriptor, source, size, 0);
+
+    IRC_ASSERT_THROW(sent == -1, std::string("Send error: ") + std::strerror(errno));
+
+    return sent;
+}
+
+ssize_t Socket::receive(void* destination, size_t size) const
+{
+    ssize_t received = ::recv(m_file_descriptor, destination, size, 0);
+
+    IRC_ASSERT_THROW(received == -1, std::string("Recv error: ") + std::strerror(errno));
+
+    return received;
+}
+
+Socket Socket::accept() const
 {
     //struct sockaddr_storage address;
     //socklen_t address_size = sizeof(address);
 
-    std::cout << file_descriptor << " accepting inbound connection.\n";
+    std::cout << m_file_descriptor << " accepting inbound connection.\n";
 
-    Socket client(::accept(file_descriptor, NULL, NULL));
+    Socket client(::accept(m_file_descriptor, NULL, NULL));
 
     IRC_ASSERT_THROW(!client.is_valid(), std::string("Accepting incoming connection failed: ") + std::strerror(errno) + '\n');
 

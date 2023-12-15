@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 12:07:46 by hseppane          #+#    #+#             */
-/*   Updated: 2023/11/29 18:42:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/12/15 14:36:23 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,25 +16,28 @@
 
 #include <sys/socket.h>
 
-struct Socket
+class Socket
 {
-    int file_descriptor;
+    public:
+        inline Socket() : m_file_descriptor(-1) {};
+        inline Socket(int file_descriptor) : m_file_descriptor(file_descriptor) {};
 
-    inline Socket() : file_descriptor(-1) {};
-    inline Socket(int file_descriptor) : file_descriptor(file_descriptor) {};
+        Socket(char const* ip, char const* port);
 
-    Socket(char const* ip, char const* port);
+        inline void close() { if (m_file_descriptor != -1) { ::close(m_file_descriptor); }}
 
-    inline void close() { if (file_descriptor != -1) { ::close(file_descriptor); }}
+        inline bool is_valid() const { return m_file_descriptor != -1; }
 
-    inline bool is_valid() { return file_descriptor != -1; }
+        inline int get_file_descriptor() const { return m_file_descriptor; }
 
-    inline int get_file_descriptor() { return file_descriptor; }
+        ssize_t send(void const* source, size_t size) const;
 
-    inline ssize_t send(void* data, size_t size) { return ::send(file_descriptor, data, size, 0); }
-    inline ssize_t send(void const* data, size_t size) { return ::send(file_descriptor, data, size, 0); }
+        ssize_t receive(void* destination, size_t size) const; 
 
-    inline ssize_t receive(void* destination, size_t size) { return ::recv(file_descriptor, destination, size, 0); }
+        Socket accept() const;
 
-    Socket accept();
+        inline bool operator == (const Socket rhs) { return m_file_descriptor == rhs.get_file_descriptor(); };
+
+    private:
+        int m_file_descriptor;
 };

@@ -6,15 +6,17 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/15 14:13:14 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/12/15 16:14:14 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventHandler.hpp"
 
+#include <iostream>
+
 void EventHandler::on_client_connected(Socket socket)
 {
-    m_socket_client_table[socket.file_descriptor] = m_clients.add_client();
+    m_socket_client_table[socket.get_file_descriptor()] = m_clients.add_client();
 }
 
 bool find_command(std::string& command, Client& client)
@@ -40,24 +42,21 @@ bool find_command(std::string& command, Client& client)
 
 void EventHandler::on_client_readable(Socket socket)
 {
-    unsigned int id = m_socket_client_table[socket.file_descriptor];
+    unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
     Client client = m_clients.get_client(id);
 
     char buf[INPUT_BUFFER_SIZE + 1];
     ssize_t received = socket.receive(buf, INPUT_BUFFER_SIZE - client.get_buffer().length());
-    if (received == -1)
+    buf[received] = '\0';
+
+    if (received == 0)
     {
-        return;
-    }
-    else if (received == 0)
-    {
-        m_socket_client_table.erase(socket.file_descriptor);
+        m_socket_client_table.erase(socket.get_file_descriptor());
         m_clients.remove_client(id);
         m_channels.remove_user(id);
         socket.close();
         return;
     }
-    buf[received] = '\0';
 
     client.add_to_buffer(buf);
     std::string command;
@@ -69,7 +68,7 @@ void EventHandler::on_client_readable(Socket socket)
 
 void EventHandler::on_client_writeable(Socket socket)
 {
-    Client client = m_clients.get_client(m_socket_client_table[socket.file_descriptor]);
+    Client client = m_clients.get_client(m_socket_client_table[socket.get_file_descriptor()]);
     if (client.has_message())
     {
         std::string msg = client.get_message();
