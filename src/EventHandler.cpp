@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/15 12:44:29 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/12/15 13:17:31 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void EventHandler::on_client_readable(Socket socket)
         m_socket_client_table.erase(socket.file_descriptor);
         m_clients.remove_client(id);
         m_channels.remove_user(id);
-		socket.close();
+        socket.close();
         return;
     }
     buf[received] = '\0';
