@@ -53,7 +53,7 @@ re: fclean all
 
 .PHONY: all clean fclean re debug
 
-test: fclean
+test:
 	@make -C testsrc
 	@echo "------------RUNNING TESTS------------"
 	@./testsrc/test
