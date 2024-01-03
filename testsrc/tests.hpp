@@ -1,18 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tests.cpp                                          :+:      :+:    :+:   */
+/*   tests.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:00:13 by emajuri          ###   ########.fr       */
+/*   Created: 2024/01/03 14:01:04 by emajuri           #+#    #+#             */
+/*   Updated: 2024/01/03 17:26:52 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
+#pragma once
 
-int main()
-{
-    test_clientDB();
-}
+void test_clientDB();
+void print(bool a);

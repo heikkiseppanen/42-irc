@@ -1,15 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   tests.hpp                                          :+:      :+:    :+:   */
+/*   tests.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/03 14:01:04 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:01:35 by emajuri          ###   ########.fr       */
+/*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
+/*   Updated: 2024/01/03 17:28:32 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#include <iostream>
+#include "tests.hpp"
 
-void test_clientDB();
+void ok()
+{
+    std::cout << "\033[1;32m" << "[OK] " << "\033[0m\n";
+}
+
+void ko()
+{
+    std::cout << "\033[1;31m" << "[KO] " << "\033[0m\n";
+}
+
+//ok on true
+void print(bool a)
+{
+    if (a)
+        ok();
+    else
+        ko();
+}
+
+int main()
+{
+    std::cout << "ClientDatabase tests:\n\n";
+    test_clientDB();
+    std::cout << "\n";
+}
