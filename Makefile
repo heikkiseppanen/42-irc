@@ -8,6 +8,10 @@ OBJDIR := ./obj
 SRC :=\
 	main.cpp\
 	ClientDatabase.cpp\
+	Server.cpp\
+	EventSystem.cpp\
+	EventHandler.cpp\
+	Socket.cpp\
 	ChannelDatabase.cpp\
 	Channel.cpp\
 	Client.cpp
@@ -43,7 +47,7 @@ clean:
 	/bin/rm -rf $(OBJDIR)
 
 fclean: clean
-	/bin/rm $(NAME)
+	/bin/rm -f $(NAME)
 
 re: fclean all
 

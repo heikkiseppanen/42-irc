@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 14:38:50 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:53:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ class ChannelDatabase
         inline void remove_channel(std::string const& channel_name) { m_channels.erase(channel_name); }
 
         void print_all_channels();
+
+        void remove_user(unsigned int user_id);
 
     private:
 

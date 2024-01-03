@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/22 14:38:40 by emajuri          ###   ########.fr       */
+/*   Updated: 2023/11/30 12:59:45 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,5 +38,16 @@ void ChannelDatabase::print_all_channels()
     {
         std::cout << it->first << "\n";
         it->second.print_channel();
+    }
+}
+
+void ChannelDatabase::remove_user(unsigned int user_id)
+{
+    for (std::map<std::string, Channel>::iterator it = m_channels.begin(); it != m_channels.end(); it++)
+    {
+        if (it->second.is_subscribed(user_id))
+        {
+            it->second.kick(user_id, it->second.get_operators().front());
+        }
     }
 }
