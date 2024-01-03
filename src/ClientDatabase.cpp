@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:48:03 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/03 14:34:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void ClientDatabase::print_clients() const
     std::cout << "\n";
 }
 
-void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, SharedPointer<std::string> const& msg)
+void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg)
 {
     for (std::vector<unsigned int>::const_iterator it = users.begin(); it != users.end(); it++)
     {

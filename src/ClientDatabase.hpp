@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:47:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/03 14:35:08 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class ClientDatabase
         inline bool is_client(unsigned int id) const { return id < m_clients.size() && !m_clients[id].is_empty(); }
         inline Client& get_client(unsigned int id) { return m_clients[id]; }
 
-        void add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, SharedPointer<std::string> const& msg);
+        void add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg);
 
     private:
         std::vector<Client> m_clients;
