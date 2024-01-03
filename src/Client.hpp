@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:34:22 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/03 18:37:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ class Client
 
         //messages
         inline void add_message(std::shared_ptr<std::string> const& msg) { m_message_queue.push_back(msg); }
-        inline std::string const& get_message() const { return *m_message_queue[0].get(); }
+        inline std::string const& get_message() const { return *m_message_queue[0]; }
         inline void remove_message() { m_message_queue.erase(m_message_queue.begin()); }
         inline bool has_message() const { return m_message_queue.size() != 0; }
 
