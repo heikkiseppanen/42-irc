@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:59:02 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 20:21:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Channel
         //Getters
         inline std::vector<unsigned int> const& get_users() const { return m_users; }
         inline std::vector<unsigned int> const& get_operators() const { return m_operators; }
+        inline std::string const& get_topic() const { return m_topic; }
 
         void print_channel();
 
