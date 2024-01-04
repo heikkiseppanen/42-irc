@@ -1,20 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   clientDB.cpp                                       :+:      :+:    :+:   */
+/*   t_client.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:56:33 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 20:53:19 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 13:31:47 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include <memory>
-#include <string>
 #include "tests.hpp"
-#include "ClientDatabase.hpp"
+#include "Client.hpp"
 
 void test1_client()
 {
@@ -76,6 +74,7 @@ void test4_client()
     print(true);
 }
 
+//same msg on multiple clients
 void test5_client()
 {
     Client c;
@@ -100,6 +99,7 @@ void test5_client()
     print(true);
 }
 
+//buffer tests
 void test6_client()
 {
     Client c;
@@ -117,20 +117,18 @@ void test6_client()
     print(true);
 }
 
+//sent count tests
 void test7_client()
 {
     Client c;
 
-    c.add_message(std::make_shared<std::string>("Message"));
+    c.set_sent_count(120);
+    if (c.get_sent_count() != 120)
+        TEST_ERROR("Set/Get sent_count failed");
+    print(true);
 }
 
-void test1_cdb()
-{
-    ClientDatabase db;
-    // db.add_client("");
-}
-
-void test_clientDB()
+void test_client()
 {
     std::cout << "Client:\n";
     test1_client();
@@ -140,6 +138,4 @@ void test_clientDB()
     test5_client();
     test6_client();
     test7_client();
-
-    test1_cdb();
 }

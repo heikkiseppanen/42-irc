@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 17:30:41 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 13:35:16 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ void print(bool a)
 
 int main()
 {
-    std::cout << "ClientDatabase tests:\n\n";
+    test_client();
+    std::cout << "\n\n";
     test_clientDB();
     std::cout << "\n";
 }
