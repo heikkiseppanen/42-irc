@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:34:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 15:21:51 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,14 @@ void ClientDatabase::remove_client(unsigned int id)
 void ClientDatabase::print_clients() const
 {
     std::cout << "Clients:\n";
-    for (std::vector<Client>::const_iterator it = m_clients.begin(); it != m_clients.end(); it++)
+    for (auto& client : m_clients)
     {
-        if (it->is_empty())
+        if (client.is_empty())
             std::cout << "Empty\n";
         else
         {
-            std::cout << "| " << it->get_nickname() << " |\n";
-            it->print_messages();
+            std::cout << "| " << client.get_nickname() << " |\n";
+            client.print_messages();
         }
     }
     std::cout << "\n";
@@ -61,18 +61,18 @@ void ClientDatabase::print_clients() const
 
 void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg)
 {
-    for (std::vector<unsigned int>::const_iterator it = users.begin(); it != users.end(); it++)
+    for (auto user_id : users)
     {
-        if (*it == exclude)
+        if (user_id == exclude)
             continue;
-        if (is_client(*it))
+        if (is_client(user_id))
         {
-            Client& tmp = get_client(*it);
+            Client& tmp = get_client(user_id);
             tmp.add_message(msg);
         }
         else
         {
-            std::cerr << "ERROR: add_messages_to_group: User " << *it << " not found\n";
+            std::cerr << "ERROR: add_messages_to_group: User " << user_id << " not found\n";
         }
     }
 }
