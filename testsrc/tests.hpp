@@ -1,23 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Client.cpp                                         :+:      :+:    :+:   */
+/*   tests.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/29 12:54:18 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:31:58 by emajuri          ###   ########.fr       */
+/*   Created: 2024/01/03 14:01:04 by emajuri           #+#    #+#             */
+/*   Updated: 2024/01/04 14:59:35 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Client.hpp"
-#include <iostream>
+#pragma once
 
-void Client::print_messages() const
-{
-    for (std::vector<std::shared_ptr<std::string> >::const_iterator msg = m_message_queue.begin(); msg != m_message_queue.end(); msg++)
-    {
-        std::cout << **msg << " | ";
-    }
-    std::cout << "\n";
-}
+#include <iostream>
+#include <string>
+
+#define TEST_ERROR(msg) do { ko(); std::cout << msg << " "; return; } while(0);
+
+void test_client();
+void test_clientDB();
+void ok();
+void ko();

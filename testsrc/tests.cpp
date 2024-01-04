@@ -1,23 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Client.cpp                                         :+:      :+:    :+:   */
+/*   tests.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/29 12:54:18 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 14:31:58 by emajuri          ###   ########.fr       */
+/*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
+/*   Updated: 2024/01/04 14:58:10 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Client.hpp"
 #include <iostream>
+#include "tests.hpp"
 
-void Client::print_messages() const
+void ok()
 {
-    for (std::vector<std::shared_ptr<std::string> >::const_iterator msg = m_message_queue.begin(); msg != m_message_queue.end(); msg++)
-    {
-        std::cout << **msg << " | ";
-    }
+    std::cout << "\033[1;32m" << "[OK] " << "\033[0m";
+}
+
+void ko()
+{
+    std::cout << "\033[1;31m" << "[KO] " << "\033[0m";
+}
+
+int main()
+{
+    test_client();
+    std::cout << "\n\n";
+    test_clientDB();
     std::cout << "\n";
 }

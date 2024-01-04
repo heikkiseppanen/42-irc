@@ -22,8 +22,8 @@ DEP := $(OBJ:%.o=%.d)
 # Compilation 
 
 CPP := c++
-CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++98
-LDFLAGS := -std=c++98
+CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++11
+LDFLAGS := -std=c++11
 
 # Rules
 
@@ -52,3 +52,9 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re debug
+
+test:
+	@make -C testsrc
+	@echo "------------RUNNING TESTS------------"
+	@./testsrc/test
+	@make fclean -C testsrc
