@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:56:33 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 13:31:47 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 14:59:47 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void test1_client()
 
     if (!c.is_empty())
         TEST_ERROR("Client not empty on creation");
-    print(true);
+    ok();
 }
 
 //nickname
@@ -31,7 +31,7 @@ void test2_client()
     c.set_nickname("Hello");
     if (c.get_nickname() != "Hello")
         TEST_ERROR("Error setting nickname");
-    print(true);
+    ok();
 }
 
 //messageque
@@ -49,7 +49,7 @@ void test3_client()
     c.remove_message();
     if (c.has_message())
         TEST_ERROR("Message removed incorrectly");
-    print(true);
+    ok();
 }
 
 //registered
@@ -71,7 +71,7 @@ void test4_client()
     if (c.is_registered())
         TEST_ERROR("Client registered only with user received");
 
-    print(true);
+    ok();
 }
 
 //same msg on multiple clients
@@ -96,7 +96,7 @@ void test5_client()
         TEST_ERROR("Remove message failed");
     if (d.get_message() != "Message")
         TEST_ERROR("Removing message on another client affected other one");
-    print(true);
+    ok();
 }
 
 //buffer tests
@@ -114,7 +114,7 @@ void test6_client()
     c.remove_from_buffer(8);
     if (c.get_buffer() != "\nsecondMessage")
         TEST_ERROR("Removing from buffer failed");
-    print(true);
+    ok();
 }
 
 //sent count tests
@@ -125,7 +125,7 @@ void test7_client()
     c.set_sent_count(120);
     if (c.get_sent_count() != 120)
         TEST_ERROR("Set/Get sent_count failed");
-    print(true);
+    ok();
 }
 
 void test_client()

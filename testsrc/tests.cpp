@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 13:35:16 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 14:58:10 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,6 @@ void ok()
 void ko()
 {
     std::cout << "\033[1;31m" << "[KO] " << "\033[0m";
-}
-
-//ok on true
-void print(bool a)
-{
-    if (a)
-        ok();
-    else
-        ko();
 }
 
 int main()

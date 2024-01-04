@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 13:26:14 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 14:40:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 15:00:05 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void test1_cdb()
         if (db.is_client(i))
             TEST_ERROR("Error removing client")
     }
-    print(true);
+    ok();
 }
 
 //Testing adding messages to a group
@@ -65,7 +65,7 @@ void    test2_cdb()
         if (db.get_client(i).get_message() != "Message")
             TEST_ERROR("Message added incorrectly")
     }
-    print(true);
+    ok();
 }
 
 void test_clientDB()
