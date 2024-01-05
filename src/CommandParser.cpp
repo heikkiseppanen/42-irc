@@ -203,6 +203,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     std::cout << "TEXT:[" << text << "]\n";  //delete
         //TODO IF TOO MANY TARGETS
             // return (ERR_TOOMANYTARGETS);
+    //TODO SEND TEXT TO ALL TARGETS
     }
 }
 
@@ -261,7 +262,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 }
 
 // ERR_NONICKNAMEGIVEN ":No nickname given"
-// ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname" ( letter / special ) *8( letter / digit / special / "-" )
+// ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname"
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
@@ -403,11 +404,10 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
 }
 
 // ERR_NEEDMOREPARAMS
+// ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
 // ERR_NOSUCHCHANNEL
-// ERR_NOTONCHANNEL
 // ERR_USERNOTINCHANNEL
-
 // "KICK #finnish,#english heikki,crisplake :Bye noobs"
 void CommandParser::kick_user(std::string const& message, unsigned int user_id)
 {
