@@ -444,90 +444,47 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
     }
     if (channel_vec.size() == 1)
     {
-        try
-        {
-            Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[0]);
-            if (!channel_ref.is_subscribed(user_id))
-            {
-                std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
-                return;
-            }
-            if (!channel_ref.is_operator(user_id))
-            {
-                std::cout << "ERR_CHANOPRIVSNEEDED\n"; //TODO ERR
-                return;
-            }
-            for (std::vector<std::string>::iterator user = users_vec.begin(); user != users_vec.end(); ++user)
-            {
-                if (!m_ClientDatabase.is_nick_in_use(*user))
-                {
-                    std::cout << "User doesn't exist\n"; //TODO?
-                    return;
-                }
-                if (!channel_ref.is_subscribed(m_ClientDatabase.get_user_id(*user))) 
-                {
-                    std::cout << "User:[" << *user << "]ERR_USERNOTINCHANNEL\n"; //TODO ERR
-                    return;
-                }
-            }
-        }
-        catch (...)
+        if (!m_ChannelDatabase.is_channel(channel_vec[0])) 
         {
             std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
             return;
         }
-        // Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[0]);
+        Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[0]);
         for (std::vector<std::string>::iterator user = users_vec.begin(); user != users_vec.end(); ++user)
         {
-            // if (!m_ClientDatabase.is_client(m_ClientDatabase.get_user_id(*user)))
-            // {
-            //     std::cout << "User doesn't exist\n"; //TODO ERR
-            //     return;
-            // }
+            if (!m_ClientDatabase.is_client(m_ClientDatabase.get_user_id(*user)))
+            {
+                std::cout << *user << ":User doesn't exist\n"; //TODO ERR
+                continue;
+            }
             std::cout << "Kicking:" << *user << " Reason:[" << args << "]\n";
-            // channel_ref.kick(user_id, m_ClientDatabase.get_user_id(*user));
+            channel_ref.kick(user_id, m_ClientDatabase.get_user_id(*user));
+            //TODO catch return value
         }
     }
     else
     {
         for (unsigned int i = 0; i < channel_vec.size(); i++)
         {
-            try
-            {
-                Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[i]);
-                if (!channel_ref.is_subscribed(user_id))
-                {
-                    std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
-                    return;
-                }
-                if (!channel_ref.is_operator(user_id))
-                {
-                    std::cout << "ERR_CHANOPRIVSNEEDED\n"; //TODO ERR
-                    return;
-                }
-            }
-            catch (...)
+            if (!m_ChannelDatabase.is_channel(channel_vec[i]))
             {
                 std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
-                return;
+                continue;
             }
-        }
-        for (unsigned int i = 0; i < channel_vec.size(); i++)
-        {
-            // Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[i]);
+            Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[i]);
             std::cout << "Kicking:" << users_vec[i] << " | Reason:[" << args << "]\n";
-            // channel_ref.kick(user_id, m_ClientDatabase.get_user_id(users_vec[i]));
+            channel_ref.kick(user_id, m_ClientDatabase.get_user_id(users_vec[i]));
+            //TODO get return value
         }
     }
 }
 
-// ERR_NEEDMOREPARAMS
+// RPL_INVITING "<channel> <nick>"
 // ERR_NOSUCHNICK
+// ERR_NEEDMOREPARAMS
 // ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
 // ERR_USERONCHANNEL
-
-// RPL_INVITING "<channel> <nick>"
 void CommandParser::invite_user(std::string const& message, unsigned int user_id)
 {
     user_id++; //delete
@@ -550,36 +507,17 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
     // std::cout << "channel:[" << channel_name << "]\n";
     if (!m_ClientDatabase.is_nick_in_use(nick))
     {
-        std::cout << "Invited doesn't exist\n"; //TODO ERR
+        std::cout << "Invited doesn't exist\n"; //TODO ERR_NOSUCHNICK
         return;
     }
-    try
-    {
-        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
-        if (channel.is_subscribed(m_ClientDatabase.get_user_id(nick)))
-        {
-            std::cout << "Invited already in channel\n"; //TODO ERR
-            return;
-        }
-        if (!channel.is_subscribed(user_id))
-        {
-            std::cout << "Not on channel\n"; //TODO ERR
-            return;
-        }
-        if (channel.m_has_invite_only == true && !channel.is_operator(user_id))
-        {
-            std::cout << "Channel operator priviledges needed\n"; //TODO ERR
-            return;
-        }
-        channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
-    }
-    catch (...)
+    if (!m_ChannelDatabase.is_channel(channel_name))
     {
         std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO?
         m_ChannelDatabase.add_channel(channel_name, user_id);
-        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
-        channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
     }
+    Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+    channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
+    //TODO check invite return value
 }
 
 //ERR_NEEDMOREPARAMS "<command> :Not enough parameters"

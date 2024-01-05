@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:33:26 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 18:09:15 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,20 +92,24 @@ int Channel::leave_channel(unsigned int leave_id)
 
 int Channel::kick(unsigned int op_id, unsigned int kick_id)
 {
+    if (!is_subscribed(op_id))
+    {
+        std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
+        return -1;
+    }
     if (!is_operator(op_id))
     {
-        //TODO return ERR_not_op
+        //TODO return ERR_CHANOPRIVSNEEDED 
         return -1;
     }
 
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), kick_id);
     if (it == m_users.end())
     {
-        //TODO ERR_user_not_found
+        //TODO ERR_USERNOTINCHANNEL
         return -1;
     }
     m_users.erase(it);
-
     it = std::find(m_operators.begin(), m_operators.end(), kick_id);
     if (it != m_operators.end())
     {
@@ -118,12 +122,21 @@ int Channel::kick(unsigned int op_id, unsigned int kick_id)
 
 int Channel::invite(unsigned int user_id, unsigned int invite_id)
 {
-    if (!is_operator(user_id))
+    if (!is_subscribed(user_id))
     {
-        //TODO return ERR_not_op
+        std::cout << "Not on channel\n"; //TODO ERR_NOTONCHANNEL
         return -1;
     }
-
+    if (m_has_invite_only == true && !is_operator(user_id))
+    {
+        //TODO return ERR_CHANOPRIVSNEEDED
+        return -1;
+    }
+    if (is_subscribed(invite_id))
+    {
+        std::cout << "Invited already in channel\n"; //TODO ERR_USERONCHANNEL
+        return -1;
+    }
     std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), invite_id);
     if (it == m_invited.end())
     {
