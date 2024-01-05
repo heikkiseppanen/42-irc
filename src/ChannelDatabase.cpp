@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 18:11:23 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 14:41:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void ChannelDatabase::remove_user(unsigned int user_id)
     {
         if (channel.second.is_subscribed(user_id))
         {
-            channel.second.kick(channel.second.get_operators().front(), user_id);
+            channel.second.leave_channel(user_id);
         }
     }
     for (auto it = m_channels.begin(), ite = m_channels.end(); it != ite;)
