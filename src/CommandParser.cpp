@@ -266,9 +266,9 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
-    if (m_ClientDatabase.get_client(user_id).get_server_password_bool() == false )//&& server_password_exists
+    //if (server_has_no_password)
+    //  password_received();
+    if (!m_ClientDatabase.get_client(user_id).has_password())
     {
         std::cout << "User has not used PASS message\n";
         //TODO ERR
@@ -317,15 +317,24 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     }
     Client& client = m_ClientDatabase.get_client(user_id);
     client.set_nickname(nick);
+    client.nick_received();
+    if (client.is_registered())
+    {
+        std::cout << "WELCOME REPLY\n"; //TODO RPL
+        return;
+    }
 }
 
 // ERR_NEEDMOREPARAMS
 // ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
-    if (m_ClientDatabase.get_client(user_id).get_nickname().empty())
+    //if (server_has_no_password)
+        // password_received();
+    Client& client = m_ClientDatabase.get_client(user_id);
+    if (!client.has_password())
     {
-        std::cout << "No nickname set yet\n";
+        std::cout << "User has not used PASS message\n";
         //TODO ERR
         return;
     }
@@ -353,9 +362,17 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
         return;
     }
-    //TODO if client is already registered
-    //TODO set client registered
-    //TODO RPL
+    if (client.is_registered())
+    {
+        std::cout << "ERR_ALREADYREGISTERED\n"; // TODO ERR
+        return;
+    }
+    client.user_received();
+    if (client.is_registered())
+    {
+        std::cout << "WELCOME REPLY\n"; //TODO RPL
+        return;
+    }
 }
 
 // ERR_NEEDMOREPARAMS
@@ -375,8 +392,9 @@ void CommandParser::connection_password(std::string const& message, unsigned int
         return;
     }
     std::string args = remove_prefix(message, 4);
+    //TODO CHECK IF SERVER HAS PASSWORD
     //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
-    m_ClientDatabase.get_client(user_id).set_server_password_true();
+    m_ClientDatabase.get_client(user_id).password_received();
 }
 
 void CommandParser::quit_server(std::string const& message, unsigned int user_id)

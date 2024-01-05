@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:36:00 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/05 18:37:21 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,6 @@ class Client
 
         inline std::string const& get_nickname() const { return m_nickname; }
         inline void set_nickname(std::string const& nick) { m_nickname = nick; }
-        inline bool get_server_password_bool() { return server_password; }
-        inline void set_server_password_true() { server_password = true; }
 
         //messages
         inline void add_message(std::shared_ptr<std::string> const& msg) { m_message_queue.push_back(msg); }
@@ -48,7 +46,9 @@ class Client
         //register
         inline void nick_received() { m_registered = m_registered | 0x1; }
         inline void user_received() { m_registered = m_registered | 0x2; }
-        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2; }
+        inline void password_received() { m_registered = m_registered | 0x4; }
+        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2 && m_registered & 0x4; }
+        inline bool has_password() { return m_registered & 0x4; }
 
         void print_messages() const;
 
