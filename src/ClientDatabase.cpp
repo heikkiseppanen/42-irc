@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ClientDatabase.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 15:21:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 17:33:31 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "ClientDatabase.hpp"
 #include <iostream>
+#include <algorithm>
 
 unsigned int ClientDatabase::add_client()
 {
@@ -27,7 +28,7 @@ unsigned int ClientDatabase::add_client()
         id = m_free_ids.top();
         m_free_ids.pop();
     }
-    return (id);
+    return id;
 }
 
 void ClientDatabase::remove_client(unsigned int id)
@@ -57,6 +58,26 @@ void ClientDatabase::print_clients() const
         }
     }
     std::cout << "\n";
+}
+
+//To use: First check if nick is in use or it segfaults
+unsigned int ClientDatabase::get_user_id(std::string const& nick)
+{
+    //TODO Update to find_if
+    std::vector<Client>::iterator it = m_clients.begin();
+    while (it->get_nickname() != nick)
+        it++;
+    return (it - m_clients.begin());
+}
+
+bool ClientDatabase::is_nick_in_use(std::string const& nick)
+{
+    for (std::vector<Client>::iterator it = m_clients.begin(); it != m_clients.end(); it++)
+    {
+        if (it->get_nickname() == nick)
+            return (true);
+    }
+    return (false);
 }
 
 void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg)

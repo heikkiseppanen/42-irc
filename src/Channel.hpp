@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 14:04:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 17:48:36 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Channel
         bool is_operator(unsigned int user_id) const;
         bool is_not_full() const;
         bool is_subscribed(unsigned int user_id) const;
+        bool if_channel_topic_empty() const;
 
     private: 
 
@@ -66,8 +67,8 @@ class Channel
 
         unsigned int m_user_limit;
 
-        bool m_has_invite_only;
         bool m_has_op_topic;
         bool m_has_password;
+        bool m_has_invite_only;
 
 };

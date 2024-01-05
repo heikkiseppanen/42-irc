@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/03 20:52:27 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 18:37:21 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,9 @@ class Client
         //register
         inline void nick_received() { m_registered = m_registered | 0x1; }
         inline void user_received() { m_registered = m_registered | 0x2; }
-        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2; }
+        inline void password_received() { m_registered = m_registered | 0x4; }
+        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2 && m_registered & 0x4; }
+        inline bool has_password() { return m_registered & 0x4; }
 
         void print_messages() const;
 

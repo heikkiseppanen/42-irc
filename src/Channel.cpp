@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 14:04:38 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 18:09:15 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,29 +27,32 @@ int Channel::join_channel(unsigned int user_id, std::string const& password)
 {
     if (!is_invited(user_id))
     {
+        std::cout << "User is not invited\n";
         //TODO return ERR_not_invited
         return -1;
     }
 
     if (!is_valid_password(password))
     {
+        std::cout << "Is not valid password\n";
         //TODO return ERR_bad_password
         return -1;
     }
 
     if (!is_not_full())
     {
+        std::cout << "Channel is full\n";
         //TODO return ERR_channel_full
         return -1;
     }
 
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
     {
+        std::cout << "User already on channel\n";
         //TODO ERR_already_on_channel
         return -1;
     }
     //TODO remove from invite list ?_?
-
     m_users.push_back(user_id);
     //TODO return RPL_user_joined_channel
     return 0;
@@ -89,20 +92,24 @@ int Channel::leave_channel(unsigned int leave_id)
 
 int Channel::kick(unsigned int op_id, unsigned int kick_id)
 {
+    if (!is_subscribed(op_id))
+    {
+        std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
+        return -1;
+    }
     if (!is_operator(op_id))
     {
-        //TODO return ERR_not_op
+        //TODO return ERR_CHANOPRIVSNEEDED 
         return -1;
     }
 
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), kick_id);
     if (it == m_users.end())
     {
-        //TODO ERR_user_not_found
+        //TODO ERR_USERNOTINCHANNEL
         return -1;
     }
     m_users.erase(it);
-
     it = std::find(m_operators.begin(), m_operators.end(), kick_id);
     if (it != m_operators.end())
     {
@@ -115,12 +122,21 @@ int Channel::kick(unsigned int op_id, unsigned int kick_id)
 
 int Channel::invite(unsigned int user_id, unsigned int invite_id)
 {
-    if (!is_operator(user_id))
+    if (!is_subscribed(user_id))
     {
-        //TODO return ERR_not_op
+        std::cout << "Not on channel\n"; //TODO ERR_NOTONCHANNEL
         return -1;
     }
-
+    if (m_has_invite_only == true && !is_operator(user_id))
+    {
+        //TODO return ERR_CHANOPRIVSNEEDED
+        return -1;
+    }
+    if (is_subscribed(invite_id))
+    {
+        std::cout << "Invited already in channel\n"; //TODO ERR_USERONCHANNEL
+        return -1;
+    }
     std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), invite_id);
     if (it == m_invited.end())
     {
@@ -325,4 +341,13 @@ bool Channel::is_subscribed(unsigned int user_id) const
         return false;
     }
     return true;
+}
+
+bool Channel::if_channel_topic_empty() const
+{
+    if (m_topic.empty())
+    {
+        return true;
+    }
+    return false;
 }
