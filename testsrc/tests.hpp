@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 14:01:04 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 14:59:35 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 19:37:13 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,5 +19,7 @@
 
 void test_client();
 void test_clientDB();
+void test_channelDB();
+void test_channel();
 void ok();
 void ko();

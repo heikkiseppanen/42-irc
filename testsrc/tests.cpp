@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:52:35 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 14:58:10 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/04 19:37:22 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,9 @@ int main()
     test_client();
     std::cout << "\n\n";
     test_clientDB();
+    std::cout << "\n\n";
+    test_channelDB();
+    std::cout << "\n\n";
+    test_channel();
     std::cout << "\n";
 }

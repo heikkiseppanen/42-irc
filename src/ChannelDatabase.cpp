@@ -6,23 +6,13 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:59:45 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 14:41:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ChannelDatabase.hpp"
 #include <algorithm>
 #include <iostream>
-
-Channel& ChannelDatabase::get_channel(std::string const& channel_name)
-{
-    std::map<std::string, Channel>::iterator it = m_channels.find(channel_name);
-    if (it == m_channels.end())
-    {
-        //TODO handle missing channel
-    }
-    return it->second;
-}
 
 void ChannelDatabase::add_channel(std::string const& channel_name, unsigned int user_id)
 {
@@ -34,20 +24,27 @@ void ChannelDatabase::add_channel(std::string const& channel_name, unsigned int 
 
 void ChannelDatabase::print_all_channels()
 {
-    for (std::map<std::string, Channel>::iterator it = m_channels.begin(); it != m_channels.end(); it++)
+    for (auto& channel : m_channels)
     {
-        std::cout << it->first << "\n";
-        it->second.print_channel();
+        std::cout << channel.first << "\n";
+        channel.second.print_channel();
     }
 }
 
 void ChannelDatabase::remove_user(unsigned int user_id)
 {
-    for (std::map<std::string, Channel>::iterator it = m_channels.begin(); it != m_channels.end(); it++)
+    for (auto& channel : m_channels)
     {
-        if (it->second.is_subscribed(user_id))
+        if (channel.second.is_subscribed(user_id))
         {
-            it->second.kick(user_id, it->second.get_operators().front());
+            channel.second.leave_channel(user_id);
         }
+    }
+    for (auto it = m_channels.begin(), ite = m_channels.end(); it != ite;)
+    {
+        if (it->second.get_users().empty())
+            it = m_channels.erase(it);
+        else
+            ++it;
     }
 }

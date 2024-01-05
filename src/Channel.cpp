@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/30 12:57:57 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/05 14:04:38 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,29 @@ int Channel::change_topic(unsigned int user_id, std::string const& topic)
     return 0;
 }
 
-int Channel::kick(unsigned int user_id, unsigned int kick_id)
+int Channel::leave_channel(unsigned int leave_id)
 {
-    if (!is_operator(user_id))
+    std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), leave_id);
+    if (it == m_users.end())
+    {
+        //TODO ERR_user_not_found
+        return -1;
+    }
+    m_users.erase(it);
+
+    it = std::find(m_operators.begin(), m_operators.end(), leave_id);
+    if (it != m_operators.end())
+    {
+        m_operators.erase(it);
+    }
+    //TODO return RPL_user_left
+    //TODO remove channel if empty
+    return m_users.size();
+}
+
+int Channel::kick(unsigned int op_id, unsigned int kick_id)
+{
+    if (!is_operator(op_id))
     {
         //TODO return ERR_not_op
         return -1;
@@ -114,9 +134,9 @@ int Channel::invite(unsigned int user_id, unsigned int invite_id)
     return 0;
 }
 
-int Channel::set_invite_only(unsigned int user_id, bool mode)
+int Channel::set_invite_only(unsigned int op_id, bool mode)
 {
-    if (!is_operator(user_id))
+    if (!is_operator(op_id))
     {
         //TODO return ERR_not_op
         return -1;
@@ -126,9 +146,9 @@ int Channel::set_invite_only(unsigned int user_id, bool mode)
     return 0;
 }
 
-int Channel::set_op_topic(unsigned int user_id, bool mode)
+int Channel::set_op_topic(unsigned int op_id, bool mode)
 {
-    if (!is_operator(user_id))
+    if (!is_operator(op_id))
     {
         //TODO return ERR_not_op
         return -1;
@@ -138,9 +158,9 @@ int Channel::set_op_topic(unsigned int user_id, bool mode)
     return 0;
 }
 
-int Channel::set_password(unsigned int user_id, bool mode, std::string const& pass)
+int Channel::set_password(unsigned int op_id, bool mode, std::string const& pass)
 {
-    if (!is_operator(user_id))
+    if (!is_operator(op_id))
     {
         //TODO return ERR_not_op
         return -1;
@@ -158,11 +178,17 @@ int Channel::set_password(unsigned int user_id, bool mode, std::string const& pa
     return 0;
 }
 
-int Channel::set_op(unsigned int user_id, bool mode, unsigned int affect_id)
+int Channel::set_op(unsigned int op_id, bool mode, unsigned int affect_id)
 {
-    if (!is_operator(user_id))
+    if (!is_operator(op_id))
     {
         //TODO return ERR_not_op
+        return -1;
+    }
+
+    if (!is_subscribed(affect_id))
+    {
+        //TODO ERR_user_not_found
         return -1;
     }
 
@@ -171,15 +197,7 @@ int Channel::set_op(unsigned int user_id, bool mode, unsigned int affect_id)
     {
         if (it == m_operators.end())
         {
-            if (std::find(m_users.begin(), m_users.end(), affect_id) != m_users.end())
-            {
-                m_operators.push_back(affect_id);
-            }
-            else
-            {
-                //TODO ERR_user_not_found
-                return -1;
-            }
+            m_operators.push_back(affect_id);
         }
         else
         {
@@ -202,9 +220,9 @@ int Channel::set_op(unsigned int user_id, bool mode, unsigned int affect_id)
     return 0;
 }
 
-int Channel::set_user_limit(unsigned int user_id, bool mode, unsigned int user_limit)
+int Channel::set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit)
 {
-    if (!is_operator(user_id))
+    if (!is_operator(op_id))
     {
         //TODO ERR_not_op
         return -1;
