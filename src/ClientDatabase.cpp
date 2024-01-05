@@ -63,6 +63,7 @@ void ClientDatabase::print_clients() const
 //To use: First check if nick is in use or it segfaults
 unsigned int ClientDatabase::get_user_id(std::string const& nick)
 {
+    //TODO Update to find_if
     std::vector<Client>::iterator it = m_clients.begin();
     while (it->get_nickname() != nick)
         it++;
