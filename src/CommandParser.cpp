@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/19 17:58:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 15:57:12 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTRED
+// ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
     Client& client = m_ClientDatabase.get_client(user_id);
