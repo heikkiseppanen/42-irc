@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 15:56:32 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:02:05 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,12 @@ ReplyEnum Channel::join_channel(unsigned int user_id, std::string const& passwor
         return ERR_CHANNELISFULL;
 
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
-        return IGNORE;
-
-    remove_invite(user_id);
+    {
+        std::cout << "User already on channel\n";
+        //TODO ERR_already_on_channel
+        return -1;
+    }
+    //TODO remove from invite list ?_?
     m_users.push_back(user_id);
     return RPL_NAMREPLY;
 }
