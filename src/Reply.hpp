@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 20:14:01 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/08 21:23:44 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include "ClientDatabase.hpp"
+#include "ChannelDatabase.hpp"
 
 enum ReplyEnum
 {
@@ -58,7 +59,8 @@ class Reply
     public:
 
         Reply() = delete;
-        Reply(ClientDatabase& clients);
+        // Reply(ClientDatabase& clients);
+        Reply(ClientDatabase& clients, ChannelDatabase& channels);
 
         void reply_to_sender(unsigned int user_id, ReplyEnum reply);
         void error_to_sender(unsigned int user_id, ReplyEnum error);
@@ -68,5 +70,6 @@ class Reply
     private:
 
         ClientDatabase& clients;
+        ChannelDatabase& channels;
         std::map<ReplyEnum, std::string> Replies;
 };

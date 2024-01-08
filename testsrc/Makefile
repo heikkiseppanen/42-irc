@@ -23,7 +23,9 @@ MAINSRC :=\
 	Socket.cpp\
 	ChannelDatabase.cpp\
 	Channel.cpp\
-	Client.cpp
+	Client.cpp\
+	CommandParser.cpp\
+	Reply.cpp
 
 MAINSRCDIR := ../src
 

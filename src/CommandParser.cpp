@@ -681,6 +681,8 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
 // ERR_NOSUCHSERVER
 void CommandParser::receive_ping(std::string const& message, unsigned int user_id)
 {
+    (void)message;
+    (void)user_id;
     // user_id++; // delete
     // user_id--; // delete
     // std::string target = remove_prefix(message, 4);
@@ -694,6 +696,8 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
 {
+    (void)message;
+    (void)user_id;
     // user_id++; // delete
     // user_id--; // delete
     // std::string target = message.substr(5, message.length() - 5);
