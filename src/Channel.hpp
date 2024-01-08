@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:48:36 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/08 17:31:04 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <string>
+#include "Reply.hpp"
 
 //Channel modes
 #define ADD     true
@@ -25,10 +26,11 @@ class Channel
         Channel() {}
         Channel(unsigned int user_id);
 
-        int join_channel(unsigned int user_id, std::string const& password);
+        ReplyEnum join_channel(unsigned int user_id, std::string const& password);
         int change_topic(unsigned int user_id, std::string const& topic);
 
         int leave_channel(unsigned int user_id);
+        void remove_invite(unsigned int user_id);
 
         //Operator only
         int kick(unsigned int op_id, unsigned int kick_id);

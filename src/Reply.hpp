@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 17:10:59 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/08 20:14:01 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,13 @@ enum ReplyEnum
     RPL_NOTOPIC, // "<channel> :No topic is set"
     RPL_CHANNELMODEIS, // "<channel> <mode> <mode params>"
     RPL_INVITING, //"<channel> <nick>"
+    RPL_NAMREPLY, //"( "=" / "*" / "@" ) <channel>
+        //        :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
+        //  - "@" is used for secret channels, "*" for private
+        //    channels, and "=" for others (public channels).
 
-// RPL_INVITELIST // "<channel> <invitemask>"
-// RPL_ENDOFINVITELIST // "<channel> :End of channel invite list"
+    RPL_INVITELIST, // "<channel> <invitemask>"
+    RPL_ENDOFINVITELIST, // "<channel> :End of channel invite list"
 
     ERR_NEEDMOREPARAMS, // "<command> :Not enough parameters"
     ERR_NOSUCHCHANNEL, // "<channel> :No such channel" 

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 16:52:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/08 20:12:12 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,40 +23,26 @@ Channel::Channel(unsigned int user_id)
     m_has_password = false;
 }
 
-int Channel::join_channel(unsigned int user_id, std::string const& password)
+ReplyEnum Channel::join_channel(unsigned int user_id, std::string const& password)
 {
     if (!is_invited(user_id))
-    {
-        std::cout << "User is not invited\n";
-        //TODO return ERR_INVITEONLYCHAN
-
-        return -1;
-    }
+        return ERR_INVITEONLYCHAN;
 
     if (!is_valid_password(password))
-    {
-        std::cout << "Is not valid password\n";
-        //TODO return ERR_bad_password
-        return -1;
-    }
+        return ERR_BADCHANNELKEY;
 
     if (!is_not_full())
-    {
-        std::cout << "Channel is full\n";
-        //TODO return ERR_channel_full
-        return -1;
-    }
+        return ERR_CHANNELISFULL;
 
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
     {
         std::cout << "User already on channel\n";
-        //TODO ERR_already_on_channel
-        return -1;
+        //TODO find out what to do if user tries to join a channel it is already on
+        return RPL_TOPIC;
     }
-    //TODO remove from invite list ?_?
+    remove_invite(user_id);
     m_users.push_back(user_id);
-    //TODO return RPL_user_joined_channel
-    return 0;
+    return RPL_NAMREPLY;
 }
 
 int Channel::change_topic(unsigned int user_id, std::string const& topic)
@@ -89,6 +75,15 @@ int Channel::leave_channel(unsigned int leave_id)
     //TODO return RPL_user_left
     //TODO remove channel if empty
     return m_users.size();
+}
+
+void Channel::remove_invite(unsigned int user_id)
+{
+    std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), user_id);
+    if (it != m_invited.end())
+    {
+        m_invited.erase(it);
+    }
 }
 
 int Channel::kick(unsigned int op_id, unsigned int kick_id)
