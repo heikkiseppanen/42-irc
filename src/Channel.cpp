@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 18:09:15 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/08 16:52:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ int Channel::join_channel(unsigned int user_id, std::string const& password)
     if (!is_invited(user_id))
     {
         std::cout << "User is not invited\n";
-        //TODO return ERR_not_invited
+        //TODO return ERR_INVITEONLYCHAN
+
         return -1;
     }
 
@@ -75,7 +76,7 @@ int Channel::leave_channel(unsigned int leave_id)
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), leave_id);
     if (it == m_users.end())
     {
-        //TODO ERR_user_not_found
+        //TODO Check if this check is needed
         return -1;
     }
     m_users.erase(it);
