@@ -325,7 +325,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTERED
+// ERR_ALREADYREGISTRED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
     Client& client = m_ClientDatabase.get_client(user_id);
@@ -364,7 +364,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (client.is_registered())
     {
-        std::cout << "ERR_ALREADYREGISTERED\n"; // TODO ERR
+        std::cout << "ERR_ALREADYREGISTRED\n"; // TODO ERR
         return;
     }
     client.user_received();
@@ -376,7 +376,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTERED
+// ERR_ALREADYREGISTRED
 
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& message, unsigned int user_id)
@@ -388,7 +388,7 @@ void CommandParser::connection_password(std::string const& message, unsigned int
     }
     if (m_ClientDatabase.is_client(user_id))
     {
-        std::cout << "ERR_ALREADYREGISTERED\n"; //TODO ERR
+        std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
         return;
     }
     std::string args = remove_prefix(message, 4);
