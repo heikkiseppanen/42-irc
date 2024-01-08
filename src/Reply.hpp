@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:02:54 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:04:50 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "ClientDatabase.hpp"
+#include "ChannelDatabase.hpp"
 
 enum ReplyEnum
 {
