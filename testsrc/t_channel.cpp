@@ -6,12 +6,13 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 19:36:49 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 14:19:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/08 20:34:28 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "tests.hpp"
 #include "Channel.hpp"
+#include "Reply.hpp"
 
 //constructor
 void test1_channel()
@@ -188,6 +189,26 @@ void test9_channel()
     ok();
 }
 
+void test10_channel()
+{
+    Channel c(0);
+
+    if (c.join_channel(1, "") != RPL_NAMREPLY)
+        TEST_ERROR("Return fail on success");
+    c.set_invite_only(0, ADD);
+    if (c.join_channel(2, "") != ERR_INVITEONLYCHAN)
+        TEST_ERROR("Return fail on not invited");
+    c.set_invite_only(0, REMOVE);
+    c.set_password(0, ADD, "pass");
+    if (c.join_channel(2, "") != ERR_BADCHANNELKEY)
+        TEST_ERROR("Return fail on wrong pass");
+    c.set_password(0, REMOVE, "");
+    c.set_user_limit(0, ADD, 2);
+    if (c.join_channel(2, "") != ERR_CHANNELISFULL)
+        TEST_ERROR("Return fail on full channel");
+    ok();
+}
+
 void test_channel()
 {
     std::cout << "Channel:\n";
@@ -201,4 +222,5 @@ void test_channel()
     test7_channel();
     test8_channel();
     test9_channel();
+    test10_channel();
 }
