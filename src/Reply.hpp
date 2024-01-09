@@ -16,7 +16,8 @@
 #include <string>
 #include <vector>
 #include "ClientDatabase.hpp"
-#include "ChannelDatabase.hpp"
+
+class ChannelDatabase;
 
 enum ReplyEnum
 {
