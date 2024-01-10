@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 21:08:10 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/10 19:07:24 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,8 @@ ReplyEnum Channel::join_channel(unsigned int user_id, std::string const& passwor
         return ERR_CHANNELISFULL;
 
     if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
-    {
-        std::cout << "User already on channel\n";
-        //TODO find out what to do if user tries to join a channel it is already on
-        return RPL_TOPIC;
-    }
+        return IGNORE;
+
     remove_invite(user_id);
     m_users.push_back(user_id);
     return RPL_NAMREPLY;
@@ -56,21 +53,12 @@ ReplyEnum Channel::change_topic(unsigned int user_id, std::string const& topic)
 int Channel::leave_channel(unsigned int leave_id)
 {
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), leave_id);
-    if (it == m_users.end())
-    {
-        //TODO Check if this check is needed
-        return -1;
-    }
     m_users.erase(it);
 
     it = std::find(m_operators.begin(), m_operators.end(), leave_id);
     if (it != m_operators.end())
-    {
         m_operators.erase(it);
-    }
-    //TODO return RPL_user_left
-    //TODO remove channel if empty
-    //TODO leave and kick similar
+    //TODO return RPL_NAMREPLY
     return m_users.size();
 }
 
@@ -102,7 +90,6 @@ ReplyEnum Channel::kick(unsigned int op_id, unsigned int kick_id)
     }
     //TODO return RPL_NAMREPLY?
     //TODO remove channel if empty
-    //TODO leave and kick similar
     return RPL_NAMREPLY;
 }
 
@@ -174,7 +161,7 @@ ReplyEnum Channel::set_op(unsigned int op_id, bool mode, unsigned int affect_id)
         }
         else
         {
-            //TODO ERR_user_already_op
+            return IGNORE;
         }
     }
     else
@@ -185,7 +172,7 @@ ReplyEnum Channel::set_op(unsigned int op_id, bool mode, unsigned int affect_id)
         }
         else
         {
-            //TODO ERR_user_already_not_op
+            return IGNORE;
         }
     }
     return RPL_NAMREPLY;
