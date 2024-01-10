@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 21:23:44 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/09 14:19:59emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ class ChannelDatabase;
 
 enum ReplyEnum
 {
+    IGNORE, // Incase no reply is meant to be sent
     RPL_WELCOME, // "Welcome to the Internet Relay Network <nick>!<user>@<host>"
     RPL_TOPIC, // "<channel> :<topic>" 
     RPL_NOTOPIC, // "<channel> :No topic is set"
@@ -48,6 +49,8 @@ enum ReplyEnum
     ERR_USERNOTINCHANNEL, // "<nick> <channel> :They aren't on that channel"
     ERR_NOSUCHNICK, // "<nickname> :No such nick/channel"
     ERR_USERONCHANNEL, // "<user> <channel> :is already on channel"
+    ERR_NOTEXTTOSEND, //":No text to send"
+
     // ERR_NOCHANMODES, // "<channel> :Channel doesn't support modes"
     ERR_KEYSET, // "<channel> :Channel key already set"
     ERR_UNKNOWNMODE // "<char> :is unknown mode char to me for <channel>"
