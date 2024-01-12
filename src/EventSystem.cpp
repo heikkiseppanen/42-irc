@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/12 12:29:09 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/12 14:17:11 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,10 +55,10 @@ void EventSystem::handle(EventHandler& handler)
         {
             Socket client(it->ident);
 
+            // TODO if multiple events trigger at once for single socket, this doesn't really help
             if (it->flags & EV_EOF)
             {
-                std::cout << "Disconnect\n";
-                client.close();
+                handler.on_client_disconnected(client);
                 continue;
             }
 
@@ -66,8 +66,6 @@ void EventSystem::handle(EventHandler& handler)
             {
                 case EVFILT_READ:
                 {
-                    std::cout << "Socket read " << client.get_file_descriptor() << '\n';
-
                     if (client == m_listener)
                     {
                         for (auto connection_count = it->data; connection_count > 0; --connection_count)
@@ -87,14 +85,10 @@ void EventSystem::handle(EventHandler& handler)
                     {
                         handler.on_client_readable(client);
                     }
-
                     break;
                 }
                 case EVFILT_WRITE:
                 {
-                    std::cout << client.get_file_descriptor() << " ready to recv: " << it->data << " bytes\n";
-
-
                     handler.on_client_writeable(client);
                     break;
                 }
@@ -106,7 +100,4 @@ void EventSystem::handle(EventHandler& handler)
             std::cerr << "ircserv: " << e.what() << '\n';
         }
     }
-
-    std::cin.ignore();
-
 }

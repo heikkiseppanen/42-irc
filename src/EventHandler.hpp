@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/01 13:06:10 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/12 14:11:51 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,11 @@ class EventHandler
     public:
         EventHandler(ClientDatabase& clients, ChannelDatabase& channels) : m_clients(clients), m_channels(channels) {}
 
-        void on_client_connected(Socket socket);
-        void on_client_readable(Socket socket);
-        void on_client_writeable(Socket socket);
+        void on_client_connected(Socket const& socket);
+        void on_client_readable(Socket const& socket);
+        void on_client_writeable(Socket const& socket);
+
+        void on_client_disconnected(Socket& socket);
 
     private:
         std::map<int, unsigned int> m_socket_client_table;
