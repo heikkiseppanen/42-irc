@@ -6,19 +6,21 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 12:07:46 by hseppane          #+#    #+#             */
-/*   Updated: 2023/12/15 14:36:23 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/12 12:35:14 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <unistd.h>
-
 #include <sys/socket.h>
+
+constexpr int SOCKET_LISTEN_BACKLOG_SIZE = 32;
 
 class Socket
 {
     public:
+
         inline Socket() : m_file_descriptor(-1) {};
         inline Socket(int file_descriptor) : m_file_descriptor(file_descriptor) {};
 

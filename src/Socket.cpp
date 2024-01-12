@@ -4,10 +4,13 @@
 
 #include <string>
 #include <netdb.h>
+#include <fcntl.h>
 
 static int create_listener_socket(struct addrinfo const* address)
 {
     int listener = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
+
+    fcntl(listener, F_SETFL, O_NONBLOCK);
 
     if (listener >= 0)
     {
@@ -15,7 +18,7 @@ static int create_listener_socket(struct addrinfo const* address)
         int reuse_address = true;
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &reuse_address, sizeof(reuse_address)) < 0
             || bind(listener, address->ai_addr, address->ai_addrlen) < 0
-            || listen(listener, 10) < 0)
+            || listen(listener, SOCKET_LISTEN_BACKLOG_SIZE) < 0)
         {
             std::cerr << "Listening socket creation failure: " << std::strerror(errno) << '\n';
             close(listener);
@@ -103,6 +106,8 @@ Socket Socket::accept() const
     std::cout << m_file_descriptor << " accepting inbound connection.\n";
 
     Socket client(::accept(m_file_descriptor, NULL, NULL));
+
+    fcntl(client.get_file_descriptor(), F_SETFL, O_NONBLOCK);
 
     IRC_ASSERT_THROW(!client.is_valid(), std::string("Accepting incoming connection failed: ") + std::strerror(errno) + '\n');
 
