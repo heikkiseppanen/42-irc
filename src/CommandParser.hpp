@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 10:44:33 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/16 14:33:03 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "ChannelDatabase.hpp"
 #include <string>
 #include <map>
+#include "Reply.hpp"
 
 enum command
 {
@@ -50,6 +51,8 @@ class CommandParser
 
         ClientDatabase& m_ClientDatabase;
         ChannelDatabase& m_ChannelDatabase;
+        Reply m_reply;
+        
 
         void send_privmsg(std::string const& message, unsigned int user_id);
         void join_channel(std::string const& message, unsigned int user_id);
