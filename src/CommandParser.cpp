@@ -32,7 +32,7 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClientDatabase(ClData), m_ChannelDatabase(ChData)
+: m_ClientDatabase(ClData), m_ChannelDatabase(ChData), m_reply(m_ClientDatabase, m_ChannelDatabase)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -266,9 +266,10 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
+    Client& client = m_ClientDatabase.get_client(user_id);
     //if (server_has_no_password)
-    //  password_received();
-    if (!m_ClientDatabase.get_client(user_id).has_password())
+    client.password_received();
+    if (!client.has_password())
     {
         std::cout << "User has not used PASS message\n";
         //TODO ERR
@@ -278,17 +279,17 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
-        std::cout << "No nickname given\n"; // ERR_NONICKNAMEGIVEN
+        m_reply.error_to_sender(user_id, ERR_NONICKNAMEGIVEN, "", "");
         return;
     }
     if (nick.size() > 9)
     {
-        std::cout << "Nickname too long\n"; // ERR_NICKNAMETOOLONG
+        m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
         return;
     }
     if (m_ClientDatabase.is_nick_in_use(nick))
     {
-        std::cout << "Nick already in use\n"; // ERR_NICKNAMEINUSE
+        m_reply.error_to_sender(user_id, ERR_NICKNAMEINUSE, nick, "");
         return;
     }
     std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
@@ -301,7 +302,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = first_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                std::cout << "Illegal character found as the first character\n"; //ERR_ERRONEUSNICKNAME
+                m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
                 return;
             }
         }
@@ -310,17 +311,16 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = second_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                std::cout << "Illegal character found\n"; //ERR_ERRONEUSNICKNAME
+                m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
                 return;
             }
         }
     }
-    Client& client = m_ClientDatabase.get_client(user_id);
     client.set_nickname(nick);
     client.nick_received();
     if (client.is_registered())
     {
-        std::cout << "WELCOME REPLY\n"; //TODO RPL
+        m_reply.reply_to_sender(user_id, RPL_WELCOME);
         return;
     }
 }
@@ -329,9 +329,9 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 // ERR_ALREADYREGISTRED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
-    //if (server_has_no_password)
-        // password_received();
     Client& client = m_ClientDatabase.get_client(user_id);
+    //if (server_has_no_password)
+    client.password_received();
     if (!client.has_password())
     {
         std::cout << "User has not used PASS message\n";
@@ -340,7 +340,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (message.length() == 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.error_to_sender(user_id, ERR_NEEDMOREPARAMS, "USER", "");
         return;
     }
     std::string args = remove_prefix(message, 4);
@@ -359,18 +359,18 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (vec.size() < 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.error_to_sender(user_id, ERR_NEEDMOREPARAMS, "USER", "");
         return;
     }
     if (client.is_registered())
     {
-        std::cout << "ERR_ALREADYREGISTRED\n"; // TODO ERR
+        m_reply.error_to_sender(user_id, ERR_ALREADYREGISTRED, "USER", "");
         return;
     }
     client.user_received();
     if (client.is_registered())
     {
-        std::cout << "WELCOME REPLY\n"; //TODO RPL
+        m_reply.reply_to_sender(user_id, RPL_WELCOME);
         return;
     }
 }

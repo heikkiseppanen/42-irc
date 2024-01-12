@@ -53,9 +53,10 @@ enum ReplyEnum
 
     // ERR_NOCHANMODES, // "<channel> :Channel doesn't support modes"
     ERR_KEYSET, // "<channel> :Channel key already set"
-    ERR_UNKNOWNMODE // "<char> :is unknown mode char to me for <channel>"
+    ERR_UNKNOWNMODE, // "<char> :is unknown mode char to me for <channel>"
     // ERR_NOORIGIN, // ":No origin specified"
     // ERR_NOSUCHSERVER // "<server name> :No such server"
+    ERR_UNKNOWNCOMMAND //"<command> :Unknown command"
 };
 
 class Reply
@@ -67,13 +68,13 @@ class Reply
         Reply(ClientDatabase& clients, ChannelDatabase& channels);
 
         void reply_to_sender(unsigned int user_id, ReplyEnum reply);
-        void error_to_sender(unsigned int user_id, ReplyEnum error);
+        void error_to_sender(unsigned int user_id, ReplyEnum error, std::string filler1, std::string filler2);
         void reply_to_channel(unsigned int user_id, ReplyEnum reply, std::vector<std::string> channels, std::string msg);
         void reply_to_target(unsigned int user_id, ReplyEnum reply, unsigned int target_id, std::string msg);
 
     private:
 
-        ClientDatabase& clients;
-        ChannelDatabase& channels;
-        std::map<ReplyEnum, std::string> Replies;
+        ClientDatabase& m_clients;
+        ChannelDatabase& m_channels;
+        std::map<ReplyEnum, std::string> m_replies;
 };
