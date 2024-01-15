@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 16:58:55 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 17:22:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/15 17:51:17 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ void test1_handler()
     Client c;
     std::string cmd;
 
-    //\r\n
     c.add_to_buffer("hello world!\r\n");
     if (!find_command(cmd, c))
         TEST_ERROR("Find command not finding command");
@@ -45,6 +44,20 @@ void test1_handler()
         TEST_ERROR("not finding command");
     if (cmd != "hello world!")
         TEST_ERROR("Incorrect command found");
+    if (c.get_buffer().length() != 0)
+        TEST_ERROR("Erased incorrectly");
+
+    c.add_to_buffer("Hello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\nHello\r\n\n");
+    while (find_command(cmd, c))
+    {
+        if (cmd != "Hello")
+            TEST_ERROR("Incorrect command found")
+    }
+    if (c.get_buffer().length() != 1)
+        TEST_ERROR("Erased incorrectly");
+    c.add_to_buffer("\r\n");
+    if (!find_command(cmd, c))
+        TEST_ERROR("not finding command");
     if (c.get_buffer().length() != 0)
         TEST_ERROR("Erased incorrectly");
     ok();
