@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 19:21:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/15 19:21:17 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ bool find_command(std::string& command, Client& client)
     {
         if (it - buffer.begin() > 510)
         {
-            client.remove_from_buffer(it - buffer.begin());
+            client.remove_from_buffer(it + 1 - buffer.begin());
             return false;
         }
         if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
