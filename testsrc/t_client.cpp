@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:56:33 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 14:59:47 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/15 17:14:29 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ void test4_client()
     if (c.is_registered())
         TEST_ERROR("Client registered only with nick received");
     c.user_received();
+    if (c.is_registered())
+        TEST_ERROR("Client registered without pass received");
+    c.password_received();
     if (!c.is_registered())
         TEST_ERROR("Client not registered when should be");
 

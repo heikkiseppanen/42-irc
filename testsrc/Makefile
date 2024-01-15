@@ -10,7 +10,8 @@ SRC :=\
 	t_client.cpp\
 	t_clientDB.cpp\
 	t_channelDB.cpp\
-	t_channel.cpp
+	t_channel.cpp\
+	t_eventhandler.cpp
 
 OBJ := $(addprefix $(OBJDIR)/,$(SRC:.cpp=.o))
 DEP := $(OBJ:%.o=%.d)

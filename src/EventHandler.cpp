@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/15 16:14:14 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/15 17:22:48 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void EventHandler::on_client_connected(Socket socket)
 bool find_command(std::string& command, Client& client)
 {
     std::string const& buffer = client.get_buffer();
-    for (std::string::const_iterator it = buffer.begin(); it != buffer.end() - 1; it++)
+    for (std::string::const_iterator it = buffer.begin(); it != buffer.end(); it++)
     {
         if (it - buffer.begin() > 510)
         {
@@ -31,8 +31,8 @@ bool find_command(std::string& command, Client& client)
         }
         if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
         {
-            it += 2;
             command = buffer.substr(0, it - buffer.begin());
+            it += 2;
             client.remove_from_buffer(it - buffer.begin());
             return true;
         }
