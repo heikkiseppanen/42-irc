@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/12 14:17:11 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/16 13:02:56 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ void EventSystem::handle(EventHandler& handler)
 
     IRC_ASSERT_THROW(events_polled < 0, std::string("kevent error: ") + std::strerror(errno));
 
-    std::cout << "EVENT COUNT: " << events_polled << '\n';
-
     m_changelist.clear();
 
     auto end = m_eventbuffer.begin() + events_polled;
@@ -53,12 +51,13 @@ void EventSystem::handle(EventHandler& handler)
     {
         try
         {
-            Socket client(it->ident);
+            Socket client{ static_cast<int>(it->ident) };
 
-            // TODO if multiple events trigger at once for single socket, this doesn't really help
+            // TODO if multiple events trigger at once for single socket, issues most likely
             if (it->flags & EV_EOF)
             {
                 handler.on_client_disconnected(client);
+                client.close();
                 continue;
             }
 
@@ -73,8 +72,10 @@ void EventSystem::handle(EventHandler& handler)
                             Socket new_client = m_listener.accept();
 
                             struct kevent client_event = {};
+
                             EV_SET(&client_event, new_client.get_file_descriptor(), EVFILT_READ, EV_ADD, 0, 0, 0);
                             m_changelist.push_back(client_event);
+
                             EV_SET(&client_event, new_client.get_file_descriptor(), EVFILT_WRITE, EV_ADD, 0, 0, 0);
                             m_changelist.push_back(client_event);
 
@@ -92,7 +93,7 @@ void EventSystem::handle(EventHandler& handler)
                     handler.on_client_writeable(client);
                     break;
                 }
-                default: std::cerr << "WARNING: Unhandled event: " << it->filter << '\n';
+                default: throw std::runtime_error("WARNING: Unhandled event type " + std::to_string(it->filter));
             }
         }
         catch (std::exception& e)

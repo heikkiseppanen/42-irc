@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 11:04:14 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/16 13:27:40 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,13 @@ void EventHandler::on_client_connected(const Socket& socket)
     m_socket_client_table[socket.get_file_descriptor()] = m_clients.add_client();
 }
 
-void EventHandler::on_client_disconnected(Socket& socket)
+void EventHandler::on_client_disconnected(Socket const& socket)
 {
     unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
-    Client client = m_clients.get_client(id);
 
     m_socket_client_table.erase(socket.get_file_descriptor());
     m_clients.remove_client(id);
     m_channels.remove_user(id);
-    socket.close();
 }
 
 bool find_command(std::string& command, Client& client)
@@ -72,7 +70,7 @@ void EventHandler::on_client_readable(Socket const& socket)
     std::string command;
     while (find_command(command, client))
     {
-        //TODO interpreter called here
+        m_parser.parser(command, id);
     }
 }
 
@@ -81,11 +79,14 @@ void EventHandler::on_client_writeable(Socket const& socket)
     Client& client = m_clients.get_client(m_socket_client_table[socket.get_file_descriptor()]);
     if (client.has_message())
     {
-        std::string msg = client.get_message();
+        std::string const& msg = client.get_message();
         unsigned int sent_count = client.get_sent_count();
         sent_count += socket.send(msg.c_str() + sent_count, msg.length() - sent_count);
         if (sent_count == msg.length())
+        {
             sent_count = 0;
+            client.remove_message();
+        }
         client.set_sent_count(sent_count);
     }
 }
