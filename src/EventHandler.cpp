@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 17:22:48 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/15 19:21:17 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ bool find_command(std::string& command, Client& client)
     {
         if (it - buffer.begin() > 510)
         {
-            client.remove_from_buffer(it - buffer.begin());
+            client.remove_from_buffer(it + 1 - buffer.begin());
             return false;
         }
         if (*it == MSG_END[0] && *(it + 1) == MSG_END[1])
@@ -43,7 +43,7 @@ bool find_command(std::string& command, Client& client)
 void EventHandler::on_client_readable(Socket socket)
 {
     unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
-    Client client = m_clients.get_client(id);
+    Client& client = m_clients.get_client(id);
 
     char buf[INPUT_BUFFER_SIZE + 1];
     ssize_t received = socket.receive(buf, INPUT_BUFFER_SIZE - client.get_buffer().length());
@@ -68,7 +68,7 @@ void EventHandler::on_client_readable(Socket socket)
 
 void EventHandler::on_client_writeable(Socket socket)
 {
-    Client client = m_clients.get_client(m_socket_client_table[socket.get_file_descriptor()]);
+    Client& client = m_clients.get_client(m_socket_client_table[socket.get_file_descriptor()]);
     if (client.has_message())
     {
         std::string msg = client.get_message();
