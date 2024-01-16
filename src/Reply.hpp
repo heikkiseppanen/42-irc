@@ -23,6 +23,16 @@ enum ReplyEnum
 {
     IGNORE, // Incase no reply is meant to be sent
     RPL_WELCOME = 1, // "Welcome to the Internet Relay Network <nick>!<user>@<host>"
+    RPL_YOURHOST = 2, // "Your host is <servername>, running version <ver>"
+    RPL_CREATED = 3, // "This server was created <date>"
+    RPL_MYINFO = 4, // "<servername> <version> <available user modes> <available channel modes>"
+
+    RPL_LUSERCLIENT = 251, // ":There are <integer> users and <integer> services on <integer> servers"
+    RPL_LUSEROP = 251, // "<integer> :operator(s) online"
+    RPL_LUSERUNKNOWN = 253, // "<integer> :unknown connection(s)"
+    RPL_LUSERCHANNELS = 254, // "<integer> :channels formed"
+    RPL_LUSERME = 255, // ":I have <integer> clients and <integer> servers"
+
     RPL_CHANNELMODEIS = 324, // "<channel> <mode> <mode params>"
     RPL_NOTOPIC = 331, // "<channel> :No topic is set"
     RPL_TOPIC = 332, // "<channel> :<topic>" 
@@ -60,13 +70,13 @@ class Reply
         Reply() = delete;
         Reply(ClientDatabase& clients, ChannelDatabase& channels) : m_clients(clients), m_channels(channels) {}
 
-        void reply_to_sender(unsigned int user_id, ReplyEnum reply);
-        void error_to_sender(unsigned int user_id, ReplyEnum error, std::string filler1, std::string filler2);
-        void reply_to_channel(unsigned int user_id, ReplyEnum reply, std::vector<std::string> channels, std::string msg);
-        void reply_to_target(unsigned int user_id, ReplyEnum reply, unsigned int target_id, std::string msg);
+        std::stringstream create_start(ReplyEnum rpl, unsigned int user_id);
+        std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
+        void reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params);
+        void reply_welcome(unsigned int user_id);
 
     private:
 
         ClientDatabase& m_clients;
-        ChannelDatabase& m_channels;
+        const ChannelDatabase& m_channels;
 };

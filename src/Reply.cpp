@@ -6,21 +6,15 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 17:20:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/16 19:20:46 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Reply.hpp"
-
-//all of these come with rpl welcome
-// :<hostname> <enum> <target> :<MSG> <hostname> <MSG> <ver> // rpl_yourhost
-// :<hostname> <enum> <target> :<MSG> <date> // rpl_created
-// :<hostname> <enum> <target> :<hostname> <ver> <usermodes> <channelmodes> // rpl_myinfo
-// :<hostname> <enum> <target> :<MSG> <integer> <MSG> <integer> <MSG> <integer> <MSG> // RPL_LUSERCLIENT
-// :<hostname> <enum> <target> <integer :<MSG> // RPL_LUSEROP
-// :<hostname> <enum> <target> <integer :<MSG> // RPL_LUSERUNKNOWN
-// :<hostname> <enum> <target> <integer :<MSG> // RPL_LUSERCHANNELS
-// :<hostname> <enum> <target> :<MSG> <integer> <MSG> <integer> <MSG> // RPL_LUSERME
+#include <sstream>
+#include <iomanip>
+#include <string>
+#include <vector>
 
 
 // :<hostname> <enum> <target> :<MSG> <target> // rpl_welcome 1
@@ -51,15 +45,47 @@
 // :<hostname> <enum> <target> <channel> :<MSG> // err_badchannelkey 475
 // :<hostname> <enum> <target> <channel> :<MSG> // err_chanoprivsneeded 482
 
+std::stringstream Reply::create_start(ReplyEnum reply, unsigned int user_id)
+{
+    std::stringstream msg;
+    msg << "<hostname>";
+    msg << " ";
+    msg << std::right << std::setfill('0') << std::setw(3) << std::to_string(reply);
+    msg << " ";
+    msg << m_clients.get_client(user_id).get_nickname();
+}
 
-void Reply::reply_to_sender(unsigned int user_id, ReplyEnum reply)
+std::string Reply::create_string(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params)
+{
+    std::stringstream msg = create_start(reply, user_id);
+    for (auto param : params)
+        msg << param;
+    msg << "\r\n";
+}
+
+void Reply::reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params)
 {
     Client client = m_clients.get_client(user_id);
-    switch (reply)
-    {
-        case RPL_WELCOME:
-            client.add_message(std::make_shared<std::string>("Welcome to the Internet Relay Network " + client.get_nickname()));
-        default:
-            (void)1;
-    }
+    std::string msg = create_string(reply, user_id, params);
+    client.add_message(std::make_shared<std::string>(msg));
+}
+
+//all of these come with rpl welcome
+// :<hostname> <enum> <target> :<MSG> <hostname> <MSG> <ver> // rpl_yourhost 2
+// :<hostname> <enum> <target> :<MSG> <date> // rpl_created
+// :<hostname> <enum> <target> :<hostname> <ver> <usermodes> <channelmodes> // rpl_myinfo
+// :<hostname> <enum> <target> :<MSG> <integer> <MSG> <integer> <MSG> <integer> <MSG> // RPL_LUSERCLIENT
+// :<hostname> <enum> <target> <integer> :<MSG> // RPL_LUSEROP
+// :<hostname> <enum> <target> <integer> :<MSG> // RPL_LUSERUNKNOWN
+// :<hostname> <enum> <target> <integer> :<MSG> // RPL_LUSERCHANNELS
+// :<hostname> <enum> <target> :<MSG> <integer> <MSG> <integer> <MSG> // RPL_LUSERME
+
+
+void Reply::reply_welcome(unsigned int user_id)
+{
+    reply_to_sender(RPL_WELCOME, user_id, {":Welcome to the Internet Relay Network ", m_clients.get_client(user_id).get_nickname()});
+    reply_to_sender(RPL_YOURHOST, user_id, {":Your host is ", "<servername> ", ", running version ", "1.0.1"});
+    reply_to_sender(RPL_CREATED, user_id, {":This server was created ", "<date>"});
+    reply_to_sender(RPL_MYINFO, user_id, {"<servername>", " ", "<ver>", " ", "* ", "iklot"});
+    // reply_to_sender();
 }
