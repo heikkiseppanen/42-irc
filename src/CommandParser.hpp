@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/15 16:59:55 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/15 10:44:33 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,9 @@ class CommandParser
     private:
     
         std::map<std::string, command> m_commands;
+
         ClientDatabase& m_ClientDatabase;
         ChannelDatabase& m_ChannelDatabase;
-        
 
         void send_privmsg(std::string const& message, unsigned int user_id);
         void join_channel(std::string const& message, unsigned int user_id);

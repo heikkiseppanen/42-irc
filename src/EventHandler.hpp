@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2023/12/01 13:06:10 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/16 13:30:06 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include "Socket.hpp"
 #include "ClientDatabase.hpp"
 #include "ChannelDatabase.hpp"
+#include "CommandParser.hpp"
+
 #include <map>
 #include <string>
 
@@ -24,14 +26,22 @@
 class EventHandler
 {
     public:
-        EventHandler(ClientDatabase& clients, ChannelDatabase& channels) : m_clients(clients), m_channels(channels) {}
+        inline EventHandler(ClientDatabase& clients, ChannelDatabase& channels)
+            : m_parser(clients, channels),
+              m_clients(clients),
+              m_channels(channels)
+        {}
 
-        void on_client_connected(Socket socket);
-        void on_client_readable(Socket socket);
-        void on_client_writeable(Socket socket);
+        void on_client_connected(Socket const& socket);
+        void on_client_disconnected(Socket const& socket);
+        void on_client_readable(Socket const& socket);
+        void on_client_writeable(Socket const& socket);
 
     private:
         std::map<int, unsigned int> m_socket_client_table;
+
+        CommandParser m_parser;
+
         ClientDatabase& m_clients;
         ChannelDatabase& m_channels;
 };

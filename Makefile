@@ -15,8 +15,8 @@ SRC :=\
 	ChannelDatabase.cpp\
 	Channel.cpp\
 	Client.cpp\
-	CommandParser.cpp\
 	Reply.cpp
+	CommandParser.cpp\
 
 OBJ := $(addprefix $(OBJDIR)/,$(SRC:.cpp=.o))
 DEP := $(OBJ:%.o=%.d)
@@ -24,8 +24,8 @@ DEP := $(OBJ:%.o=%.d)
 # Compilation 
 
 CPP := c++
-CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++11
-LDFLAGS := -std=c++11
+CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++17
+LDFLAGS := -std=c++17
 
 # Rules
 

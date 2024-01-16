@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2023/11/23 19:22:18by jole             ###   ########.fr       */
+/*   Updated: 2024/01/15 14:51:25 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,7 @@ std::vector<std::string> split_string_to_vector(std::string string, std::string 
 
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
-    user_id++; // delete
-    std::cout << "MESSAGE:" << message << '\n'; //delete
+    (void)user_id;
     std::vector<std::string> targets = get_targets(message, 7);
     if (check_if_channel(targets) == 1)
     {
@@ -329,9 +328,10 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 // ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
-    //if (server_has_no_password)
-        // password_received();
     Client& client = m_ClientDatabase.get_client(user_id);
+
+    //if (server_has_no_password)
+     client.password_received();
     if (!client.has_password())
     {
         std::cout << "User has not used PASS message\n";
@@ -399,8 +399,8 @@ void CommandParser::connection_password(std::string const& message, unsigned int
 
 void CommandParser::quit_server(std::string const& message, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
+    (void)user_id;
+
     std::string args;
     if (message.length() > 4)
         args = remove_prefix(message, 4);
@@ -605,8 +605,7 @@ l - set the user limit to channel;
 // RPL_ENDOFINVITELIST
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
-    user_id++; // delete
-    user_id--; // delete
+    (void)user_id;
     std::string::size_type pos = message.find(" ");
     std::string split = message.substr(pos + 1, message.length() - (pos + 1));
     pos = split.find(" ");
@@ -681,6 +680,8 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
 // ERR_NOSUCHSERVER
 void CommandParser::receive_ping(std::string const& message, unsigned int user_id)
 {
+    (void)message;
+    (void)user_id;
     // user_id++; // delete
     // user_id--; // delete
     // std::string target = remove_prefix(message, 4);
@@ -694,8 +695,8 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
 {
-    // user_id++; // delete
-    // user_id--; // delete
+    (void)message;
+    (void)user_id;
     // std::string target = message.substr(5, message.length() - 5);
     // std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
     /*TODO IF TARGET EXISTS IN DATABASE*/
