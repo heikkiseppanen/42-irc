@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 19:36:22 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/16 22:33:33 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class ClientDatabase
 
         inline bool is_client(unsigned int id) const { return id < m_clients.size() && !m_clients[id].is_empty(); }
         inline Client& get_client(unsigned int id) { return m_clients[id]; }
-        inline int count_clients() { return m_clients.size(); }
+        inline unsigned int count_clients() const { return m_clients.size(); }
 
         unsigned int get_user_id(std::string const& nick);
 

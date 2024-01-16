@@ -78,5 +78,5 @@ class Reply
     private:
 
         ClientDatabase& m_clients;
-        const ChannelDatabase& m_channels;
+        ChannelDatabase const& m_channels;
 };

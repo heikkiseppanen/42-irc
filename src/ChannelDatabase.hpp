@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelDatabase.hpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:31:56 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/16 22:33:13 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ class ChannelDatabase
         inline void remove_channel(std::string const& channel_name) { m_channels.erase(channel_name); }
 
         void print_all_channels();
+
+        inline unsigned int count_channels() const { return m_channels.size(); }
 
         bool is_user_on_channel(std::string const& channel_name, unsigned int user_id) { return get_channel(channel_name).is_subscribed(user_id); }
         void remove_user(unsigned int user_id);

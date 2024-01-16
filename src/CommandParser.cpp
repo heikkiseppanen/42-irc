@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 19:23:21 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/16 22:27:32 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,17 +278,17 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
-        // m_reply.create_start(user_id, ERR_NONICKNAMEGIVEN, "", "");
+        m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {" :No nickname given"});
         return;
     }
     if (nick.size() > 9)
     {
-        // m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
+        m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
         return;
     }
     if (m_ClientDatabase.is_nick_in_use(nick))
     {
-        // m_reply.error_to_sender(user_id, ERR_NICKNAMEINUSE, nick, "");
+        m_reply.reply_to_sender(ERR_NICKNAMEINUSE, user_id, {nick, " :Nickname is already in use"});
         return;
     }
     std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
@@ -301,7 +301,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = first_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                // m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
+                m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
                 return;
             }
         }
@@ -310,7 +310,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = second_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                // m_reply.error_to_sender(user_id, ERR_ERRONEUSNICKNAME, nick, "");
+                m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
                 return;
             }
         }
@@ -339,7 +339,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (message.length() == 4)
     {
-        // m_reply.error_to_sender(user_id, ERR_NEEDMOREPARAMS, "USER", "");
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
         return;
     }
     std::string args = remove_prefix(message, 4);
@@ -358,18 +358,18 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (vec.size() < 4)
     {
-        // m_reply.error_to_sender(user_id, ERR_NEEDMOREPARAMS, "USER", "");
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
         return;
     }
     if (client.is_registered())
     {
-        // m_reply.error_to_sender(user_id, ERR_ALREADYREGISTRED, "USER", "");
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
         return;
     }
     client.user_received();
     if (client.is_registered())
     {
-        // m_reply.reply_to_sender(user_id, RPL_WELCOME);
+        m_reply.reply_welcome(user_id);
         return;
     }
 }

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 19:48:28 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/16 22:32:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ std::stringstream Reply::create_start(ReplyEnum reply, unsigned int user_id)
     msg << std::right << std::setfill('0') << std::setw(3) << std::to_string(reply);
     msg << " ";
     msg << m_clients.get_client(user_id).get_nickname();
+    return msg;
 }
 
 std::string Reply::create_string(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params)
@@ -61,6 +62,7 @@ std::string Reply::create_string(ReplyEnum reply, unsigned int user_id, std::vec
     for (auto param : params)
         msg << param;
     msg << "\r\n";
+    return msg.str();
 }
 
 void Reply::reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params)
@@ -90,6 +92,6 @@ void Reply::reply_welcome(unsigned int user_id)
     reply_to_sender(RPL_LUSERCLIENT, user_id, {":There are ", std::to_string(m_clients.count_clients()), " and 0 services on 1 servers"});
     reply_to_sender(RPL_LUSEROP, user_id, {"<integer>", " operator(s) online"});
     reply_to_sender(RPL_LUSERUNKNOWN, user_id, {"<integer>", " unknown connection(s)"});
-    reply_to_sender(RPL_LUSERCHANNELS, user_id, {"<integer>", " channels formed"});
+    reply_to_sender(RPL_LUSERCHANNELS, user_id, {std::to_string(m_channels.count_channels()), " channels formed"});
     reply_to_sender(RPL_LUSERME, user_id, {":I have, ", std::to_string(m_clients.count_clients()), " clients and 1 servers"});
 }
