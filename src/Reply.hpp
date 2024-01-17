@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/09 14:19:59emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 14:56:18 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,8 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "ClientDatabase.hpp"
 
-class ChannelDatabase;
+#include "ClientDatabase.hpp"
 
 enum ReplyEnum
 {
@@ -28,7 +27,7 @@ enum ReplyEnum
     RPL_MYINFO = 4, // "<servername> <version> <available user modes> <available channel modes>"
 
     RPL_LUSERCLIENT = 251, // ":There are <integer> users and <integer> services on <integer> servers"
-    RPL_LUSEROP = 251, // "<integer> :operator(s) online"
+    RPL_LUSEROP = 252, // "<integer> :operator(s) online"
     RPL_LUSERUNKNOWN = 253, // "<integer> :unknown connection(s)"
     RPL_LUSERCHANNELS = 254, // "<integer> :channels formed"
     RPL_LUSERME = 255, // ":I have <integer> clients and <integer> servers"
@@ -68,7 +67,7 @@ class Reply
     public:
 
         Reply() = delete;
-        Reply(ClientDatabase& clients, ChannelDatabase& channels) : m_clients(clients), m_channels(channels) {}
+        Reply(ClientDatabase& clients) : m_clients(clients) {}
 
         std::stringstream create_start(ReplyEnum rpl, unsigned int user_id);
         std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
@@ -78,5 +77,4 @@ class Reply
     private:
 
         ClientDatabase& m_clients;
-        ChannelDatabase const& m_channels;
 };

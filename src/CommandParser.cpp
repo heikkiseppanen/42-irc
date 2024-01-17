@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 22:27:32 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 14:47:48 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClientDatabase(ClData), m_ChannelDatabase(ChData), m_reply(m_ClientDatabase, m_ChannelDatabase)
+: m_ClientDatabase(ClData), m_ChannelDatabase(ChData),
+  m_reply(m_ClientDatabase)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
