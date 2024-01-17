@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 17:54:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 18:02:16 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -696,15 +696,9 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
 {
     (void)message;
     (void)user_id;
-    // user_id++; // delete
-    // user_id--; // delete
-    // std::string target = remove_prefix(message, 4);
-    // std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
-    // if (!m_ClientDatabase.is_client(user_id))
-    // {
-    //     std::cout << ":No origin specified\n"; //TODO ERR_NOORIGIN
-    //     return;
-    // }
+    //TODO errors
+    //TODO hostname
+    m_ClientDatabase.get_client(user_id).add_message(std::make_shared<std::string>(":localhost PONG localhost :localhost"));
 }
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
