@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 14:56:18 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/17 15:37:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ enum ReplyEnum
 
     ERR_NOSUCHNICK = 401, // "<nickname> :No such nick/channel"
     ERR_NOSUCHCHANNEL = 403, // "<channel> :No such channel" 
+    ERR_CANNOTSENDTOCHAN = 404, // "<channel name> :Cannot send to channel"
+    ERR_NORECIPIENT = 411, // ":No recipient given (<command>)"
     ERR_NOTEXTTOSEND = 412, //":No text to send"
     ERR_NONICKNAMEGIVEN = 431, // ":No nickname given"
     ERR_ERRONEUSNICKNAME = 432, // "<nick> :Erroneous nickname"

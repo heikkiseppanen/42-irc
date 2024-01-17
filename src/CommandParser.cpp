@@ -6,11 +6,12 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 14:47:48 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/17 17:54:26 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandParser.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -177,33 +178,46 @@ std::vector<std::string> split_string_to_vector(std::string string, std::string 
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
     (void)user_id;
+    //TODO add these checks
+    // else
+    // {
+    //     //TODO IF TARGET(S) EXISTS IN DATABASE
+    //         //return (ERR_NORECIPIENT);
+    //     //TODO IF NICK EXISTS IN DATABASE
+    //         //return (ERR_NOSUCHNICK);
+    // std::string text;
+    // if (!create_text(message, text))
+    //         std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
+    // std::cout << "TEXT:[" << text << "]\n";  //delete
+    //     //TODO IF TOO MANY TARGETS
+    //         // return (ERR_TOOMANYTARGETS);
+    // //TODO SEND TEXT TO ALL TARGETS
+    // }
     std::vector<std::string> targets = get_targets(message, 7);
-    if (check_if_channel(targets) == 1)
+    for (auto &target : targets)
     {
-        for (unsigned int i = 0; i < targets.size(); i++)
+        if (target[0] == '#')
         {
-            if (m_ChannelDatabase.is_channel(targets[i]))
+            if (!m_ChannelDatabase.is_channel(target))
             {
-                if (i == targets.size())
-                    std::cout << "SEND MSG TO CHANNELS\n"; //TODO SEND MSG TO CHANNEL
-                continue;            
+                m_reply.reply_to_sender(ERR_CANNOTSENDTOCHAN, user_id, {target, " :Cannot sent to channel"});
+            }
+            else
+            {
+                for (auto user : m_ChannelDatabase.get_channel(target).get_users())
+                {
+                    m_ClientDatabase.get_client(user).add_message(std::make_shared<std::string>(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message));
+                }
             }
         }
-        std::cout << "ERR_CANNOTSENDTOCHAN\n"; //return (ERR_CANNOTSENDTOCHAN);
-    } 
-    else
-    {
-        //TODO IF TARGET(S) EXISTS IN DATABASE
-            //return (ERR_NORECIPIENT);
-        //TODO IF NICK EXISTS IN DATABASE
-            //return (ERR_NOSUCHNICK);
-    std::string text;
-    if (!create_text(message, text))
-            std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
-    std::cout << "TEXT:[" << text << "]\n";  //delete
-        //TODO IF TOO MANY TARGETS
-            // return (ERR_TOOMANYTARGETS);
-    //TODO SEND TEXT TO ALL TARGETS
+        else if (m_ClientDatabase.is_nick_in_use(target))
+        {
+            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(std::make_shared<std::string>(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message));
+        }
+        else
+        {
+            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+        }
     }
 }
 
