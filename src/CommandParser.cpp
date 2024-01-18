@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:18:33 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:20:25 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,6 +239,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
+    //TODO find out why irssi send JOIN : and what to do to it
     if (message == "JOIN :")
     {
         return;
