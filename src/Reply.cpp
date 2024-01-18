@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 15:01:32 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/17 18:08:35 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void Reply::reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<s
 {
     Client& client = m_clients.get_client(user_id);
     std::string msg = create_string(reply, user_id, params);
-    client.add_message(std::make_shared<std::string>(std::move(msg)));
+    client.add_message(std::move(msg));
 }
 
 //all of these come with rpl welcome

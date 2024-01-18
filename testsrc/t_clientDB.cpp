@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 13:26:14 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 15:00:05 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 18:09:48 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,38 +39,8 @@ void test1_cdb()
     ok();
 }
 
-//Testing adding messages to a group
-void    test2_cdb()
-{
-    ClientDatabase db;
-    std::vector<unsigned int> ids;
-
-    for (unsigned int i = 0; i < 10; i++)
-    {
-        unsigned int y = db.add_client();
-        ids.push_back(y);
-        if (y != i)
-            TEST_ERROR("Error adding client")
-        if (db.is_client(i))
-            TEST_ERROR("Client not empty after add")
-        db.get_client(i).set_nickname("name");
-    }
-    db.add_messages_to_group(ids, 0, std::make_shared<std::string>("Message"));
-    if (db.get_client(0).has_message())
-        TEST_ERROR("message to group exclude didn't work")
-    for (unsigned int i = 1; i < 10; i++)
-    {
-        if (!db.get_client(i).has_message())
-            TEST_ERROR("Didn't add message to all")
-        if (db.get_client(i).get_message() != "Message")
-            TEST_ERROR("Message added incorrectly")
-    }
-    ok();
-}
-
 void test_clientDB()
 {
     std::cout << "ClientDatabase:\n";
     test1_cdb();
-    test2_cdb();
 }

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 18:02:16 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 20:38:18 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,13 +206,14 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
             {
                 for (auto user : m_ChannelDatabase.get_channel(target).get_users())
                 {
-                    m_ClientDatabase.get_client(user).add_message(std::make_shared<std::string>(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message));
+                    //TODO remove multiple targets
+                    m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
                 }
             }
         }
         else if (m_ClientDatabase.is_nick_in_use(target))
         {
-            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(std::make_shared<std::string>(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message));
+            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + "!~Adium@localhost" + " " + message);
         }
         else
         {
@@ -698,7 +699,7 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
     (void)user_id;
     //TODO errors
     //TODO hostname
-    m_ClientDatabase.get_client(user_id).add_message(std::make_shared<std::string>(":localhost PONG localhost :localhost"));
+    m_ClientDatabase.get_client(user_id).add_message(":localhost PONG localhost :localhost");
 }
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)

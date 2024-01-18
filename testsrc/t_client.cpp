@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:56:33 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 14:31:05 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 18:09:19 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void test3_client()
 
     if (c.has_message())
         TEST_ERROR("Messages not empty on construction");
-    c.add_message(std::make_shared<std::string>("Message1"));
+    c.add_message("Message1");
     if (!c.has_message())
         TEST_ERROR("Can't add messages");
     if (c.get_message() != "Message1")
@@ -83,7 +83,7 @@ void test5_client()
     Client c;
     Client d;
 
-    std::shared_ptr<std::string> pmsg = std::make_shared<std::string>("Message");
+   std::string pmsg = "Message";
     c.add_message(pmsg);
     d.add_message(pmsg);
     if (!c.has_message())

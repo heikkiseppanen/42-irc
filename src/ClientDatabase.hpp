@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 22:33:33 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/17 18:10:02 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ class ClientDatabase
         unsigned int get_user_id(std::string const& nick);
 
         bool is_nick_in_use(std::string const& nick);
-        void add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg);
 
     private:
         std::vector<Client> m_clients;

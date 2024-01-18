@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 18:37:21 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/17 18:06:43 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ class Client
         inline void set_nickname(std::string const& nick) { m_nickname = nick; }
 
         //messages
-        inline void add_message(std::shared_ptr<std::string> const& msg) { m_message_queue.push_back(msg); }
-        inline std::string const& get_message() const { return *m_message_queue[0]; }
+        inline void add_message(std::string const& msg) { m_message_queue.push_back(msg); }
+        inline std::string const& get_message() const { return m_message_queue[0]; }
         inline void remove_message() { m_message_queue.erase(m_message_queue.begin()); }
         inline bool has_message() const { return m_message_queue.size() != 0; }
 
@@ -54,7 +54,7 @@ class Client
 
     private:
         std::string m_nickname;
-        std::vector<std::shared_ptr<std::string> > m_message_queue;
+        std::vector<std::string> m_message_queue;
         std::string m_buffer;
         unsigned int m_sent_count;
         int m_registered;
