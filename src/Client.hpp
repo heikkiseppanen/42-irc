@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/18 18:59:00 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/18 19:22:02 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ class Client
         inline void user_received() { m_registered = m_registered | 0x2; }
         inline void password_received() { m_registered = m_registered | 0x4; }
         inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2 && m_registered & 0x4; }
+        inline bool has_nick() { return m_registered & 0x1; }
+        inline bool has_user() { return m_registered & 0x2; }
         inline bool has_password() { return m_registered & 0x4; }
 
         void print_messages() const;

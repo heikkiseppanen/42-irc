@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/18 19:00:58 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/18 19:50:37 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,6 +234,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
+    //TODO find out why irssi send JOIN : and what to do to it
     if (message == "JOIN :")
     {
         return;
@@ -340,12 +341,9 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
         }
     }
     client.set_nickname(nick);
-    client.nick_received();
-    if (client.is_registered())
-    {
+    if (!client.has_nick() && client.has_user() && client.has_password())
         m_reply.reply_welcome(user_id);
-        return;
-    }
+    client.nick_received();
 }
 
 // ERR_NEEDMOREPARAMS
@@ -390,12 +388,12 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
         return;
     }
-    client.user_received();
-    if (client.is_registered())
+    if (!client.has_user() && client.has_nick() && client.has_password())
     {
         m_reply.reply_welcome(user_id);
         return;
     }
+    client.user_received();
 }
 
 // ERR_NEEDMOREPARAMS
