@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 18:08:35 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/18 18:59:44 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ std::string Reply::create_string(ReplyEnum reply, unsigned int user_id, std::vec
     msg << ' ';
     for (auto param : params)
         msg << param;
-    msg << "\r\n";
     return msg.str();
 }
 

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 20:38:18 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/18 19:00:58 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
     m_commands["MODE"] = MODE;
     m_commands["PING"] = PING;
     m_commands["PONG"] = PONG;
+    m_commands["CAP"] = CAP;
 }
 
 command CommandParser::get_command_type(std::string const& message)
@@ -107,6 +108,9 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case PONG:
             receive_pong(message, user_id);
+            break;
+        case CAP:
+            answer_cap(message, user_id);
             break;
     }
 }
@@ -213,7 +217,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
         }
         else if (m_ClientDatabase.is_nick_in_use(target))
         {
-            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + "!~Adium@localhost" + " " + message);
+            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
         }
         else
         {
@@ -230,6 +234,10 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
+    if (message == "JOIN :")
+    {
+        return;
+    }
     if (message.length() <= 4)
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
@@ -294,7 +302,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
-        m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {" :No nickname given"});
+        m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {":No nickname given"});
         return;
     }
     if (nick.size() > 9)
@@ -711,4 +719,13 @@ void CommandParser::receive_pong(std::string const& message, unsigned int user_i
     /*TODO IF TARGET EXISTS IN DATABASE*/
     //ERR_NOORIGIN
     //ERR_NOSUCHSERVER
+}
+
+void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
+{
+    (void)message;
+    (void)user_id;
+    //TODO sanitize
+    if (message != "CAP END")
+        m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
 }
