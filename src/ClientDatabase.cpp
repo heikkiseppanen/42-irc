@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 18:10:01 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 17:34:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,4 +83,15 @@ bool ClientDatabase::is_nick_in_use(std::string const& nick)
 void ClientDatabase::empty_client(Client& client)
 {
     client.empty_client();
+}
+
+unsigned int ClientDatabase::count_unknown_clients() const 
+{
+    unsigned int count = 0;
+    for (auto const& client : m_clients)
+    {
+        if (client.is_registered())
+            count++;
+    }
+    return count;
 }

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/19 15:15:19 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 17:58:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,10 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
 {
     command cmd = get_command_type(message);
     if (cmd < 100)
+    {
         if (!m_ClientDatabase.get_client(user_id).is_registered())
             return;
+    }
     switch (cmd)
     {
         case ERR_NO_CMD:
@@ -201,7 +203,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     // //TODO SEND TEXT TO ALL TARGETS
     // }
     std::vector<std::string> targets = get_targets(message, 7);
-    for (auto &target : targets)
+    for (auto& target : targets)
     {
         if (target[0] == '#')
         {
@@ -340,7 +342,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     }
     client.set_nickname(nick);
     if (!client.has_nick() && client.has_user() && client.has_password())
-        m_reply.reply_welcome(user_id);
+        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
     client.nick_received();
 }
 
@@ -387,10 +389,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         return;
     }
     if (!client.has_user() && client.has_nick() && client.has_password())
-    {
-        m_reply.reply_welcome(user_id);
-        return;
-    }
+        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
     client.user_received();
 }
 

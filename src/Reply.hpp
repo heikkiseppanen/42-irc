@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 15:37:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 17:26:59 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ enum ReplyEnum
     RPL_YOURHOST = 2, // "Your host is <servername>, running version <ver>"
     RPL_CREATED = 3, // "This server was created <date>"
     RPL_MYINFO = 4, // "<servername> <version> <available user modes> <available channel modes>"
+    RPL_ISUPPORT = 5, // "<client> <1-13 tokens> :are supported by this server"
 
     RPL_LUSERCLIENT = 251, // ":There are <integer> users and <integer> services on <integer> servers"
     RPL_LUSEROP = 252, // "<integer> :operator(s) online"
@@ -48,6 +49,7 @@ enum ReplyEnum
     ERR_CANNOTSENDTOCHAN = 404, // "<channel name> :Cannot send to channel"
     ERR_NORECIPIENT = 411, // ":No recipient given (<command>)"
     ERR_NOTEXTTOSEND = 412, //":No text to send"
+    ERR_NOMOTD = 422, // "<client> :MOTD File is missing"
     ERR_NONICKNAMEGIVEN = 431, // ":No nickname given"
     ERR_ERRONEUSNICKNAME = 432, // "<nick> :Erroneous nickname"
     ERR_NICKNAMEINUSE = 433, // "<nick> :Nickname is already in use"
@@ -74,7 +76,7 @@ class Reply
         std::stringstream create_start(ReplyEnum rpl, unsigned int user_id);
         std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
         void reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params);
-        void reply_welcome(unsigned int user_id);
+        void reply_welcome(unsigned int user_id, unsigned int channel_count);
 
     private:
 

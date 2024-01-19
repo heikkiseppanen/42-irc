@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 18:10:02 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 17:13:41 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,14 @@ class ClientDatabase
         void print_clients() const;
 
         inline bool is_client(unsigned int id) const { return id < m_clients.size() && !m_clients[id].is_empty(); }
+        bool is_nick_in_use(std::string const& nick);
+        
         inline Client& get_client(unsigned int id) { return m_clients[id]; }
-        inline unsigned int count_clients() const { return m_clients.size(); }
-
         unsigned int get_user_id(std::string const& nick);
 
-        bool is_nick_in_use(std::string const& nick);
+        inline unsigned int count_clients() const { return m_clients.size(); }
+        unsigned int count_unknown_clients() const;
+
 
     private:
         std::vector<Client> m_clients;
