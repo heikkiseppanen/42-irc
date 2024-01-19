@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/18 15:50:49 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 15:13:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@ enum command
     ERR_NO_CMD,
     PRIVMSG,
     JOIN,
-    NICK,
-    USER,
-    PASS,
     QUIT,
     KICK,
     INVITE,
     TOPIC,
     MODE,
+    NICK = 100,
+    USER,
+    PASS,
     PING,
     PONG,
     CAP

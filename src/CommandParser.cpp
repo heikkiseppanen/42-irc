@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/18 19:50:37 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/19 15:15:19 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,9 @@ command CommandParser::get_command_type(std::string const& message)
 void    CommandParser::parser(std::string const& message, unsigned int user_id)
 {
     command cmd = get_command_type(message);
+    if (cmd < 100)
+        if (!m_ClientDatabase.get_client(user_id).is_registered())
+            return;
     switch (cmd)
     {
         case ERR_NO_CMD:
@@ -78,15 +81,6 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case JOIN:
             join_channel(message, user_id);
-            break;
-        case NICK:
-            change_nick(message,user_id);
-            break;
-        case USER:
-            user_register(message, user_id);
-            break;
-        case PASS:
-            connection_password(message, user_id);
             break;
         case QUIT:
             quit_server(message, user_id);
@@ -102,6 +96,15 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case MODE:
             change_mode(message, user_id);
+            break;
+        case NICK:
+            change_nick(message,user_id);
+            break;
+        case USER:
+            user_register(message, user_id);
+            break;
+        case PASS:
+            connection_password(message, user_id);
             break;
         case PING:
             receive_ping(message, user_id);
@@ -234,11 +237,6 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
-    //TODO find out why irssi send JOIN : and what to do to it
-    if (message == "JOIN :")
-    {
-        return;
-    }
     if (message.length() <= 4)
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
