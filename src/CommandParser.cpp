@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:35 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:21:47 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,21 +279,24 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         if (!m_ChannelDatabase.is_channel(vec[i]))
         {
             std::cout << "Channel doesn't exist\n"; //ERR NOSUCHCHANNEL
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {vec[i], " :No such channel"});
             i++;
             continue;
         }
-        try 
+        Client& client = m_ClientDatabase.get_client(user_id);
+        Channel& channel = m_ChannelDatabase.get_channel(vec[i]);
+        //TODO make sure that vec2 has something and no out of bounds accessing
+        //TODO add return value handling
+        channel.join_channel(user_id, vec2[i]);
+        client.add_message(":localhost " + client.get_nickname() + " JOIN " + vec[i]);
+        m_reply.reply_to_sender(RPL_TOPIC, user_id, {vec[i], " :", channel.get_topic()});
+        //TODO rpl_namreply
+        for (auto user : channel.get_users())
         {
-            Channel& channel = m_ChannelDatabase.get_channel(vec[i]); //Check that emil fixed missing channel
-            channel.join_channel(user_id, vec2[i]); // TODO in Channel.cpp
-            i++;
+            //TODO remove multiple targets
+            m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
         }
-        catch (...)
-        {
-            std::cout << "Missing channel\n";
-            //ERR_NOSUCHCHANNEL
-            continue;
-        }
+        i++;
     }
 }
 
