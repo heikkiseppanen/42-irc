@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ClientDatabase.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:33:31 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/19 17:34:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,25 +80,18 @@ bool ClientDatabase::is_nick_in_use(std::string const& nick)
     return (false);
 }
 
-void ClientDatabase::add_messages_to_group(std::vector<unsigned int> const& users, unsigned int exclude, std::shared_ptr<std::string> const& msg)
-{
-    for (auto user_id : users)
-    {
-        if (user_id == exclude)
-            continue;
-        if (is_client(user_id))
-        {
-            Client& tmp = get_client(user_id);
-            tmp.add_message(msg);
-        }
-        else
-        {
-            std::cerr << "ERROR: add_messages_to_group: User " << user_id << " not found\n";
-        }
-    }
-}
-
 void ClientDatabase::empty_client(Client& client)
 {
     client.empty_client();
+}
+
+unsigned int ClientDatabase::count_unknown_clients() const 
+{
+    unsigned int count = 0;
+    for (auto const& client : m_clients)
+    {
+        if (client.is_registered())
+            count++;
+    }
+    return count;
 }

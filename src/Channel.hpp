@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:48:36 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/08 21:07:46 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <string>
+#include "Reply.hpp"
 
 //Channel modes
 #define ADD     true
@@ -25,21 +26,22 @@ class Channel
         Channel() {}
         Channel(unsigned int user_id);
 
-        int join_channel(unsigned int user_id, std::string const& password);
-        int change_topic(unsigned int user_id, std::string const& topic);
+        ReplyEnum join_channel(unsigned int user_id, std::string const& password);
+        ReplyEnum change_topic(unsigned int user_id, std::string const& topic);
 
         int leave_channel(unsigned int user_id);
+        void remove_invite(unsigned int user_id);
 
         //Operator only
-        int kick(unsigned int op_id, unsigned int kick_id);
-        int invite(unsigned int op_id, unsigned int invite_id);
+        ReplyEnum kick(unsigned int op_id, unsigned int kick_id);
+        ReplyEnum invite(unsigned int op_id, unsigned int invite_id);
 
         //Channel modes
-        int set_invite_only(unsigned int op_id, bool mode);
-        int set_op_topic(unsigned int op_id, bool mode);
-        int set_password(unsigned int op_id, bool mode, std::string const& pass);
-        int set_op(unsigned int op_id, bool mode, unsigned int affect_id);
-        int set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit);
+        ReplyEnum set_invite_only(unsigned int op_id, bool mode);
+        ReplyEnum set_op_topic(unsigned int op_id, bool mode);
+        ReplyEnum set_password(unsigned int op_id, bool mode, std::string const& pass);
+        ReplyEnum set_op(unsigned int op_id, bool mode, unsigned int affect_id);
+        ReplyEnum set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit);
 
         //Getters
         inline std::vector<unsigned int> const& get_users() const { return m_users; }

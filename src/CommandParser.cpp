@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 14:51:25 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/19 17:58:55 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommandParser.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -32,7 +33,8 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClientDatabase(ClData), m_ChannelDatabase(ChData)
+: m_ClientDatabase(ClData), m_ChannelDatabase(ChData),
+  m_reply(m_ClientDatabase)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -46,6 +48,7 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
     m_commands["MODE"] = MODE;
     m_commands["PING"] = PING;
     m_commands["PONG"] = PONG;
+    m_commands["CAP"] = CAP;
 }
 
 command CommandParser::get_command_type(std::string const& message)
@@ -65,6 +68,11 @@ command CommandParser::get_command_type(std::string const& message)
 void    CommandParser::parser(std::string const& message, unsigned int user_id)
 {
     command cmd = get_command_type(message);
+    if (cmd < 100)
+    {
+        if (!m_ClientDatabase.get_client(user_id).is_registered())
+            return;
+    }
     switch (cmd)
     {
         case ERR_NO_CMD:
@@ -75,15 +83,6 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case JOIN:
             join_channel(message, user_id);
-            break;
-        case NICK:
-            change_nick(message,user_id);
-            break;
-        case USER:
-            user_register(message, user_id);
-            break;
-        case PASS:
-            connection_password(message, user_id);
             break;
         case QUIT:
             quit_server(message, user_id);
@@ -100,11 +99,23 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
         case MODE:
             change_mode(message, user_id);
             break;
+        case NICK:
+            change_nick(message,user_id);
+            break;
+        case USER:
+            user_register(message, user_id);
+            break;
+        case PASS:
+            connection_password(message, user_id);
+            break;
         case PING:
             receive_ping(message, user_id);
             break;
         case PONG:
             receive_pong(message, user_id);
+            break;
+        case CAP:
+            answer_cap(message, user_id);
             break;
     }
 }
@@ -176,33 +187,47 @@ std::vector<std::string> split_string_to_vector(std::string string, std::string 
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
     (void)user_id;
+    //TODO add these checks
+    // else
+    // {
+    //     //TODO IF TARGET(S) EXISTS IN DATABASE
+    //         //return (ERR_NORECIPIENT);
+    //     //TODO IF NICK EXISTS IN DATABASE
+    //         //return (ERR_NOSUCHNICK);
+    // std::string text;
+    // if (!create_text(message, text))
+    //         std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
+    // std::cout << "TEXT:[" << text << "]\n";  //delete
+    //     //TODO IF TOO MANY TARGETS
+    //         // return (ERR_TOOMANYTARGETS);
+    // //TODO SEND TEXT TO ALL TARGETS
+    // }
     std::vector<std::string> targets = get_targets(message, 7);
-    if (check_if_channel(targets) == 1)
+    for (auto& target : targets)
     {
-        for (unsigned int i = 0; i < targets.size(); i++)
+        if (target[0] == '#')
         {
-            if (m_ChannelDatabase.is_channel(targets[i]))
+            if (!m_ChannelDatabase.is_channel(target))
             {
-                if (i == targets.size())
-                    std::cout << "SEND MSG TO CHANNELS\n"; //TODO SEND MSG TO CHANNEL
-                continue;            
+                m_reply.reply_to_sender(ERR_CANNOTSENDTOCHAN, user_id, {target, " :Cannot sent to channel"});
+            }
+            else
+            {
+                for (auto user : m_ChannelDatabase.get_channel(target).get_users())
+                {
+                    //TODO remove multiple targets
+                    m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+                }
             }
         }
-        std::cout << "ERR_CANNOTSENDTOCHAN\n"; //return (ERR_CANNOTSENDTOCHAN);
-    } 
-    else
-    {
-        //TODO IF TARGET(S) EXISTS IN DATABASE
-            //return (ERR_NORECIPIENT);
-        //TODO IF NICK EXISTS IN DATABASE
-            //return (ERR_NOSUCHNICK);
-    std::string text;
-    if (!create_text(message, text))
-            std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
-    std::cout << "TEXT:[" << text << "]\n";  //delete
-        //TODO IF TOO MANY TARGETS
-            // return (ERR_TOOMANYTARGETS);
-    //TODO SEND TEXT TO ALL TARGETS
+        else if (m_ClientDatabase.is_nick_in_use(target))
+        {
+            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+        }
+        else
+        {
+            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+        }
     }
 }
 
@@ -265,9 +290,10 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
+    Client& client = m_ClientDatabase.get_client(user_id);
     //if (server_has_no_password)
-    //  password_received();
-    if (!m_ClientDatabase.get_client(user_id).has_password())
+    client.password_received();
+    if (!client.has_password())
     {
         std::cout << "User has not used PASS message\n";
         //TODO ERR
@@ -277,17 +303,17 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
-        std::cout << "No nickname given\n"; // ERR_NONICKNAMEGIVEN
+        m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {":No nickname given"});
         return;
     }
     if (nick.size() > 9)
     {
-        std::cout << "Nickname too long\n"; // ERR_NICKNAMETOOLONG
+        m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
         return;
     }
     if (m_ClientDatabase.is_nick_in_use(nick))
     {
-        std::cout << "Nick already in use\n"; // ERR_NICKNAMEINUSE
+        m_reply.reply_to_sender(ERR_NICKNAMEINUSE, user_id, {nick, " :Nickname is already in use"});
         return;
     }
     std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
@@ -300,7 +326,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = first_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                std::cout << "Illegal character found as the first character\n"; //ERR_ERRONEUSNICKNAME
+                m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
                 return;
             }
         }
@@ -309,29 +335,24 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
             pos = second_set.find(nick[i]);
             if (pos == std::string::npos)
             {
-                std::cout << "Illegal character found\n"; //ERR_ERRONEUSNICKNAME
+                m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
                 return;
             }
         }
     }
-    Client& client = m_ClientDatabase.get_client(user_id);
     client.set_nickname(nick);
+    if (!client.has_nick() && client.has_user() && client.has_password())
+        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
     client.nick_received();
-    if (client.is_registered())
-    {
-        std::cout << "WELCOME REPLY\n"; //TODO RPL
-        return;
-    }
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTERED
+// ERR_ALREADYREGISTRED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
     Client& client = m_ClientDatabase.get_client(user_id);
-
     //if (server_has_no_password)
-     client.password_received();
+    client.password_received();
     if (!client.has_password())
     {
         std::cout << "User has not used PASS message\n";
@@ -340,7 +361,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (message.length() == 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
         return;
     }
     std::string args = remove_prefix(message, 4);
@@ -359,24 +380,21 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
     }
     if (vec.size() < 4)
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
         return;
     }
     if (client.is_registered())
     {
-        std::cout << "ERR_ALREADYREGISTERED\n"; // TODO ERR
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
         return;
     }
+    if (!client.has_user() && client.has_nick() && client.has_password())
+        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
     client.user_received();
-    if (client.is_registered())
-    {
-        std::cout << "WELCOME REPLY\n"; //TODO RPL
-        return;
-    }
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTERED
+// ERR_ALREADYREGISTRED
 
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& message, unsigned int user_id)
@@ -388,7 +406,7 @@ void CommandParser::connection_password(std::string const& message, unsigned int
     }
     if (m_ClientDatabase.is_client(user_id))
     {
-        std::cout << "ERR_ALREADYREGISTERED\n"; //TODO ERR
+        std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
         return;
     }
     std::string args = remove_prefix(message, 4);
@@ -682,15 +700,9 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
 {
     (void)message;
     (void)user_id;
-    // user_id++; // delete
-    // user_id--; // delete
-    // std::string target = remove_prefix(message, 4);
-    // std::cout << "TYPE:PING | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
-    // if (!m_ClientDatabase.is_client(user_id))
-    // {
-    //     std::cout << ":No origin specified\n"; //TODO ERR_NOORIGIN
-    //     return;
-    // }
+    //TODO errors
+    //TODO hostname
+    m_ClientDatabase.get_client(user_id).add_message(":localhost PONG localhost :localhost");
 }
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
@@ -702,4 +714,13 @@ void CommandParser::receive_pong(std::string const& message, unsigned int user_i
     /*TODO IF TARGET EXISTS IN DATABASE*/
     //ERR_NOORIGIN
     //ERR_NOSUCHSERVER
+}
+
+void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
+{
+    (void)message;
+    (void)user_id;
+    //TODO sanitize
+    if (message != "CAP END")
+        m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
 }

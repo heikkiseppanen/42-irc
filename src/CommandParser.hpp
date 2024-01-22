@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/15 10:44:33 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/19 15:13:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,24 @@
 #include "ChannelDatabase.hpp"
 #include <string>
 #include <map>
+#include "Reply.hpp"
 
 enum command
 {
     ERR_NO_CMD,
     PRIVMSG,
     JOIN,
-    NICK,
-    USER,
-    PASS,
     QUIT,
     KICK,
     INVITE,
     TOPIC,
     MODE,
+    NICK = 100,
+    USER,
+    PASS,
     PING,
-    PONG
+    PONG,
+    CAP
 };
 
 class CommandParser
@@ -50,6 +52,8 @@ class CommandParser
 
         ClientDatabase& m_ClientDatabase;
         ChannelDatabase& m_ChannelDatabase;
+        Reply m_reply;
+        
 
         void send_privmsg(std::string const& message, unsigned int user_id);
         void join_channel(std::string const& message, unsigned int user_id);
@@ -63,4 +67,5 @@ class CommandParser
         void change_mode(std::string const& message, unsigned int user_id);
         void receive_ping(std::string const& message, unsigned int user_id);
         void receive_pong(std::string const& message, unsigned int user_id);
+        void answer_cap(std::string const& message, unsigned int user_id);
 };

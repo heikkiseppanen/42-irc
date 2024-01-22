@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 18:37:21 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/19 17:11:26 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ class Client
         inline void set_nickname(std::string const& nick) { m_nickname = nick; }
 
         //messages
-        inline void add_message(std::shared_ptr<std::string> const& msg) { m_message_queue.push_back(msg); }
-        inline std::string const& get_message() const { return *m_message_queue[0]; }
+        inline void add_message(std::string const& msg) { m_message_queue.push_back(msg + "\r\n"); }
+        inline std::string const& get_message() const { return m_message_queue[0]; }
         inline void remove_message() { m_message_queue.erase(m_message_queue.begin()); }
         inline bool has_message() const { return m_message_queue.size() != 0; }
 
@@ -47,14 +47,16 @@ class Client
         inline void nick_received() { m_registered = m_registered | 0x1; }
         inline void user_received() { m_registered = m_registered | 0x2; }
         inline void password_received() { m_registered = m_registered | 0x4; }
-        inline bool is_registered() { return m_registered & 0x1 && m_registered & 0x2 && m_registered & 0x4; }
-        inline bool has_password() { return m_registered & 0x4; }
+        inline bool is_registered() const { return m_registered & 0x1 && m_registered & 0x2 && m_registered & 0x4; }
+        inline bool has_nick() const { return m_registered & 0x1; }
+        inline bool has_user() const { return m_registered & 0x2; }
+        inline bool has_password() const { return m_registered & 0x4; }
 
         void print_messages() const;
 
     private:
         std::string m_nickname;
-        std::vector<std::shared_ptr<std::string> > m_message_queue;
+        std::vector<std::string> m_message_queue;
         std::string m_buffer;
         unsigned int m_sent_count;
         int m_registered;

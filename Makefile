@@ -15,8 +15,8 @@ SRC :=\
 	ChannelDatabase.cpp\
 	Channel.cpp\
 	Client.cpp\
-	Reply.cpp
-	CommandParser.cpp\
+	Reply.cpp\
+	CommandParser.cpp
 
 OBJ := $(addprefix $(OBJDIR)/,$(SRC:.cpp=.o))
 DEP := $(OBJ:%.o=%.d)
