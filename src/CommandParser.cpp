@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:16 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:21:35 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,7 +202,17 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //         // return (ERR_TOOMANYTARGETS);
     // //TODO SEND TEXT TO ALL TARGETS
     // }
+    if (message.length() < 9)
+    {
+        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+        return;
+    }
     std::vector<std::string> targets = get_targets(message, 7);
+    if (targets.size() == 0)
+    {
+        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+        return;
+    }
     for (auto& target : targets)
     {
         if (target[0] == '#')
@@ -226,7 +236,9 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
         }
         else
         {
-            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+            //TODO remove multiple targets
+            //TODO change to nosuchnick
+            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
         }
     }
 }
