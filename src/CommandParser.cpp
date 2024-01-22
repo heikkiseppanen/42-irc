@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:47 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:21:58 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -638,6 +638,7 @@ l - set the user limit to channel;
 // RPL_ENDOFINVITELIST
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
+    //TODO handle discarding of mode messages that arent for channels
     (void)user_id;
     std::string::size_type pos = message.find(" ");
     std::string split = message.substr(pos + 1, message.length() - (pos + 1));
