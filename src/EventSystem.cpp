@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/16 13:02:56 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/22 10:05:27 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #include <iostream>
 #include <array>
 
-EventSystem::EventSystem()
+EventSystem::EventSystem(const char* port)
     : m_kqueue(kqueue())
-    , m_listener(NULL, "6667")
+    , m_listener(NULL, port)
     , m_changelist()
     , m_eventbuffer(EVENT_BUFFER_SIZE)
 {
@@ -34,7 +34,7 @@ EventSystem::~EventSystem() { close(m_kqueue); }
 
 void EventSystem::handle(EventHandler& handler)
 {
-    static struct timespec const timeout = {0, 10000};
+    static struct timespec constexpr timeout = {0, 10000};
 
     int events_polled = kevent(m_kqueue,
             m_changelist.data(), m_changelist.size(),

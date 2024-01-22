@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 14:17:49 by hseppane          #+#    #+#             */
-/*   Updated: 2023/12/15 15:46:40 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/22 09:49:03 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,12 @@
 class EventSystem
 {
     public:
-        EventSystem();
+        EventSystem() = delete;
+        EventSystem(const char* port);
+
+        EventSystem(EventSystem const& other) = delete;
+        EventSystem& operator = (EventSystem const& other) = delete;
+
         ~EventSystem();
 
         void handle(EventHandler& handler);

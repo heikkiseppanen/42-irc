@@ -6,7 +6,7 @@
 /*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 11:56:39 by hseppane          #+#    #+#             */
-/*   Updated: 2023/12/15 15:22:28 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/22 10:36:24 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,25 @@
 #include "ClientDatabase.hpp"
 #include "ChannelDatabase.hpp"
 
+#include <optional>
+#include <string>
+
 class Server
 {
     public:
-        Server();
+        Server() = delete;
+        Server(const char* port, const char* password);
+
+        Server(Server const& other) = delete;
+        Server& operator = (Server const& other) = delete;
+
         ~Server();
 
         void run();
 
     private:
-        Server(Server const& other);
-        Server& operator = (Server const& other);
+
+        std::optional<std::string> m_password;
 
         EventSystem m_eventloop;
 
