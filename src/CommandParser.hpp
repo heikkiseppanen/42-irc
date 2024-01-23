@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:20:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:22:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ enum command
     INVITE,
     TOPIC,
     MODE,
+    PART,
     NICK = 100,
     USER,
     PASS,
@@ -68,4 +69,5 @@ class CommandParser
         void receive_ping(std::string const& message, unsigned int user_id);
         void receive_pong(std::string const& message, unsigned int user_id);
         void answer_cap(std::string const& message, unsigned int user_id);
+        void part_command(std::string message, unsigned int user_id);
 };

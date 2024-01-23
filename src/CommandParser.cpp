@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:58 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:22:09 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
     m_commands["USER"] = USER;
     m_commands["PASS"] = PASS;
     m_commands["QUIT"] = QUIT;
+    m_commands["PART"] = PART;
     m_commands["KICK"] = KICK;
     m_commands["INVITE"] = INVITE;
     m_commands["TOPIC"] = TOPIC;
@@ -98,6 +99,9 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case MODE:
             change_mode(message, user_id);
+            break;
+        case PART:
+            part_command(message, user_id);
             break;
         case NICK:
             change_nick(message,user_id);
@@ -739,4 +743,48 @@ void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
     //TODO sanitize
     if (message != "CAP END")
         m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
+}
+
+void CommandParser::part_command(std::string message, unsigned int user_id)
+{
+    if (message.length() < 6)
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
+        return;
+    }
+    message.erase(message.begin(), message.begin() + 5);
+    std::vector<std::string> channels;
+    size_t pos;
+    do
+    {
+        pos = message.find(',');
+        channels.push_back(message.substr(0, pos));
+        message.erase(0, pos + pos == std::string::npos ? 0 : 1);
+    } while (pos != std::string::npos);
+    std::string reason;
+    if (channels.back().find(' ') != std::string::npos)
+    {
+        reason = channels.back().substr(channels.back().find(' '), std::string::npos);
+        channels.back().erase(channels.back().find(' '), std::string::npos);
+    }
+    std::string nick = m_ClientDatabase.get_client(user_id).get_nickname();
+    for (auto& channel : channels)
+    {
+        if (!m_ChannelDatabase.is_channel(channel))
+        {
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel, " :No such channel"});
+            continue;
+        }
+        Channel& chan = m_ChannelDatabase.get_channel(channel);
+        if (!chan.is_subscribed(user_id))
+        {
+            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel, " :You're not on that channel"});
+            continue;
+        }
+        for (auto user : chan.get_users())
+        {
+            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel + reason);
+        }
+        m_ClientDatabase.remove_client(user_id);
+    }
 }
