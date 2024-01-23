@@ -4,7 +4,11 @@
 
 #include <iostream>
 
-Server::Server() : m_eventloop() {}
+Server::Server(const char* port, const char* password)
+    : m_password(password ? std::make_optional<std::string>(password) : std::nullopt),
+      m_eventloop(port)
+{
+}
 
 Server::~Server() {}
 
