@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/19 17:58:55 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:22:09 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
     m_commands["USER"] = USER;
     m_commands["PASS"] = PASS;
     m_commands["QUIT"] = QUIT;
+    m_commands["PART"] = PART;
     m_commands["KICK"] = KICK;
     m_commands["INVITE"] = INVITE;
     m_commands["TOPIC"] = TOPIC;
@@ -98,6 +99,9 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case MODE:
             change_mode(message, user_id);
+            break;
+        case PART:
+            part_command(message, user_id);
             break;
         case NICK:
             change_nick(message,user_id);
@@ -202,7 +206,17 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //         // return (ERR_TOOMANYTARGETS);
     // //TODO SEND TEXT TO ALL TARGETS
     // }
+    if (message.length() < 9)
+    {
+        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+        return;
+    }
     std::vector<std::string> targets = get_targets(message, 7);
+    if (targets.size() == 0)
+    {
+        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+        return;
+    }
     for (auto& target : targets)
     {
         if (target[0] == '#')
@@ -226,7 +240,9 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
         }
         else
         {
-            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+            //TODO remove multiple targets
+            //TODO change to nosuchnick
+            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
         }
     }
 }
@@ -267,21 +283,24 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         if (!m_ChannelDatabase.is_channel(vec[i]))
         {
             std::cout << "Channel doesn't exist\n"; //ERR NOSUCHCHANNEL
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {vec[i], " :No such channel"});
             i++;
             continue;
         }
-        try 
+        Client& client = m_ClientDatabase.get_client(user_id);
+        Channel& channel = m_ChannelDatabase.get_channel(vec[i]);
+        //TODO make sure that vec2 has something and no out of bounds accessing
+        //TODO add return value handling
+        channel.join_channel(user_id, vec2[i]);
+        client.add_message(":localhost " + client.get_nickname() + " JOIN " + vec[i]);
+        m_reply.reply_to_sender(RPL_TOPIC, user_id, {vec[i], " :", channel.get_topic()});
+        //TODO rpl_namreply
+        for (auto user : channel.get_users())
         {
-            Channel& channel = m_ChannelDatabase.get_channel(vec[i]); //Check that emil fixed missing channel
-            channel.join_channel(user_id, vec2[i]); // TODO in Channel.cpp
-            i++;
+            //TODO remove multiple targets
+            m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
         }
-        catch (...)
-        {
-            std::cout << "Missing channel\n";
-            //ERR_NOSUCHCHANNEL
-            continue;
-        }
+        i++;
     }
 }
 
@@ -347,7 +366,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 }
 
 // ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTRED
+// ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
     Client& client = m_ClientDatabase.get_client(user_id);
@@ -623,6 +642,7 @@ l - set the user limit to channel;
 // RPL_ENDOFINVITELIST
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
+    //TODO handle discarding of mode messages that arent for channels
     (void)user_id;
     std::string::size_type pos = message.find(" ");
     std::string split = message.substr(pos + 1, message.length() - (pos + 1));
@@ -723,4 +743,48 @@ void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
     //TODO sanitize
     if (message != "CAP END")
         m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
+}
+
+void CommandParser::part_command(std::string message, unsigned int user_id)
+{
+    if (message.length() < 6)
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
+        return;
+    }
+    message.erase(message.begin(), message.begin() + 5);
+    std::vector<std::string> channels;
+    size_t pos;
+    do
+    {
+        pos = message.find(',');
+        channels.push_back(message.substr(0, pos));
+        message.erase(0, pos + pos == std::string::npos ? 0 : 1);
+    } while (pos != std::string::npos);
+    std::string reason;
+    if (channels.back().find(' ') != std::string::npos)
+    {
+        reason = channels.back().substr(channels.back().find(' '), std::string::npos);
+        channels.back().erase(channels.back().find(' '), std::string::npos);
+    }
+    std::string nick = m_ClientDatabase.get_client(user_id).get_nickname();
+    for (auto& channel : channels)
+    {
+        if (!m_ChannelDatabase.is_channel(channel))
+        {
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel, " :No such channel"});
+            continue;
+        }
+        Channel& chan = m_ChannelDatabase.get_channel(channel);
+        if (!chan.is_subscribed(user_id))
+        {
+            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel, " :You're not on that channel"});
+            continue;
+        }
+        for (auto user : chan.get_users())
+        {
+            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel + reason);
+        }
+        m_ClientDatabase.remove_client(user_id);
+    }
 }

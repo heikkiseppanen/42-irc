@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 13:56:33 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 18:09:19 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/23 16:28:18 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void test3_client()
     c.add_message("Message1");
     if (!c.has_message())
         TEST_ERROR("Can't add messages");
-    if (c.get_message() != "Message1")
+    if (c.get_message() != "Message1\r\n")
         TEST_ERROR("Message added incorrectly");
     c.remove_message();
     if (c.has_message())
@@ -90,14 +90,14 @@ void test5_client()
         TEST_ERROR("Adding msg on c failed");
     if (!d.has_message())
         TEST_ERROR("Adding msg on d failed");
-    if (c.get_message() != "Message")
+    if (c.get_message() != "Message\r\n")
         TEST_ERROR("Incorrect msg on c");
-    if (d.get_message() != "Message")
+    if (d.get_message() != "Message\r\n")
         TEST_ERROR("Incorrect msg on d");
     c.remove_message();
     if (c.has_message())
         TEST_ERROR("Remove message failed");
-    if (d.get_message() != "Message")
+    if (d.get_message() != "Message\r\n")
         TEST_ERROR("Removing message on another client affected other one");
     ok();
 }

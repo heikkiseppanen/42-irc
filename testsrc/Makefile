@@ -33,8 +33,8 @@ MAINSRCDIR := ../src
 MAINOBJ := $(addprefix $(OBJDIR)/,$(MAINSRC:.cpp=.o))
 
 CPP := c++
-CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++11
-LDFLAGS := -std=c++11
+CPPFLAGS := -O2 -Wall -Werror -Wextra -std=c++17
+LDFLAGS := -std=c++17
 
 all: $(NAME)
 
