@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:46:15 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/24 15:47:37 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,10 +227,12 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
             }
             else
             {
-                for (auto user : m_ChannelDatabase.get_channel(target).get_users())
+                for (unsigned int channel_user_id : m_ChannelDatabase.get_channel(target).get_users())
                 {
-                    //TODO remove multiple targets
-                    m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+                    if (channel_user_id != user_id)
+                    {
+                        m_ClientDatabase.get_client(channel_user_id).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+                    }
                 }
             }
         }
@@ -290,14 +292,15 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {":No such channel"});
             continue;
         }
-        else if (!m_ChannelDatabase.is_channel(channel_name))
+
+        const std::string& password = (key != key_list.end()) ? *(key++) : "";
+
+        if (!m_ChannelDatabase.is_channel(channel_name))
         {
             m_ChannelDatabase.add_channel(channel_name, user_id);
         }
 
         Channel& channel = m_ChannelDatabase.get_channel(channel_name);
-
-        const std::string& password = (key != key_list.end()) ? *(key++) : "";
         ReplyEnum reply = channel.join_channel(user_id, password);
 
         switch (reply)
@@ -324,9 +327,9 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         {
             auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
             //TODO channel modes, highest user mode
-            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {client.get_nickname(), " = ", channel_name, " :", channel_client.get_nickname()});
+            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {" = ", channel_name, " :", channel_client.get_nickname()});
         }
-        m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {client.get_nickname(), " " , channel_name,  " :End of /NAMES list"});
+        m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {" " , channel_name,  " :End of /NAMES list"});
     }
 }
 
