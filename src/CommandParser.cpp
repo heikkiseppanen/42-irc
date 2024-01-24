@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 17:45:29 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/25 18:03:01 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -502,23 +502,27 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
 {
     (void)user_id;
 
-    std::string args;
+    std::string reason;
     if (message.length() > 4)
-        args = remove_prefix(message, 4);
-    else
-        args = message.substr(0, 4);
+        reason = message.substr(4, std::string::npos);
     // m_ChannelDatabase.remove_user(user_id);
-    if (args.size() > 0)
+    for (auto& channel : m_ChannelDatabase.get_channels())
     {
-        std::cout << "QUITTING SERVER\nReason:[" << args << "]\n";
-        // TODO ERR_QUIT with quit message
-        return;
+        if (channel.second.is_subscribed(user_id))
+        {
+            channel.second.leave_channel(user_id);
+            for (unsigned int user : channel.second.get_users())
+            {
+                m_ClientDatabase.get_client(user).add_message(":localhost " + m_ClientDatabase.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
+            }
+        }
     }
-    else
+    for (auto it = m_ChannelDatabase.get_channels().begin(), ite = m_ChannelDatabase.get_channels().end(); it != ite;)
     {
-        std::cout << "QUITTING SERVER\n";
-        // TODO ERR_QUIT
-        return;
+        if (it->second.get_users().empty())
+            it = m_ChannelDatabase.get_channels().erase(it);
+        else
+            ++it;
     }
 }
 
