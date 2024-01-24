@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:25 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/24 15:46:48 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ enum ReplyEnum
         //        :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
         //  - "@" is used for secret channels, "*" for private
         //    channels, and "=" for others (public channels).
+    RPL_ENDOFNAMES = 366, //"( "=" / "*" / "@" ) <channel>
 
     ERR_NOSUCHNICK = 401, // "<nickname> :No such nick/channel"
     ERR_NOSUCHCHANNEL = 403, // "<channel> :No such channel" 

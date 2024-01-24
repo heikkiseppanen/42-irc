@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:45:32 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/24 15:46:15 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,28 +280,53 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         key_list.emplace_back(std::move(arg));
     }
 
+    auto& client = m_ClientDatabase.get_client(user_id);
+
     auto key = key_list.begin();
-    for (auto const& name : channel_list)
+    for (auto const& channel_name : channel_list)
     {
-        if (name.front() != '#')
+        if (channel_name.front() != '#')
         {
             m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {":No such channel"});
+            continue;
         }
-        else if (!m_ChannelDatabase.is_channel(name))
+        else if (!m_ChannelDatabase.is_channel(channel_name))
         {
-            m_ChannelDatabase.add_channel(name, user_id);
-            m_reply.reply_to_sender(RPL_TOPIC, user_id, channel.get_topic());
+            m_ChannelDatabase.add_channel(channel_name, user_id);
         }
-        Channel& channel = m_ChannelDatabase.get_channel(name);
-        channel.join_channel(user_id, key != key_list.end() ? *key : "");
 
-        m_reply.reply_to_sender(RPL_TOPIC, user_id, channel.get_topic());
-        for (unsigned int user : channel.get_users())
+        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+
+        const std::string& password = (key != key_list.end()) ? *(key++) : "";
+        ReplyEnum reply = channel.join_channel(user_id, password);
+
+        switch (reply)
         {
-            //TODO remove multiple targets
-            m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+            case ERR_INVITEONLYCHAN: m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+i)"}); continue;
+            case ERR_BADCHANNELKEY:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+k)"}); continue;
+            case ERR_CHANNELISFULL:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+l)"}); continue;
+            case IGNORE: continue;
+            default:;
         }
-        i++;
+
+        for (unsigned int channel_user_id : channel.get_users())
+        {
+            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
+        }
+
+        if (!channel.if_channel_topic_empty())
+        {
+            m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
+        }
+
+        for (unsigned int channel_user_id : channel.get_users())
+        {
+            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            //TODO channel modes, highest user mode
+            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {client.get_nickname(), " = ", channel_name, " :", channel_client.get_nickname()});
+        }
+        m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {client.get_nickname(), " " , channel_name,  " :End of /NAMES list"});
     }
 }
 
