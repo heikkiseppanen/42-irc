@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:22:09 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/24 15:56:22 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,10 +227,12 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
             }
             else
             {
-                for (auto user : m_ChannelDatabase.get_channel(target).get_users())
+                for (unsigned int channel_user_id : m_ChannelDatabase.get_channel(target).get_users())
                 {
-                    //TODO remove multiple targets
-                    m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+                    if (channel_user_id != user_id)
+                    {
+                        m_ClientDatabase.get_client(channel_user_id).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+                    }
                 }
             }
         }
@@ -262,45 +264,72 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
     }
     std::string args = remove_prefix(message, 4);
     std::string::size_type pos = args.find(" ");
-    std::string first_arg = args.substr(0, pos);
-    std::string second_arg = args.substr(pos + 1, args.length() - pos - 1);
-    std::vector<std::string> vec;
-    std::stringstream ss(first_arg);
-    std::string item;
-    while (getline (ss, item, ','))
-        vec.push_back(item);
-    std::stringstream ss2(second_arg);
-    std::vector<std::string> vec2;
-    while (getline (ss2, item, ','))
-        vec2.push_back(item);
-    if (vec.size() != vec2.size())
+    std::string channel_argument = args.substr(0, pos);
+    std::string key_argument = args.substr(pos + 1, args.length() - pos - 1);
+
+    std::vector<std::string> channel_list;
+    std::vector<std::string> key_list;
+
+    std::stringstream stream(channel_argument);
+    std::string arg;
+    while (getline (stream, arg, ','))
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
-        return;
+        channel_list.emplace_back(std::move(arg));
     }
-    for (unsigned int i = 0; i < vec.size();)
+    stream.str(key_argument);
+    while (getline (stream, arg, ','))
     {
-        if (!m_ChannelDatabase.is_channel(vec[i]))
+        key_list.emplace_back(std::move(arg));
+    }
+
+    auto& client = m_ClientDatabase.get_client(user_id);
+
+    auto key = key_list.begin();
+    for (auto const& channel_name : channel_list)
+    {
+        if (channel_name.front() != '#')
         {
-            std::cout << "Channel doesn't exist\n"; //ERR NOSUCHCHANNEL
-            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {vec[i], " :No such channel"});
-            i++;
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {":No such channel"});
             continue;
         }
-        Client& client = m_ClientDatabase.get_client(user_id);
-        Channel& channel = m_ChannelDatabase.get_channel(vec[i]);
-        //TODO make sure that vec2 has something and no out of bounds accessing
-        //TODO add return value handling
-        channel.join_channel(user_id, vec2[i]);
-        client.add_message(":localhost " + client.get_nickname() + " JOIN " + vec[i]);
-        m_reply.reply_to_sender(RPL_TOPIC, user_id, {vec[i], " :", channel.get_topic()});
-        //TODO rpl_namreply
-        for (auto user : channel.get_users())
+
+        const std::string& password = (key != key_list.end()) ? *(key++) : "";
+
+        if (!m_ChannelDatabase.is_channel(channel_name))
         {
-            //TODO remove multiple targets
-            m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+            m_ChannelDatabase.add_channel(channel_name, user_id);
         }
-        i++;
+
+        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+        ReplyEnum reply = channel.join_channel(user_id, password);
+
+        switch (reply)
+        {
+            case ERR_INVITEONLYCHAN: m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+i)"}); continue;
+            case ERR_BADCHANNELKEY:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+k)"}); continue;
+            case ERR_CHANNELISFULL:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+l)"}); continue;
+            case IGNORE: continue;
+            default:;
+        }
+
+        for (unsigned int channel_user_id : channel.get_users())
+        {
+            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
+        }
+
+        if (!channel.if_channel_topic_empty())
+        {
+            m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
+        }
+
+        for (unsigned int channel_user_id : channel.get_users())
+        {
+            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            //TODO channel modes, highest user mode
+            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :", channel_client.get_nickname()});
+        }
+        m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {channel_name,  " :End of /NAMES list"});
     }
 }
 
