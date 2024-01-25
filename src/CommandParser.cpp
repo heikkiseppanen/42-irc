@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:04:15 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 18:04:23 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -510,7 +510,7 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
             channel.second.leave_channel(user_id);
             for (unsigned int user : channel.second.get_users())
             {
-                m_ClientDatabase.get_client(user).add_message(":localhost " + m_ClientDatabase.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
+                m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
             }
         }
     }
@@ -849,7 +849,7 @@ void CommandParser::part_command(std::string const& message, unsigned int user_i
         }
         for (auto user : channel.get_users())
         {
-            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel_name + reason);
+            m_ClientDatabase.get_client(user).add_message(":" + nick + " PART " + channel_name + reason);
         }
         m_ClientDatabase.remove_client(user_id);
     }
