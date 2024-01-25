@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:04:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 18:04:15 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -834,22 +834,22 @@ void CommandParser::part_command(std::string const& message, unsigned int user_i
     }
 
     std::string nick = m_ClientDatabase.get_client(user_id).get_nickname();
-    for (auto& channel : channels)
+    for (auto& channel_name : channels)
     {
-        if (!m_ChannelDatabase.is_channel(channel))
+        if (!m_ChannelDatabase.is_channel(channel_name))
         {
-            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel, " :No such channel"});
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
             continue;
         }
-        Channel& chan = m_ChannelDatabase.get_channel(channel);
-        if (!chan.is_subscribed(user_id))
+        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
+        if (!channel.is_subscribed(user_id))
         {
-            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel, " :You're not on that channel"});
+            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
             continue;
         }
-        for (auto user : chan.get_users())
+        for (auto user : channel.get_users())
         {
-            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel + reason);
+            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel_name + reason);
         }
         m_ClientDatabase.remove_client(user_id);
     }
