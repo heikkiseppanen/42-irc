@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:03:01 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 18:03:12 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -500,12 +500,9 @@ void CommandParser::connection_password(std::string const& message, unsigned int
 
 void CommandParser::quit_server(std::string const& message, unsigned int user_id)
 {
-    (void)user_id;
-
     std::string reason;
     if (message.length() > 4)
         reason = message.substr(4, std::string::npos);
-    // m_ChannelDatabase.remove_user(user_id);
     for (auto& channel : m_ChannelDatabase.get_channels())
     {
         if (channel.second.is_subscribed(user_id))
