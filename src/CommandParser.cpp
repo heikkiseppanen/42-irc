@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:04:23 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 18:24:26 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -849,8 +849,8 @@ void CommandParser::part_command(std::string const& message, unsigned int user_i
         }
         for (auto user : channel.get_users())
         {
-            m_ClientDatabase.get_client(user).add_message(":" + nick + " PART " + channel_name + reason);
+            m_ClientDatabase.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
         }
-        m_ClientDatabase.remove_client(user_id);
+        channel.leave_channel(user_id);
     }
 }
