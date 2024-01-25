@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 16:22:50 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/25 17:45:29 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,22 +320,26 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         }
 
         auto& channel = m_ChannelDatabase.get_channel(channel_name);
-        if (!channel.is_invited(user_id))
+
+        if (!channel.is_subscribed(user_id))
         {
-            m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {" :Cannot join channel (+i)"});
-            continue;
+            if (!channel.is_invited(user_id))
+            {
+                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {" :Cannot join channel (+i)"});
+                continue;
+            }
+            if (!channel.is_valid_password(password))
+            {
+                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {" :Cannot join channel (+k)"});
+                continue;
+            }
+            if (!channel.is_not_full())
+            {
+                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {" :Cannot join channel (+l)"});
+                continue;
+            }
+            channel.join_channel(user_id);
         }
-        if (!channel.is_valid_password(password))
-        {
-            m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {" :Cannot join channel (+k)"});
-            continue;
-        }
-        if (!channel.is_not_full())
-        {
-            m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {" :Cannot join channel (+l)"});
-            continue;
-        }
-        channel.join_channel(user_id, password);
 
         for (unsigned int channel_user_id : channel.get_users())
         {

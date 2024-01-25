@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:05:25 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 17:42:31 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,23 +23,10 @@ Channel::Channel(unsigned int user_id)
     m_has_password = false;
 }
 
-ReplyEnum Channel::join_channel(unsigned int user_id, std::string const& password)
+void Channel::join_channel(unsigned int user_id)
 {
-    if (!is_invited(user_id))
-        return ERR_INVITEONLYCHAN;
-
-    if (!is_valid_password(password))
-        return ERR_BADCHANNELKEY;
-
-    if (!is_not_full())
-        return ERR_CHANNELISFULL;
-
-    if (std::find(m_users.begin(), m_users.end(), user_id) != m_users.end())
-        return IGNORE;
-
     remove_invite(user_id);
     m_users.push_back(user_id);
-    return RPL_NAMREPLY;
 }
 
 ReplyEnum Channel::change_topic(unsigned int user_id, std::string const& topic)
