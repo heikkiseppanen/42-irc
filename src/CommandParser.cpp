@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:03:12 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 18:04:07 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -810,28 +810,29 @@ void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
         m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
 }
 
-void CommandParser::part_command(std::string message, unsigned int user_id)
+void CommandParser::part_command(std::string const& message, unsigned int user_id)
 {
     if (message.length() < 6)
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
         return;
     }
-    message.erase(message.begin(), message.begin() + 5);
-    std::vector<std::string> channels;
-    size_t pos;
-    do
-    {
-        pos = message.find(',');
-        channels.push_back(message.substr(0, pos));
-        message.erase(0, pos + pos == std::string::npos ? 0 : 1);
-    } while (pos != std::string::npos);
+    std::string args = message.substr(5);
+    std::string::size_type pos = args.find(' ');
+    std::string channel_args = args.substr(0, pos);
     std::string reason;
-    if (channels.back().find(' ') != std::string::npos)
+    if (pos != std::string::npos)
+        reason = args.substr(pos + 1);
+
+    std::vector<std::string> channels;
+
+    std::stringstream ss(channel_args);
+    std::string channel_name;
+    while(getline(ss, channel_name, ','))
     {
-        reason = channels.back().substr(channels.back().find(' '), std::string::npos);
-        channels.back().erase(channels.back().find(' '), std::string::npos);
+        channels.emplace_back(std::move(channel_name));
     }
+
     std::string nick = m_ClientDatabase.get_client(user_id).get_nickname();
     for (auto& channel : channels)
     {
