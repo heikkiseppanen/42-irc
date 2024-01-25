@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:56:22 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 17:45:29 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,20 +147,6 @@ std::vector<std::string> get_targets(std::string const& message, unsigned int sk
     return (vec);
 }
 
-int check_if_channel(std::vector<std::string> targets)
-{
-    for (unsigned int i = 0; i < targets.size(); i++)
-    {
-        if (targets[i][0] == '#')
-        {
-            if (i + 1 == targets.size())
-                return (1);
-            continue;
-        }
-    }
-    return 0;
-}
-
 int create_text(std::string const& message, std::string &text)
 {
     std::string::size_type pos = message.find(" ");
@@ -190,7 +176,6 @@ std::vector<std::string> split_string_to_vector(std::string string, std::string 
 
 void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
 {
-    (void)user_id;
     //TODO add these checks
     // else
     // {
@@ -206,39 +191,54 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
     //         // return (ERR_TOOMANYTARGETS);
     // //TODO SEND TEXT TO ALL TARGETS
     // }
-    if (message.length() < 9)
+    // Gets rid of command prefix and stores arguments
+    std::stringstream stream(message);
+
+    std::string discard;
+    std::string arguments;
+    std::getline(stream, discard, ' ');
+    std::getline(stream, arguments, ' ');
+
+    if (arguments.empty())
     {
         m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
         return;
     }
-    std::vector<std::string> targets = get_targets(message, 7);
-    if (targets.size() == 0)
+
+    std::string content;
+    std::getline(stream, content, '\0');
+
+    stream.str(arguments);
+    stream.clear();
+    std::vector<std::string> target_list;
+    while (std::getline(stream, discard, ','))
     {
-        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
-        return;
+        target_list.emplace_back(std::move(discard));
     }
-    for (auto& target : targets)
+
+    auto& client = m_ClientDatabase.get_client(user_id);
+    for (auto& target : target_list)
     {
         if (target[0] == '#')
         {
             if (!m_ChannelDatabase.is_channel(target))
             {
                 m_reply.reply_to_sender(ERR_CANNOTSENDTOCHAN, user_id, {target, " :Cannot sent to channel"});
+                continue;
             }
-            else
+            for (unsigned int channel_user_id : m_ChannelDatabase.get_channel(target).get_users())
             {
-                for (unsigned int channel_user_id : m_ChannelDatabase.get_channel(target).get_users())
+                if (channel_user_id != user_id)
                 {
-                    if (channel_user_id != user_id)
-                    {
-                        m_ClientDatabase.get_client(channel_user_id).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
-                    }
+                    auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+                    channel_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
                 }
             }
         }
         else if (m_ClientDatabase.is_nick_in_use(target))
         {
-            m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target)).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " " + message);
+            auto& receiver_client = m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target));
+            receiver_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
         }
         else
         {
@@ -257,29 +257,38 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // RPL_TOPIC
 void CommandParser::join_channel(std::string const& message, unsigned int user_id)
 {
-    if (message.length() <= 4)
-    {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
-        return;
-    }
-    std::string args = remove_prefix(message, 4);
-    std::string::size_type pos = args.find(" ");
-    std::string channel_argument = args.substr(0, pos);
-    std::string key_argument = args.substr(pos + 1, args.length() - pos - 1);
+//    if (message.length() <= 4)
+//    {
+//        std::cout << "ERR_NEEDMOREPARAMS\n";
+//        return;
+//    }
+//    std::string args = remove_prefix(message, 4);
+
+    // TODO handle invalid inputs LATERRRR
+    std::stringstream stream(message);
+    std::string channel_argument;
+    std::string key_argument;
+
+    std::getline(stream, channel_argument, ' '); // Discard command prefix
+    std::getline(stream, channel_argument, ' ');
+    std::getline(stream, key_argument, '\0');
+
+    stream.str(channel_argument);
+    stream.clear();
 
     std::vector<std::string> channel_list;
-    std::vector<std::string> key_list;
-
-    std::stringstream stream(channel_argument);
-    std::string arg;
-    while (getline (stream, arg, ','))
+    while (getline(stream, channel_argument, ','))
     {
-        channel_list.emplace_back(std::move(arg));
+        channel_list.emplace_back(std::move(channel_argument));
     }
+
     stream.str(key_argument);
-    while (getline (stream, arg, ','))
+    stream.clear();
+
+    std::vector<std::string> key_list;
+    while (getline(stream, key_argument, ','))
     {
-        key_list.emplace_back(std::move(arg));
+        key_list.emplace_back(std::move(key_argument));
     }
 
     auto& client = m_ClientDatabase.get_client(user_id);
@@ -293,23 +302,43 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             continue;
         }
 
-        const std::string& password = (key != key_list.end()) ? *(key++) : "";
+        const bool has_password_provided = (key != key_list.end());
+        const std::string& password = (has_password_provided) ? *(key++) : "";
 
         if (!m_ChannelDatabase.is_channel(channel_name))
         {
             m_ChannelDatabase.add_channel(channel_name, user_id);
+            auto& channel = m_ChannelDatabase.get_channel(channel_name);
+            if (has_password_provided)
+            {
+                channel.set_password(user_id, ADD, password);
+            }
+            m_reply.reply_to_sender(RPL_NOTOPIC, user_id, {channel_name,  " :No topic set"});
+            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :@", client.get_nickname()});
+            m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {channel_name, " :End of /NAMES list"});
+            continue;
         }
 
-        Channel& channel = m_ChannelDatabase.get_channel(channel_name);
-        ReplyEnum reply = channel.join_channel(user_id, password);
+        auto& channel = m_ChannelDatabase.get_channel(channel_name);
 
-        switch (reply)
+        if (!channel.is_subscribed(user_id))
         {
-            case ERR_INVITEONLYCHAN: m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+i)"}); continue;
-            case ERR_BADCHANNELKEY:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+k)"}); continue;
-            case ERR_CHANNELISFULL:  m_reply.reply_to_sender(reply, user_id, {" :Cannot join channel (+l)"}); continue;
-            case IGNORE: continue;
-            default:;
+            if (!channel.is_invited(user_id))
+            {
+                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {" :Cannot join channel (+i)"});
+                continue;
+            }
+            if (!channel.is_valid_password(password))
+            {
+                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {" :Cannot join channel (+k)"});
+                continue;
+            }
+            if (!channel.is_not_full())
+            {
+                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {" :Cannot join channel (+l)"});
+                continue;
+            }
+            channel.join_channel(user_id);
         }
 
         for (unsigned int channel_user_id : channel.get_users())
@@ -326,8 +355,14 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         for (unsigned int channel_user_id : channel.get_users())
         {
             auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
-            //TODO channel modes, highest user mode
-            m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :", channel_client.get_nickname()});
+            if (channel.is_operator(channel_user_id))
+            {
+                m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :@", channel_client.get_nickname()});
+            }
+            else
+            {
+                m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :", channel_client.get_nickname()});
+            }
         }
         m_reply.reply_to_sender(RPL_ENDOFNAMES, user_id, {channel_name,  " :End of /NAMES list"});
     }

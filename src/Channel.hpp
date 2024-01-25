@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:04:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/25 17:42:41 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ class Channel
         Channel() {}
         Channel(unsigned int user_id);
 
-        ReplyEnum join_channel(unsigned int user_id, std::string const& password);
+        void join_channel(unsigned int user_id);
+
         ReplyEnum change_topic(unsigned int user_id, std::string const& topic);
 
         int leave_channel(unsigned int user_id);
