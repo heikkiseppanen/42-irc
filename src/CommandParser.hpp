@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 14:22:38 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 13:44:06 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,7 @@ enum command
 class CommandParser
 {
     public:
-        //Constructors
-        // CommandParser(); // delete?
+        CommandParser() = delete;
         CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData);
 
         command get_command_type(std::string const& message);
@@ -51,8 +50,8 @@ class CommandParser
     
         std::map<std::string, command> m_commands;
 
-        ClientDatabase& m_ClientDatabase;
-        ChannelDatabase& m_ChannelDatabase;
+        ClientDatabase& m_client_database;
+        ChannelDatabase& m_channel_database;
         Reply m_reply;
         
 
