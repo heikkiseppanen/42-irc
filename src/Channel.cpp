@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 17:42:31 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/26 17:34:01 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,6 @@ void Channel::join_channel(unsigned int user_id)
 {
     remove_invite(user_id);
     m_users.push_back(user_id);
-}
-
-ReplyEnum Channel::change_topic(unsigned int user_id, std::string const& topic)
-{
-    if (m_has_op_topic && !is_operator(user_id))
-        return ERR_CHANOPRIVSNEEDED;
-    m_topic = topic;
-    return RPL_TOPIC;
 }
 
 int Channel::leave_channel(unsigned int leave_id)
@@ -266,13 +258,4 @@ bool Channel::is_subscribed(unsigned int user_id) const
         return false;
     }
     return true;
-}
-
-bool Channel::if_channel_topic_empty() const
-{
-    if (m_topic.empty())
-    {
-        return true;
-    }
-    return false;
 }

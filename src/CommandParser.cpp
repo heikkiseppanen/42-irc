@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 13:43:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 17:42:49 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
         }
 
-        if (!channel.if_channel_topic_empty())
+        if (!channel.is_channel_topic_empty())
         {
             m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
         }
@@ -639,47 +639,71 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
     //TODO check invite return value
 }
 
-//ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
-//RPL_NOTOPIC "<channel> :No topic is set"
-//RPL_TOPIC "<channel> :<topic>"
-//ERR_CHANOPRIVSNEEDED "<channel> :You're not channel operator"
-//ERR_NOTONCHANNEL "<channel> :You're not on that channel"
 void CommandParser::change_topic(std::string const& message, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
-    std::string::size_type pos = message.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    std::stringstream stream(message);
+    std::string channel_name;
+    std::string topic;
+
+    std::getline(stream, channel_name, ' '); //Discard
+    channel_name.clear();
+    std::getline(stream, channel_name, ' ');
+    std::getline(stream, topic, '\0');
+
+    if (channel_name.empty())
     {
-        std::cout << "1 ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
         return;
     }
-    std::string channel = message.substr(pos + 1, message.length() - (pos + 1));
-    pos = channel.find(" ");
-    if (!channel[pos + 1])
+    if (!m_channel_database.is_channel(channel_name))
     {
-        std::cout << "2 ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
         return;
     }
-    std::string topic = channel.substr(pos + 1, channel.length() - (pos + 1));
-    channel = channel.substr(0, pos);
-    if (channel.empty())
+
+    Channel& channel = m_channel_database.get_channel(channel_name);
+
+    if (!channel.is_subscribed(user_id))
     {
-        std::cout << "3 ERR_NEEDMOREPARAMS\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
         return;
     }
-    std::cout << "CHANNEL:[" << channel << "]\n"; //delete
-    std::cout << "TOPIC:[" << topic << "]\n"; //delete
-    Channel& ref = m_channel_database.get_channel(channel);
-    if (!ref.is_subscribed(user_id))
-        std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
-    if (ref.if_channel_topic_empty())
-        std::cout << "RPL_NOTOPIC\n"; //TODO RPL
-    else if (!topic.empty())
-        std::cout << "RPL_TOPIC\n"; //TODO RPL
-    if (!ref.is_operator(user_id))
-        std::cout << "ERR_CHANOPRIVSNEEDED\n"; // TODO ERR
-    // ref.change_topic(user_id, topic);
+    if (topic.empty())
+    {
+        if (channel.is_channel_topic_empty())
+        {
+            m_reply.reply_to_sender(RPL_NOTOPIC, user_id, {channel_name, " :No topic is set"});
+        }
+        else
+        {
+            m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
+        }
+        return;
+    }
+    if (channel.is_topic_op_mode_on())
+    {
+        if (!channel.is_operator(user_id))
+        {
+            m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You are not channel operator"});
+            return;
+        }
+    }
+    if (topic.length() == 1 && topic[0] == ':')
+    {
+        channel.topic_clear();
+        for (unsigned int user : channel.get_users())
+        {
+            m_reply.reply_to_other(RPL_NOTOPIC, user, user_id, {channel_name, " :No topic is set"});
+        }
+    }
+    else
+    {
+        channel.topic_change(topic.substr(1));
+        for (unsigned int user : channel.get_users())
+        {
+            m_reply.reply_to_other(RPL_TOPIC, user, user_id, {channel_name, " :No topic is set"});
+        }
+    }
 }
 
 //MODE #Finnish +il 100 Wiz

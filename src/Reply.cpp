@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:21 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 17:39:22 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,13 @@ void Reply::reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<s
 {
     Client& client = m_clients.get_client(user_id);
     std::string msg = create_string(reply, user_id, params);
+    client.add_message(std::move(msg));
+}
+
+void Reply::reply_to_other(ReplyEnum reply, unsigned int user_id, unsigned int sender, std::vector<std::string> const& params)
+{
+    Client& client = m_clients.get_client(user_id);
+    std::string msg = create_string(reply, sender, params);
     client.add_message(std::move(msg));
 }
 
