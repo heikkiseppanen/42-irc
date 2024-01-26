@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 17:45:29 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/26 13:43:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@
 // }
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
-: m_ClientDatabase(ClData), m_ChannelDatabase(ChData),
-  m_reply(m_ClientDatabase)
+: m_client_database(ClData), m_channel_database(ChData),
+  m_reply(m_client_database)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -71,7 +71,7 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
     command cmd = get_command_type(message);
     if (cmd < 100)
     {
-        if (!m_ClientDatabase.get_client(user_id).is_registered())
+        if (!m_client_database.get_client(user_id).is_registered())
             return;
     }
     switch (cmd)
@@ -216,28 +216,28 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
         target_list.emplace_back(std::move(discard));
     }
 
-    auto& client = m_ClientDatabase.get_client(user_id);
+    auto& client = m_client_database.get_client(user_id);
     for (auto& target : target_list)
     {
         if (target[0] == '#')
         {
-            if (!m_ChannelDatabase.is_channel(target))
+            if (!m_channel_database.is_channel(target))
             {
                 m_reply.reply_to_sender(ERR_CANNOTSENDTOCHAN, user_id, {target, " :Cannot sent to channel"});
                 continue;
             }
-            for (unsigned int channel_user_id : m_ChannelDatabase.get_channel(target).get_users())
+            for (unsigned int channel_user_id : m_channel_database.get_channel(target).get_users())
             {
                 if (channel_user_id != user_id)
                 {
-                    auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+                    auto& channel_client = m_client_database.get_client(channel_user_id);
                     channel_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
                 }
             }
         }
-        else if (m_ClientDatabase.is_nick_in_use(target))
+        else if (m_client_database.is_nick_in_use(target))
         {
-            auto& receiver_client = m_ClientDatabase.get_client(m_ClientDatabase.get_user_id(target));
+            auto& receiver_client = m_client_database.get_client(m_client_database.get_user_id(target));
             receiver_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
         }
         else
@@ -291,7 +291,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         key_list.emplace_back(std::move(key_argument));
     }
 
-    auto& client = m_ClientDatabase.get_client(user_id);
+    auto& client = m_client_database.get_client(user_id);
 
     auto key = key_list.begin();
     for (auto const& channel_name : channel_list)
@@ -305,10 +305,10 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
         const bool has_password_provided = (key != key_list.end());
         const std::string& password = (has_password_provided) ? *(key++) : "";
 
-        if (!m_ChannelDatabase.is_channel(channel_name))
+        if (!m_channel_database.is_channel(channel_name))
         {
-            m_ChannelDatabase.add_channel(channel_name, user_id);
-            auto& channel = m_ChannelDatabase.get_channel(channel_name);
+            m_channel_database.add_channel(channel_name, user_id);
+            auto& channel = m_channel_database.get_channel(channel_name);
             if (has_password_provided)
             {
                 channel.set_password(user_id, ADD, password);
@@ -319,7 +319,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             continue;
         }
 
-        auto& channel = m_ChannelDatabase.get_channel(channel_name);
+        auto& channel = m_channel_database.get_channel(channel_name);
 
         if (!channel.is_subscribed(user_id))
         {
@@ -343,7 +343,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 
         for (unsigned int channel_user_id : channel.get_users())
         {
-            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            auto& channel_client = m_client_database.get_client(channel_user_id);
             channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
         }
 
@@ -354,7 +354,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 
         for (unsigned int channel_user_id : channel.get_users())
         {
-            auto& channel_client = m_ClientDatabase.get_client(channel_user_id);
+            auto& channel_client = m_client_database.get_client(channel_user_id);
             if (channel.is_operator(channel_user_id))
             {
                 m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :@", channel_client.get_nickname()});
@@ -373,7 +373,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& message, unsigned int user_id)
 {
-    Client& client = m_ClientDatabase.get_client(user_id);
+    Client& client = m_client_database.get_client(user_id);
     //if (server_has_no_password)
     client.password_received();
     if (!client.has_password())
@@ -394,7 +394,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
         m_reply.reply_to_sender(ERR_ERRONEUSNICKNAME, user_id, {nick, " :Erroneous nickname"});
         return;
     }
-    if (m_ClientDatabase.is_nick_in_use(nick))
+    if (m_client_database.is_nick_in_use(nick))
     {
         m_reply.reply_to_sender(ERR_NICKNAMEINUSE, user_id, {nick, " :Nickname is already in use"});
         return;
@@ -425,7 +425,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
     }
     client.set_nickname(nick);
     if (!client.has_nick() && client.has_user() && client.has_password())
-        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
+        m_reply.reply_welcome(user_id, m_channel_database.count_channels());
     client.nick_received();
 }
 
@@ -433,7 +433,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 // ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& message, unsigned int user_id)
 {
-    Client& client = m_ClientDatabase.get_client(user_id);
+    Client& client = m_client_database.get_client(user_id);
     //if (server_has_no_password)
     client.password_received();
     if (!client.has_password())
@@ -472,7 +472,7 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         return;
     }
     if (!client.has_user() && client.has_nick() && client.has_password())
-        m_reply.reply_welcome(user_id, m_ChannelDatabase.count_channels());
+        m_reply.reply_welcome(user_id, m_channel_database.count_channels());
     client.user_received();
 }
 
@@ -487,7 +487,7 @@ void CommandParser::connection_password(std::string const& message, unsigned int
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
-    if (m_ClientDatabase.is_client(user_id))
+    if (m_client_database.is_client(user_id))
     {
         std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
         return;
@@ -495,30 +495,30 @@ void CommandParser::connection_password(std::string const& message, unsigned int
     std::string args = remove_prefix(message, 4);
     //TODO CHECK IF SERVER HAS PASSWORD
     //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
-    m_ClientDatabase.get_client(user_id).password_received();
+    m_client_database.get_client(user_id).password_received();
 }
 
 void CommandParser::quit_server(std::string const& message, unsigned int user_id)
 {
-    (void)user_id;
-
-    std::string args;
+    //TODO if last op leaves make new op?
+    std::string reason;
     if (message.length() > 4)
-        args = remove_prefix(message, 4);
-    else
-        args = message.substr(0, 4);
-    // m_ChannelDatabase.remove_user(user_id);
-    if (args.size() > 0)
+        reason = message.substr(4, std::string::npos);
+    for (auto channel = m_channel_database.get_channels().begin(), ite = m_channel_database.get_channels().end(); channel != ite;)
     {
-        std::cout << "QUITTING SERVER\nReason:[" << args << "]\n";
-        // TODO ERR_QUIT with quit message
-        return;
-    }
-    else
-    {
-        std::cout << "QUITTING SERVER\n";
-        // TODO ERR_QUIT
-        return;
+        if (channel->second.is_subscribed(user_id))
+        {
+            channel->second.leave_channel(user_id);
+            for (unsigned int user : channel->second.get_users())
+            {
+                m_client_database.get_client(user).add_message(":" + m_client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
+            }
+            //Todo error reply to quitter
+            if (channel->second.get_users().empty())
+                channel = m_channel_database.get_channels().erase(channel);
+            else
+                ++channel;
+        }
     }
 }
 
@@ -563,21 +563,21 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
     }
     if (channel_vec.size() == 1)
     {
-        if (!m_ChannelDatabase.is_channel(channel_vec[0])) 
+        if (!m_channel_database.is_channel(channel_vec[0])) 
         {
             std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
             return;
         }
-        Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[0]);
+        Channel& channel_ref = m_channel_database.get_channel(channel_vec[0]);
         for (std::vector<std::string>::iterator user = users_vec.begin(); user != users_vec.end(); ++user)
         {
-            if (!m_ClientDatabase.is_client(m_ClientDatabase.get_user_id(*user)))
+            if (!m_client_database.is_client(m_client_database.get_user_id(*user)))
             {
                 std::cout << *user << ":User doesn't exist\n"; //TODO ERR
                 continue;
             }
             std::cout << "Kicking:" << *user << " Reason:[" << args << "]\n";
-            channel_ref.kick(user_id, m_ClientDatabase.get_user_id(*user));
+            channel_ref.kick(user_id, m_client_database.get_user_id(*user));
             //TODO catch return value
         }
     }
@@ -585,14 +585,14 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
     {
         for (unsigned int i = 0; i < channel_vec.size(); i++)
         {
-            if (!m_ChannelDatabase.is_channel(channel_vec[i]))
+            if (!m_channel_database.is_channel(channel_vec[i]))
             {
                 std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
                 continue;
             }
-            Channel& channel_ref = m_ChannelDatabase.get_channel(channel_vec[i]);
+            Channel& channel_ref = m_channel_database.get_channel(channel_vec[i]);
             std::cout << "Kicking:" << users_vec[i] << " | Reason:[" << args << "]\n";
-            channel_ref.kick(user_id, m_ClientDatabase.get_user_id(users_vec[i]));
+            channel_ref.kick(user_id, m_client_database.get_user_id(users_vec[i]));
             //TODO get return value
         }
     }
@@ -624,18 +624,18 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
     std::string channel_name = args.substr(pos + 1, args.size() - pos - 1);
     // std::cout << "nick:[" << nick << "]\n";
     // std::cout << "channel:[" << channel_name << "]\n";
-    if (!m_ClientDatabase.is_nick_in_use(nick))
+    if (!m_client_database.is_nick_in_use(nick))
     {
         std::cout << "Invited doesn't exist\n"; //TODO ERR_NOSUCHNICK
         return;
     }
-    if (!m_ChannelDatabase.is_channel(channel_name))
+    if (!m_channel_database.is_channel(channel_name))
     {
         std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO?
-        m_ChannelDatabase.add_channel(channel_name, user_id);
+        m_channel_database.add_channel(channel_name, user_id);
     }
-    Channel& channel = m_ChannelDatabase.get_channel(channel_name);
-    channel.invite(user_id, m_ClientDatabase.get_user_id(nick));
+    Channel& channel = m_channel_database.get_channel(channel_name);
+    channel.invite(user_id, m_client_database.get_user_id(nick));
     //TODO check invite return value
 }
 
@@ -670,7 +670,7 @@ void CommandParser::change_topic(std::string const& message, unsigned int user_i
     }
     std::cout << "CHANNEL:[" << channel << "]\n"; //delete
     std::cout << "TOPIC:[" << topic << "]\n"; //delete
-    Channel& ref = m_ChannelDatabase.get_channel(channel);
+    Channel& ref = m_channel_database.get_channel(channel);
     if (!ref.is_subscribed(user_id))
         std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
     if (ref.if_channel_topic_empty())
@@ -729,9 +729,9 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     vec.push_back(split.substr(0, pos));
     for (unsigned int i = 0; i < vec.size(); i++)
         std::cout << "ARG" << i << ":[" << vec[i] << "]\n";
-    if (1 || m_ChannelDatabase.is_channel(channel))
+    if (1 || m_channel_database.is_channel(channel))
     {
-        Channel& ref = m_ChannelDatabase.get_channel(channel);
+        Channel& ref = m_channel_database.get_channel(channel);
         (void)ref; //delete
         int mode = 0;
         for (unsigned int i = 0; i < flags.size(); i++)
@@ -786,7 +786,7 @@ void CommandParser::receive_ping(std::string const& message, unsigned int user_i
     (void)user_id;
     //TODO errors
     //TODO hostname
-    m_ClientDatabase.get_client(user_id).add_message(":localhost PONG localhost :localhost");
+    m_client_database.get_client(user_id).add_message(":localhost PONG localhost :localhost");
 }
 
 void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
@@ -806,49 +806,55 @@ void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
     (void)user_id;
     //TODO sanitize
     if (message != "CAP END")
-        m_ClientDatabase.get_client(user_id).add_message("CAP * LS");
+        m_client_database.get_client(user_id).add_message("CAP * LS");
 }
 
-void CommandParser::part_command(std::string message, unsigned int user_id)
+void CommandParser::part_command(std::string const& message, unsigned int user_id)
 {
+    //TODO if last op leaves make new op?
     if (message.length() < 6)
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
         return;
     }
-    message.erase(message.begin(), message.begin() + 5);
-    std::vector<std::string> channels;
-    size_t pos;
-    do
-    {
-        pos = message.find(',');
-        channels.push_back(message.substr(0, pos));
-        message.erase(0, pos + pos == std::string::npos ? 0 : 1);
-    } while (pos != std::string::npos);
+    std::string args = message.substr(5);
+    std::string::size_type pos = args.find(' ');
+    std::string channel_args = args.substr(0, pos);
     std::string reason;
-    if (channels.back().find(' ') != std::string::npos)
+    if (pos != std::string::npos)
+        reason = args.substr(pos + 1);
+
+    std::vector<std::string> channels;
+
+    std::stringstream ss(channel_args);
+    std::string channel_name;
+    while(getline(ss, channel_name, ','))
     {
-        reason = channels.back().substr(channels.back().find(' '), std::string::npos);
-        channels.back().erase(channels.back().find(' '), std::string::npos);
+        channels.emplace_back(std::move(channel_name));
     }
-    std::string nick = m_ClientDatabase.get_client(user_id).get_nickname();
-    for (auto& channel : channels)
+
+    std::string nick = m_client_database.get_client(user_id).get_nickname();
+    for (auto& channel_name : channels)
     {
-        if (!m_ChannelDatabase.is_channel(channel))
+        if (!m_channel_database.is_channel(channel_name))
         {
-            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel, " :No such channel"});
+            m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
             continue;
         }
-        Channel& chan = m_ChannelDatabase.get_channel(channel);
-        if (!chan.is_subscribed(user_id))
+        Channel& channel = m_channel_database.get_channel(channel_name);
+        if (!channel.is_subscribed(user_id))
         {
-            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel, " :You're not on that channel"});
+            m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
             continue;
         }
-        for (auto user : chan.get_users())
+        for (auto user : channel.get_users())
         {
-            m_ClientDatabase.get_client(user).add_message(":localhost " + nick + " PART " + channel + reason);
+            m_client_database.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
         }
-        m_ClientDatabase.remove_client(user_id);
+        channel.leave_channel(user_id);
+        if (channel.get_users().empty())
+        {
+            m_channel_database.get_channels().erase(channel_name);
+        }
     }
 }
