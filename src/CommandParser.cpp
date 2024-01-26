@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:42:49 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 18:40:25 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -641,6 +641,7 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
 
 void CommandParser::change_topic(std::string const& message, unsigned int user_id)
 {
+    //TODO topicwhotime reply
     std::stringstream stream(message);
     std::string channel_name;
     std::string topic;
