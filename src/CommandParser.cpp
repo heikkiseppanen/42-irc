@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 15:10:54 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 16:29:47 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,23 +137,11 @@ std::vector<std::string> get_targets(std::string const& message, unsigned int sk
     return (vec);
 }
 
-int create_text(std::string const& message, std::string &text)
-{
-    std::string::size_type pos = message.find(" ");
-    text = message.substr(pos + 1, message.length() - pos);
-    pos = text.find(" ");
-    text = text.substr(pos + 1, text.length() - pos);
-    if (text[0] == ':')
-        text = text.substr(1, text.length() - 1);
-    if (text[0] == '\0')
-        return (0);
-    return (1);
-}
-
 std::vector<std::string> split_string_to_vector(std::string string, std::string delim)
 {
     std::vector<std::string> vec;
     std::string::size_type pos = string.find(delim);
+
     while (pos != std::string::npos)
     {
         vec.push_back(string.substr(0, pos));
@@ -268,8 +256,8 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
             continue;
         }
 
-        const bool has_password_provided = (key != key_list.end());
-        const std::string& password = (has_password_provided) ? *(key++) : "";
+        bool const has_password_provided = (key != key_list.end());
+        std::string const& password = (has_password_provided) ? *(key++) : "";
 
         if (!m_channel_database.is_channel(channel_name))
         {
@@ -291,17 +279,17 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
         {
             if (!channel.is_invited(user_id))
             {
-                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {" :Cannot join channel (+i)"});
+                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {":Cannot join channel (+i)"});
                 continue;
             }
             if (!channel.is_valid_password(password))
             {
-                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {" :Cannot join channel (+k)"});
+                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {":Cannot join channel (+k)"});
                 continue;
             }
             if (!channel.is_not_full())
             {
-                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {" :Cannot join channel (+l)"});
+                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {":Cannot join channel (+l)"});
                 continue;
             }
             channel.join_channel(user_id);
@@ -717,19 +705,21 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
     std::string::size_type pos = args.find(' ');
     std::string channel_args = args.substr(0, pos);
     std::string reason;
+
     if (pos != std::string::npos)
         reason = args.substr(pos + 1);
 
     std::vector<std::string> channels;
-
     std::stringstream ss(channel_args);
     std::string channel_name;
+
     while(getline(ss, channel_name, ','))
     {
         channels.emplace_back(std::move(channel_name));
     }
 
     std::string nick = m_client_database.get_client(user_id).get_nickname();
+
     for (auto& channel_name : channels)
     {
         if (!m_channel_database.is_channel(channel_name))
@@ -737,7 +727,9 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
             m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
             continue;
         }
+
         Channel& channel = m_channel_database.get_channel(channel_name);
+
         if (!channel.is_subscribed(user_id))
         {
             m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
