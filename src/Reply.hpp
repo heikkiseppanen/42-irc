@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Reply.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:59:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 17:24:01 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,12 +59,13 @@ enum ReplyEnum
     ERR_USERONCHANNEL = 443, // "<user> <channel> :is already on channel"
     ERR_NEEDMOREPARAMS = 461, // "<command> :Not enough parameters"
     ERR_ALREADYREGISTRED = 462, //":Unauthorized command (already registered)"
-    ERR_KEYSET = 467, // "<channel> :Channel key already set"
     ERR_CHANNELISFULL = 471, //  "<channel> :Cannot join channel (+l)"
     ERR_UNKNOWNMODE = 472, // "<char> :is unknown mode char to me for <channel>"
     ERR_INVITEONLYCHAN = 473, // "<channel> :Cannot join channel (+i)"
     ERR_BADCHANNELKEY = 475, // "<channel> :Cannot join channel (+k)"
     ERR_CHANOPRIVSNEEDED = 482, // "<channel> :You're not channel operator"
+
+    ERR_INVALIDKEY = 525,  // "<client> <channel> :Key is not well-formed"
 };
 
 class Reply
