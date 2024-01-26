@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/25 18:29:27 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 13:41:40 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -504,23 +504,21 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
     std::string reason;
     if (message.length() > 4)
         reason = message.substr(4, std::string::npos);
-    for (auto& channel : m_ChannelDatabase.get_channels())
+    for (auto channel = m_ChannelDatabase.get_channels().begin(), ite = m_ChannelDatabase.get_channels().end(); channel != ite;)
     {
-        if (channel.second.is_subscribed(user_id))
+        if (channel->second.is_subscribed(user_id))
         {
-            channel.second.leave_channel(user_id);
-            for (unsigned int user : channel.second.get_users())
+            channel->second.leave_channel(user_id);
+            for (unsigned int user : channel->second.get_users())
             {
                 m_ClientDatabase.get_client(user).add_message(":" + m_ClientDatabase.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
             }
+            //Todo error reply to quitter
+            if (channel->second.get_users().empty())
+                channel = m_ChannelDatabase.get_channels().erase(channel);
+            else
+                ++channel;
         }
-    }
-    for (auto it = m_ChannelDatabase.get_channels().begin(), ite = m_ChannelDatabase.get_channels().end(); it != ite;)
-    {
-        if (it->second.get_users().empty())
-            it = m_ChannelDatabase.get_channels().erase(it);
-        else
-            ++it;
     }
 }
 
@@ -854,5 +852,9 @@ void CommandParser::part_command(std::string const& message, unsigned int user_i
             m_ClientDatabase.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
         }
         channel.leave_channel(user_id);
+        if (channel.get_users().empty())
+        {
+            m_ChannelDatabase.get_channels().erase(channel_name);
+        }
     }
 }
