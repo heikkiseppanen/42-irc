@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 18:40:25 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 13:12:04 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -702,7 +702,7 @@ void CommandParser::change_topic(std::string const& message, unsigned int user_i
         channel.topic_change(topic.substr(1));
         for (unsigned int user : channel.get_users())
         {
-            m_reply.reply_to_other(RPL_TOPIC, user, user_id, {channel_name, " :No topic is set"});
+            m_reply.reply_to_other(RPL_TOPIC, user, user_id, {channel_name, " :", topic.substr(1)});
         }
     }
 }
