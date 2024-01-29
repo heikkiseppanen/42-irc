@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:30:58 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:31:36 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -647,11 +647,11 @@ l - set the user limit to channel; TYPE C
 */
 
 // ERR_NEEDMOREPPARAMS
-
 // RPL_CHANMODEIS
 // ERR_NOSUCHCHANNEL
-// ERR_USERNOTINCHANNEL
+// ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
+
 // ERR_UNKNOWNMODE
 // ERR_INVALIDKEY
 
@@ -666,82 +666,91 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
 
     std::stringstream stream(message);
     std::string channel_name;
-    std::string modes;
+    std::string modestring;
     std::string params;
 
     std::getline(stream, channel_name, ' '); // Discard command prefix
     channel_name.clear();
     std::getline(stream, channel_name, ' ');
-    std::getline(stream, modes, ' ');
+    std::getline(stream, modestring, ' ');
     std::getline(stream, params, '\0');
 
     if (channel_name.empty())
     {
-        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE", " :Not enough parameters"});
         return;
     }
-    if (modes.empty())
+    if (modestring.empty())
     {
-        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {message, " :" }); //TODO currently-set modes and mode arguments
+        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " :" }); //TODO currently-set modes and mode arguments
+        return;
+    }
+    if (!m_channel_database.is_channel(channel_name))
+    {
+        m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
+        return;
+    }
+    if (!m_channel_database.is_user_on_channel(channel_name, user_id))
+    {
+        m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
+        return;
+    }
+    if (!m_channel_database.get_channel(channel_name).is_operator(user_id))
+    {
+        m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
         return;
     }
 
     stream.str(params);
     stream.clear();
-
     std::vector<std::string> param_list;
+
     while (getline(stream, params, ','))
     {
         param_list.emplace_back(std::move(params));
     }
 
-    // if (1 || m_channel_database.is_channel(channel))
-    // {
-    //     Channel& ref = m_channel_database.get_channel(channel);
-    //     (void)ref; //delete
-    //     int mode = 0;
-    //     for (unsigned int i = 0; i < flags.size(); i++)
-    //     {
-    //         switch (flags[i])
-    //         {
-    //             case '+':
-    //                 mode = 1;
-    //                 std::cout << "SETTING MODE TO 1\n";
-    //                 break;
-    //             case '-':
-    //                 mode = -1;
-    //                 std::cout << "SETTING MODE TO -1\n";
-    //                 break;
-    //             case 'i':
-    //                 // ref.set_invite_only(user_id, mode);
-    //                 std::cout << "SETTING INVITE ONLY TO MODE:" << mode << '\n';
-    //                 break;
-    //             case 't':
-    //                 // ref.set_op_topic(user_id, mode);
-    //                 std::cout << "SETTING OP_TOPIC TO MODE:" << mode << '\n';
-    //                 break;
-    //             case 'k':
-    //                 std::cout << "SETTING KEY MODE TO:" << mode << "\nKEY WILL BE:" << vec[i - 1] << '\n';
-    //                 // ref.set_password(user_id, mode, vec[i]);
-    //                 break;
-    //             case 'o':
-    //                 std::cout << "SETTING OPERATOR TO:" << vec[i - 1] << '\n';
-    //                 // ref.set_op(user_id, mode, vec[i]); //affect_id instead of vec[i]
-    //                 break;
-    //             case 'l':
-    //             {
-    //                 std::stringstream ss;
-    //                 unsigned int user_limit;
-    //                 ss << vec[i - 1];
-    //                 ss >> user_limit;
-    //                 std::cout << "SETTING USER LIMIT MODE:" << mode << "\nLIMIT:" << user_limit << "\n";
-    //                 //check limit is int
-    //                 // ref.set_user_limit(user_id, mode, user_limit);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+    std::string events_message;
+    bool mode_value; // For determining if we add or remove a setting
+    for (unsigned int i = 0; modestring[i]; i++)
+    {
+        switch (modestring[i])
+        {
+            case '+':
+                mode_value = true;
+                break;
+            case '-':
+                mode_value = false;
+                break;
+            case 'i':
+            {
+                channel_ref.set_invite_only(user_id, mode_value);
+                break;
+            }
+            case 't':
+            {
+                channel_ref.set_op_topic(user_id, mode_value);
+                break;
+            }
+            case 'k':
+                break;
+            case 'o':
+                break;
+            case 'l':
+            {
+                std::stringstream ss;
+                unsigned int user_limit;
+                ss << params[i - 1];
+                ss >> user_limit;
+                //check limit is int
+                break;
+            }
+            default :
+                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {modestring[i], " :is unknown mode char to me for" + channel_name});
+        }
+    }
+    //TODO Send a MODE command to all members of the channel containing the mode changes
 }
 
 // ERR_NOORIGIN
