@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 13:12:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 13:34:47 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -689,21 +689,10 @@ void CommandParser::change_topic(std::string const& message, unsigned int user_i
             return;
         }
     }
-    if (topic.length() == 1 && topic[0] == ':')
+    channel.topic_change(topic.substr(1));
+    for (unsigned int user : channel.get_users())
     {
-        channel.topic_clear();
-        for (unsigned int user : channel.get_users())
-        {
-            m_reply.reply_to_other(RPL_NOTOPIC, user, user_id, {channel_name, " :No topic is set"});
-        }
-    }
-    else
-    {
-        channel.topic_change(topic.substr(1));
-        for (unsigned int user : channel.get_users())
-        {
-            m_reply.reply_to_other(RPL_TOPIC, user, user_id, {channel_name, " :", topic.substr(1)});
-        }
+        m_reply.reply_to_other(RPL_TOPIC, user, user_id, {channel_name, " ", topic});
     }
 }
 
