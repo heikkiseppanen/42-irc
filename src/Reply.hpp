@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:59:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/26 17:39:04 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ class Reply
         std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
         void reply_to_sender(ReplyEnum reply, unsigned int user_id, std::vector<std::string> const& params);
         void reply_welcome(unsigned int user_id, unsigned int channel_count);
+        void reply_to_other(ReplyEnum reply, unsigned int user_id, unsigned int sender, std::vector<std::string> const& params);
 
     private:
 
