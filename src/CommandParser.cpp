@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 15:43:03 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/29 17:16:42 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -694,7 +694,7 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
 
     if (channel_name.empty())
     {
-        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE", " :Not enough parameters"});
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE :Not enough parameters"});
         return;
     }
     if (modestring.empty())
@@ -728,7 +728,7 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     }
 
     Channel& channel_ref = m_channel_database.get_channel(channel_name);
-    std::string events_message;
+    std::vector<std::string> events_list;
     bool mode_value; // For determining if we add or remove a setting
     for (unsigned int i = 0; modestring[i]; i++)
     {
@@ -743,14 +743,17 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
             case 'i':
             {
                 channel_ref.set_invite_only(user_id, mode_value);
+                events_list.emplace_back("set the #" + channel_name + " to invite-only");
                 break;
             }
             case 't':
             {
                 channel_ref.set_op_topic(user_id, mode_value);
+                events_list.emplace_back("set the topic of #" + channel_name + " to operator-only");
                 break;
             }
             case 'k':
+
                 break;
             case 'o':
                 break;
