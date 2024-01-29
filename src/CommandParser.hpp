@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 13:44:06 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 15:24:28 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,18 +55,18 @@ class CommandParser
         Reply m_reply;
         
 
-        void send_privmsg(std::string const& message, unsigned int user_id);
-        void join_channel(std::string const& message, unsigned int user_id);
-        void change_nick(std::string const& message, unsigned int user_id);
-        void user_register(std::string const& message, unsigned int user_id);
-        void connection_password(std::string const& message, unsigned int user_id);
-        void quit_server(std::string const& message, unsigned int user_id);
-        void kick_user(std::string const& message, unsigned int user_id);
-        void invite_user(std::string const& message, unsigned int user_id);
-        void change_topic(std::string const& message, unsigned int user_id);
-        void change_mode(std::string const& message, unsigned int user_id);
-        void receive_ping(std::string const& message, unsigned int user_id);
-        void receive_pong(std::string const& message, unsigned int user_id);
-        void answer_cap(std::string const& message, unsigned int user_id);
-        void part_command(std::string const& message, unsigned int user_id);
+        void send_privmsg(std::string const& arguments, unsigned int user_id);
+        void join_channel(std::string const& arguments, unsigned int user_id);
+        void change_nick(std::string const& arguments, unsigned int user_id);
+        void user_register(std::string const& arguments, unsigned int user_id);
+        void connection_password(std::string const& arguments, unsigned int user_id);
+        void quit_server(std::string const& arguments, unsigned int user_id);
+        void kick_user(std::string const& arguments, unsigned int user_id);
+        void invite_user(std::string const& arguments, unsigned int user_id);
+        void change_topic(std::string const& arguments, unsigned int user_id);
+        void change_mode(std::string const& arguments, unsigned int user_id);
+        void receive_ping(std::string const& arguments, unsigned int user_id);
+        void receive_pong(std::string const& arguments, unsigned int user_id);
+        void answer_cap(std::string const& arguments, unsigned int user_id);
+        void part_command(std::string const& arguments, unsigned int user_id);
 };

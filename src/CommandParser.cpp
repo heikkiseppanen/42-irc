@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 13:34:47 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/29 15:42:39 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,18 +55,22 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData)
 command CommandParser::get_command_type(std::string const& message)
 {
     std::size_t pos = message.find(" ");
-    std::string cmd;
-    if (pos == std::string::npos)
-        cmd = message.substr(0, message.length());
-    else
-        cmd = message.substr(0, pos);
+    std::string cmd = message.substr(0, pos);
     std::map<std::string, command>::iterator it = m_commands.find(cmd);
     if (it == m_commands.end())
         return ERR_NO_CMD;
     return it->second;
 }
 
-void    CommandParser::parser(std::string const& message, unsigned int user_id)
+std::string get_command_args(std::string const& message)
+{
+    std::size_t pos = message.find(" ");
+    if (pos == std::string::npos)
+        return "";
+    return message.substr(pos + 1);
+}
+
+void CommandParser::parser(std::string const& message, unsigned int user_id)
 {
     command cmd = get_command_type(message);
     if (cmd < 100)
@@ -74,52 +78,53 @@ void    CommandParser::parser(std::string const& message, unsigned int user_id)
         if (!m_client_database.get_client(user_id).is_registered())
             return;
     }
+    std::string args = get_command_args(message);
     switch (cmd)
     {
         case ERR_NO_CMD:
             //TODO
             break;
         case PRIVMSG:
-            send_privmsg(message, user_id);
+            send_privmsg(args, user_id);
             break;
         case JOIN:
-            join_channel(message, user_id);
+            join_channel(args, user_id);
             break;
         case QUIT:
-            quit_server(message, user_id);
+            quit_server(args, user_id);
             break;
         case KICK:
-            kick_user(message, user_id);
+            kick_user(args, user_id);
             break;
         case INVITE:
-            invite_user(message, user_id);
+            invite_user(args, user_id);
             break;
         case TOPIC:
-            change_topic(message, user_id);
+            change_topic(args, user_id);
             break;
         case MODE:
-            change_mode(message, user_id);
+            change_mode(args, user_id);
             break;
         case PART:
-            part_command(message, user_id);
+            part_command(args, user_id);
             break;
         case NICK:
-            change_nick(message,user_id);
+            change_nick(args,user_id);
             break;
         case USER:
-            user_register(message, user_id);
+            user_register(args, user_id);
             break;
         case PASS:
-            connection_password(message, user_id);
+            connection_password(args, user_id);
             break;
         case PING:
-            receive_ping(message, user_id);
+            receive_ping(args, user_id);
             break;
         case PONG:
-            receive_pong(message, user_id);
+            receive_pong(args, user_id);
             break;
         case CAP:
-            answer_cap(message, user_id);
+            answer_cap(args, user_id);
             break;
     }
 }
@@ -174,46 +179,30 @@ std::vector<std::string> split_string_to_vector(std::string string, std::string 
     return (vec);
 }
 
-void CommandParser::send_privmsg(std::string const& message, unsigned int user_id)
+void CommandParser::send_privmsg(std::string const& arguments, unsigned int user_id)
 {
-    //TODO add these checks
-    // else
-    // {
-    //     //TODO IF TARGET(S) EXISTS IN DATABASE
-    //         //return (ERR_NORECIPIENT);
-    //     //TODO IF NICK EXISTS IN DATABASE
-    //         //return (ERR_NOSUCHNICK);
-    // std::string text;
-    // if (!create_text(message, text))
-    //         std::cout << "ERR_NOTEXTTOSEND\n"; // return (ERR_NOTEXTTOSEND);
-    // std::cout << "TEXT:[" << text << "]\n";  //delete
-    //     //TODO IF TOO MANY TARGETS
-    //         // return (ERR_TOOMANYTARGETS);
-    // //TODO SEND TEXT TO ALL TARGETS
-    // }
-    // Gets rid of command prefix and stores arguments
-    std::stringstream stream(message);
+    std::stringstream stream(arguments);
+    std::string targets;
 
-    std::string discard;
-    std::string arguments;
-    std::getline(stream, discard, ' ');
-    std::getline(stream, arguments, ' ');
+    std::getline(stream, targets, ' ');
 
-    if (arguments.empty())
+    if (targets.empty())
     {
-        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+        m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
         return;
     }
 
     std::string content;
     std::getline(stream, content, '\0');
 
-    stream.str(arguments);
+    stream.str(targets);
     stream.clear();
     std::vector<std::string> target_list;
-    while (std::getline(stream, discard, ','))
+    std::string target;
+
+    while (std::getline(stream, target, ','))
     {
-        target_list.emplace_back(std::move(discard));
+        target_list.emplace_back(std::move(target));
     }
 
     auto& client = m_client_database.get_client(user_id);
@@ -244,7 +233,7 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
         {
             //TODO remove multiple targets
             //TODO change to nosuchnick
-            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (" + message + ")"});
+            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
         }
     }
 }
@@ -255,21 +244,13 @@ void CommandParser::send_privmsg(std::string const& message, unsigned int user_i
 // ERR_INVITEONLYCHAN "<channel> :Cannot join channel (+i)"
 // ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
 // RPL_TOPIC
-void CommandParser::join_channel(std::string const& message, unsigned int user_id)
+void CommandParser::join_channel(std::string const& arguments, unsigned int user_id)
 {
-//    if (message.length() <= 4)
-//    {
-//        std::cout << "ERR_NEEDMOREPARAMS\n";
-//        return;
-//    }
-//    std::string args = remove_prefix(message, 4);
-
     // TODO handle invalid inputs LATERRRR
-    std::stringstream stream(message);
+    std::stringstream stream(arguments);
     std::string channel_argument;
     std::string key_argument;
 
-    std::getline(stream, channel_argument, ' '); // Discard command prefix
     std::getline(stream, channel_argument, ' ');
     std::getline(stream, key_argument, '\0');
 
@@ -371,7 +352,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
 // ERR_NONICKNAMEGIVEN ":No nickname given"
 // ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname"
 // ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
-void CommandParser::change_nick(std::string const& message, unsigned int user_id)
+void CommandParser::change_nick(std::string const& arguments, unsigned int user_id)
 {
     Client& client = m_client_database.get_client(user_id);
     //if (server_has_no_password)
@@ -382,7 +363,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
         //TODO ERR
         return;
     }
-    std::string nick = remove_prefix(message, 4);
+    std::string nick = arguments;
     std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
@@ -431,7 +412,7 @@ void CommandParser::change_nick(std::string const& message, unsigned int user_id
 
 // ERR_NEEDMOREPARAMS
 // ERR_ALREADYREGISTERED
-void CommandParser::user_register(std::string const& message, unsigned int user_id)
+void CommandParser::user_register(std::string const& arguments, unsigned int user_id)
 {
     Client& client = m_client_database.get_client(user_id);
     //if (server_has_no_password)
@@ -442,12 +423,12 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
         //TODO ERR
         return;
     }
-    if (message.length() == 4)
+    if (arguments.empty())
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
         return;
     }
-    std::string args = remove_prefix(message, 4);
+    std::string args = arguments;
     std::vector<std::string> vec;
     std::string::size_type pos = args.find(" ");
     for (unsigned int i = 0; pos != std::string::npos && i < 3; i++)
@@ -480,9 +461,9 @@ void CommandParser::user_register(std::string const& message, unsigned int user_
 // ERR_ALREADYREGISTRED
 
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
-void CommandParser::connection_password(std::string const& message, unsigned int user_id)
+void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
-    if (message.length() <= 4)
+    if (arguments.empty())
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
@@ -492,18 +473,15 @@ void CommandParser::connection_password(std::string const& message, unsigned int
         std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
         return;
     }
-    std::string args = remove_prefix(message, 4);
     //TODO CHECK IF SERVER HAS PASSWORD
     //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
     m_client_database.get_client(user_id).password_received();
 }
 
-void CommandParser::quit_server(std::string const& message, unsigned int user_id)
+void CommandParser::quit_server(std::string const& arguments, unsigned int user_id)
 {
     //TODO if last op leaves make new op?
-    std::string reason;
-    if (message.length() > 4)
-        reason = message.substr(4, std::string::npos);
+    std::string reason = arguments;
     for (auto channel = m_channel_database.get_channels().begin(), ite = m_channel_database.get_channels().end(); channel != ite;)
     {
         if (channel->second.is_subscribed(user_id))
@@ -513,7 +491,8 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
             {
                 m_client_database.get_client(user).add_message(":" + m_client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
             }
-            //Todo error reply to quitter
+            //TODO error reply to quitter
+            //TODO remove use for db and close socket
             if (channel->second.get_users().empty())
                 channel = m_channel_database.get_channels().erase(channel);
             else
@@ -528,16 +507,16 @@ void CommandParser::quit_server(std::string const& message, unsigned int user_id
 // ERR_NOSUCHCHANNEL
 // ERR_USERNOTINCHANNEL
 // "KICK #finnish,#english heikki,crisplake :Bye noobs"
-void CommandParser::kick_user(std::string const& message, unsigned int user_id)
+void CommandParser::kick_user(std::string const& arguments, unsigned int user_id)
 {
-    if (message.length() <= 4)
+    if (arguments.empty())
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
-    std::string args = remove_prefix(message, 4);
+    std::string args = remove_prefix(arguments, 4);
     std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    if (pos == std::string::npos || !arguments[pos + 1] || arguments.empty())
     {
         std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
         return;
@@ -604,18 +583,18 @@ void CommandParser::kick_user(std::string const& message, unsigned int user_id)
 // ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
 // ERR_USERONCHANNEL
-void CommandParser::invite_user(std::string const& message, unsigned int user_id)
+void CommandParser::invite_user(std::string const& arguments, unsigned int user_id)
 {
     user_id++; //delete
     user_id--; //delete
-    if (message.length() <= 4)
+    if (arguments.length() <= 4)
     {
         std::cout << "ERR_NEEDMOREPARAMS\n";
         return;
     }
-    std::string args = remove_prefix(message, 6);
+    std::string args = remove_prefix(arguments, 6);
     std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !message[pos + 1] || message.empty())
+    if (pos == std::string::npos || !arguments[pos + 1] || arguments.empty())
     {
         std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
         return;
@@ -639,21 +618,19 @@ void CommandParser::invite_user(std::string const& message, unsigned int user_id
     //TODO check invite return value
 }
 
-void CommandParser::change_topic(std::string const& message, unsigned int user_id)
+void CommandParser::change_topic(std::string const& arguments, unsigned int user_id)
 {
     //TODO topicwhotime reply
-    std::stringstream stream(message);
+    std::stringstream stream(arguments);
     std::string channel_name;
     std::string topic;
 
-    std::getline(stream, channel_name, ' '); //Discard
-    channel_name.clear();
     std::getline(stream, channel_name, ' ');
     std::getline(stream, topic, '\0');
 
     if (channel_name.empty())
     {
-        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"TOPIC :Not enough parameters"});
         return;
     }
     if (!m_channel_database.is_channel(channel_name))
@@ -718,12 +695,12 @@ l - set the user limit to channel;
 // RPL_ENDOFBANLIST
 // RPL_ENDOFEXCEPTLIST
 // RPL_ENDOFINVITELIST
-void CommandParser::change_mode(std::string const& message, unsigned int user_id)
+void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
     //TODO handle discarding of mode messages that arent for channels
     (void)user_id;
-    std::string::size_type pos = message.find(" ");
-    std::string split = message.substr(pos + 1, message.length() - (pos + 1));
+    std::string::size_type pos = arguments.find(" ");
+    std::string split = arguments.substr(pos + 1, arguments.length() - (pos + 1));
     pos = split.find(" ");
     std::string channel = split.substr(0, pos);
     std::cout << "CHANNEL:[" << channel << "]\n";
@@ -794,18 +771,18 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
 
 // ERR_NOORIGIN
 // ERR_NOSUCHSERVER
-void CommandParser::receive_ping(std::string const& message, unsigned int user_id)
+void CommandParser::receive_ping(std::string const& arguments, unsigned int user_id)
 {
-    (void)message;
+    (void)arguments;
     (void)user_id;
     //TODO errors
     //TODO hostname
     m_client_database.get_client(user_id).add_message(":localhost PONG localhost :localhost");
 }
 
-void CommandParser::receive_pong(std::string const& message, unsigned int user_id)
+void CommandParser::receive_pong(std::string const& arguments, unsigned int user_id)
 {
-    (void)message;
+    (void)arguments;
     (void)user_id;
     // std::string target = message.substr(5, message.length() - 5);
     // std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
@@ -814,24 +791,22 @@ void CommandParser::receive_pong(std::string const& message, unsigned int user_i
     //ERR_NOSUCHSERVER
 }
 
-void CommandParser::answer_cap(std::string const& message, unsigned int user_id)
+void CommandParser::answer_cap(std::string const& arguments, unsigned int user_id)
 {
-    (void)message;
-    (void)user_id;
     //TODO sanitize
-    if (message != "CAP END")
+    if (arguments != "END")
         m_client_database.get_client(user_id).add_message("CAP * LS");
 }
 
-void CommandParser::part_command(std::string const& message, unsigned int user_id)
+void CommandParser::part_command(std::string const& arguments, unsigned int user_id)
 {
     //TODO if last op leaves make new op?
-    if (message.length() < 6)
+    if (arguments.empty())
     {
-        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {message, " :Not enough parameters"});
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"PART :Not enough parameters"});
         return;
     }
-    std::string args = message.substr(5);
+    std::string args = arguments;
     std::string::size_type pos = args.find(' ');
     std::string channel_args = args.substr(0, pos);
     std::string reason;
