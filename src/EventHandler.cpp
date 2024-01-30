@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/17 17:54:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/30 15:00:51 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ void EventHandler::on_client_disconnected(Socket const& socket)
     unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
 
     m_socket_client_table.erase(socket.get_file_descriptor());
+    m_channels.remove_user(id, ":Connection timeout", m_clients);
     m_clients.remove_client(id);
-    m_channels.remove_user(id);
 }
 
 bool find_command(std::string& command, Client& client)
@@ -83,7 +83,20 @@ void EventHandler::on_client_writeable(Socket const& socket)
         {
             sent_count = 0;
             client.remove_message();
+            if (client.is_quitting())
+                m_clients.add_to_cleanup(socket.get_file_descriptor());
         }
         client.set_sent_count(sent_count);
     }
+}
+
+void EventHandler::cleanup()
+{
+    for (int socket_id : m_clients.get_cleanup())
+    {
+        m_socket_client_table.erase(socket_id);
+        m_clients.remove_client(m_socket_client_table[socket_id]);
+        Socket(socket_id).close();
+    }
+    m_clients.empty_cleanup();
 }

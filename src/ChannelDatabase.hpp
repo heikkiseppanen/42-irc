@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:20:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/24 15:22:21 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/30 14:39:14 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class ChannelDatabase
         inline unsigned int count_channels() const { return m_channels.size(); }
 
         bool is_user_on_channel(std::string const& channel_name, unsigned int user_id) { return get_channel(channel_name).is_subscribed(user_id); }
-        void remove_user(unsigned int user_id);
+        void remove_user(unsigned int user_id, std::string const& reason, ClientDatabase& client_database);
 
     private:
 
