@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 15:42:39 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 19:32:18 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -480,7 +480,6 @@ void CommandParser::connection_password(std::string const& arguments, unsigned i
 
 void CommandParser::quit_server(std::string const& arguments, unsigned int user_id)
 {
-    //TODO if last op leaves make new op?
     std::string reason = arguments;
     for (auto channel = m_channel_database.get_channels().begin(), ite = m_channel_database.get_channels().end(); channel != ite;)
     {
@@ -800,7 +799,6 @@ void CommandParser::answer_cap(std::string const& arguments, unsigned int user_i
 
 void CommandParser::part_command(std::string const& arguments, unsigned int user_id)
 {
-    //TODO if last op leaves make new op?
     if (arguments.empty())
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"PART :Not enough parameters"});

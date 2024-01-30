@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 19:36:49 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/08 20:34:28 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 19:44:27 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void test2_channel()
 
     for (unsigned int i = 0; i < 10; i++)
     {
-        c.join_channel(i, "");
+        c.join_channel(i);
         if (!c.is_subscribed(i))
             TEST_ERROR("Joining failed");
     }
@@ -47,7 +47,7 @@ void test3_channel()
 
     for (unsigned int i = 1; i < 10; i++)
     {
-        c.join_channel(i, "");
+        c.join_channel(i);
         if (!c.is_subscribed(i))
             TEST_ERROR("Joining failed");
         c.kick(0, i);
@@ -68,7 +68,8 @@ void test4_channel()
         c.invite(0, i);
         if (!c.is_invited(i))
             TEST_ERROR("Invite failed");
-        c.join_channel(i, "");
+        if (c.is_invited(i))
+            c.join_channel(i);
         if (!c.is_subscribed(i))
             TEST_ERROR("Joining failed");
     }
@@ -76,7 +77,8 @@ void test4_channel()
     {
         if (c.is_invited(i))
             TEST_ERROR("Invited without invite");
-        c.join_channel(i, "");
+        if (c.is_invited(i))
+            c.join_channel(i);
         if (c.is_subscribed(i))
             TEST_ERROR("Joining without invite");
     }
@@ -88,21 +90,22 @@ void test5_channel()
 {
     Channel c(0);
 
-    c.change_topic(0, "Hello");
+    c.topic_change("Hello");
     if (c.get_topic() != "Hello")
         TEST_ERROR("Failed to set/get topic");
-    c.change_topic(0, "World");
+    c.topic_change("World");
     if (c.get_topic() != "World")
         TEST_ERROR("Failed to set/get topic");
-    c.change_topic(1, "topic");
+    c.topic_change("topic");
     if (c.get_topic() != "topic")
         TEST_ERROR("Failed to set/get topic");
     c.set_op_topic(0, ADD);
-    c.change_topic(1, "good");
+    if (c.is_operator(1))
+        c.topic_change("good");
     if (c.get_topic() == "good")
         TEST_ERROR("Set topic without op");
     c.set_op_topic(0, REMOVE);
-    c.change_topic(1, "good");
+    c.topic_change("good");
     if (c.get_topic() != "good")
         TEST_ERROR("Removing op only topic failed");
     ok();
@@ -113,14 +116,17 @@ void test6_channel()
     Channel c(0);
 
     c.set_password(0, ADD, "pass123");
-    c.join_channel(1, "");
+    if (c.is_valid_password(""))
+        c.join_channel(1);
     if (c.is_subscribed(1))
         TEST_ERROR("Joining without password");
-    c.join_channel(1, "pass123");
+    if (c.is_valid_password("pass123"))
+        c.join_channel(1);
     if (!c.is_subscribed(1))
         TEST_ERROR("Failed to join with password");
     c.set_password(0, REMOVE, "");
-    c.join_channel(2, "123");
+    if (c.is_valid_password("123"))
+        c.join_channel(2);
     if (!c.is_subscribed(2))
         TEST_ERROR("Failed to remove password");
     ok();
@@ -134,7 +140,7 @@ void test7_channel()
     c.set_op(0, ADD, 1);
     if (c.is_operator(1))
         TEST_ERROR("Op without being on channel");
-    c.join_channel(1, "");
+    c.join_channel(1);
     c.set_op(0, ADD, 1);
     if (!c.is_operator(1))
         TEST_ERROR("Couldn't add operator");
@@ -150,9 +156,11 @@ void test8_channel()
     Channel c(0);
 
     c.set_user_limit(0, ADD, 2);
-    c.join_channel(1, "");
-    c.join_channel(2, "");
-    c.join_channel(3, "");
+    c.join_channel(1);
+    if (c.is_not_full())
+        c.join_channel(2);
+    if (c.is_not_full())
+        c.join_channel(3);
     if (!c.is_subscribed(1))
         TEST_ERROR("Cannot join when space on channel");
     if (c.is_subscribed(2))
@@ -160,8 +168,10 @@ void test8_channel()
     if (c.is_subscribed(3))
         TEST_ERROR("Joined with limit full");
     c.set_user_limit(0, REMOVE, 0);
-    c.join_channel(2, "");
-    c.join_channel(3, "");
+    if (c.is_not_full())
+        c.join_channel(2);
+    if (c.is_not_full())
+        c.join_channel(3);
     if (!c.is_subscribed(2))
         TEST_ERROR("Limit remove failed");
     if (!c.is_subscribed(3))
@@ -173,7 +183,7 @@ void test9_channel()
 {
     Channel c(0);
 
-    c.join_channel(1, "");
+    c.join_channel(1);
     if (!c.is_subscribed(0))
         TEST_ERROR("Not on channel");
     if (!c.is_subscribed(1))
@@ -186,26 +196,6 @@ void test9_channel()
         TEST_ERROR("On channel after leave");
     if (c.is_subscribed(1))
         TEST_ERROR("On channel after leave");
-    ok();
-}
-
-void test10_channel()
-{
-    Channel c(0);
-
-    if (c.join_channel(1, "") != RPL_NAMREPLY)
-        TEST_ERROR("Return fail on success");
-    c.set_invite_only(0, ADD);
-    if (c.join_channel(2, "") != ERR_INVITEONLYCHAN)
-        TEST_ERROR("Return fail on not invited");
-    c.set_invite_only(0, REMOVE);
-    c.set_password(0, ADD, "pass");
-    if (c.join_channel(2, "") != ERR_BADCHANNELKEY)
-        TEST_ERROR("Return fail on wrong pass");
-    c.set_password(0, REMOVE, "");
-    c.set_user_limit(0, ADD, 2);
-    if (c.join_channel(2, "") != ERR_CHANNELISFULL)
-        TEST_ERROR("Return fail on full channel");
     ok();
 }
 
@@ -222,5 +212,4 @@ void test_channel()
     test7_channel();
     test8_channel();
     test9_channel();
-    test10_channel();
 }

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 15:24:01 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/04 19:34:20 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/29 19:33:05 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void test2_channeldb()
     if (!db.is_channel("channel5"))
         TEST_ERROR("Error adding channel5");
 
-    db.get_channel("channel4").join_channel(0, "");
+    db.get_channel("channel4").join_channel(0);
 
     if (!db.is_user_on_channel("channel1", 0))
         TEST_ERROR("User not on channel1");
