@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 15:24:28 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:23:19 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class CommandParser
 {
     public:
         CommandParser() = delete;
-        CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData);
+        CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time);
 
         command get_command_type(std::string const& message);
         void parser(std::string const& message, unsigned int user_id);

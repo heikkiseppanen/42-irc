@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hseppane <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 11:56:39 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/22 10:36:24 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/31 14:27:08 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,5 +39,5 @@ class Server
         EventSystem m_eventloop;
 
         ClientDatabase m_clients;
-        ChannelDatabase m_channels; 
+        ChannelDatabase m_channels;
 };

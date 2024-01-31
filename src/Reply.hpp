@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:39:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:45:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ enum ReplyEnum
     RPL_CHANNELMODEIS = 324, // "<channel> <mode> <mode params>"
     RPL_NOTOPIC = 331, // "<channel> :No topic is set"
     RPL_TOPIC = 332, // "<channel> :<topic>" 
+    RPL_TOPICWHOTIME = 333, // "<channel> <nick> <setat>" 
     RPL_INVITING = 341, //"<channel> <nick>"
     RPL_INVITELIST = 346, // "<channel> <invitemask>"
     RPL_ENDOFINVITELIST = 347, // "<channel> :End of channel invite list"
@@ -72,7 +73,7 @@ class Reply
     public:
 
         Reply() = delete;
-        Reply(ClientDatabase& clients) : m_clients(clients) {}
+        Reply(ClientDatabase& clients, std::string const& start_time) : m_start_time(start_time), m_clients(clients) {}
 
         std::stringstream create_start(ReplyEnum rpl, unsigned int user_id);
         std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
@@ -81,6 +82,7 @@ class Reply
         void reply_to_other(ReplyEnum reply, unsigned int user_id, unsigned int sender, std::vector<std::string> const& params);
 
     private:
+        std::string const m_start_time;
 
         ClientDatabase& m_clients;
 };

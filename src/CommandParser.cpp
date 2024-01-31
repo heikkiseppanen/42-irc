@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 14:57:23 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 15:10:54 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,26 +15,11 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <ctime>
 
-// CommandParser::CommandParser()
-// {
-//     m_commands["PRIVMSG"] = PRIVMSG;
-//     m_commands["JOIN"] = JOIN;
-//     m_commands["NICK"] = NICK;
-//     m_commands["USER"] = USER;
-//     m_commands["PASS"] = PASS;
-//     m_commands["QUIT"] = QUIT;
-//     m_commands["KICK"] = KICK;
-//     m_commands["INVITE"] = INVITE;
-//     m_commands["TOPIC"] = TOPIC;
-//     m_commands["MODE"] = MODE;
-//     m_commands["PING"] = PING;
-//     m_commands["PONG"] = PONG;
-// }
-
-CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
+CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time) 
 : m_client_database(ClData), m_channel_database(ChData),
-  m_reply(m_client_database)
+  m_reply(m_client_database, start_time)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -331,6 +316,10 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
         if (!channel.is_channel_topic_empty())
         {
             m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
+        }
+        else
+        {
+            m_reply.reply_to_sender(RPL_NOTOPIC, user_id, {channel_name,  " :No topic set"});
         }
 
         for (unsigned int channel_user_id : channel.get_users())
@@ -637,6 +626,11 @@ void CommandParser::change_topic(std::string const& arguments, unsigned int user
         else
         {
             m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
+
+            std::string const& nick = m_client_database.get_client(user_id).get_nickname();
+            std::string const time = std::to_string(std::time(nullptr));
+
+            m_reply.reply_to_sender(RPL_TOPICWHOTIME, user_id, {channel_name, nick, time});
         }
         return;
     }
