@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:08:35 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:20:20 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ class Channel
         inline std::vector<unsigned int> const& get_users() const { return m_users; }
         inline std::vector<unsigned int> const& get_operators() const { return m_operators; }
         inline std::string const& get_topic() const { return m_topic; }
+        inline std::string const& get_password() const { return m_password; }
+        inline unsigned int get_user_limit() const { return m_user_limit; }
 
         void print_channel();
 
@@ -61,7 +63,7 @@ class Channel
         inline bool is_invite_only() const { return m_has_invite_only; }
         inline bool is_topic_op_only() const { return m_has_op_topic; }
         inline bool has_password() const { return m_has_password; }
-        inline bool has_user_limit() const { return m_user_limit; }
+        inline bool has_user_limit() const { return m_user_limit != 0; }
 
     private: 
 

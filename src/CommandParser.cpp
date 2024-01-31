@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 15:26:51 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:25:40 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -318,7 +318,7 @@ void CommandParser::join_channel(std::string const& message, unsigned int user_i
             channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
         }
 
-        if (!channel.if_channel_topic_empty())
+        if (!channel.is_channel_topic_empty())
         {
             m_reply.reply_to_sender(RPL_TOPIC, user_id, {channel_name, " :", channel.get_topic()});
         }
@@ -645,13 +645,36 @@ void CommandParser::change_topic(std::string const& message, unsigned int user_i
     Channel& ref = m_channel_database.get_channel(channel);
     if (!ref.is_subscribed(user_id))
         std::cout << "ERR_NOTONCHANNEL\n"; //TODO ERR
-    if (ref.if_channel_topic_empty())
+    if (ref.is_channel_topic_empty())
         std::cout << "RPL_NOTOPIC\n"; //TODO RPL
     else if (!topic.empty())
         std::cout << "RPL_TOPIC\n"; //TODO RPL
     if (!ref.is_operator(user_id))
         std::cout << "ERR_CHANOPRIVSNEEDED\n"; // TODO ERR
     // ref.change_topic(user_id, topic);
+}
+
+std::string CommandParser::get_current_modes(std::string channel_name)
+{
+    std::string modestring;
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+
+    if (channel_ref.is_invite_only())
+        modestring += 'i';
+    if (channel_ref.is_topic_op_only())
+        modestring += 't';
+    if (channel_ref.has_password())
+        modestring += 'k';
+    if (channel_ref.has_user_limit())
+        modestring += 'l';
+    modestring += " ";
+    if (channel_ref.has_password())
+        modestring += channel_ref.get_password();
+    if (channel_ref.has_password() && channel_ref.has_user_limit())
+        modestring += ", ";
+    if (channel_ref.has_user_limit())
+        modestring += channel_ref.get_user_limit(); 
+    return (modestring);
 }
 
 //MODE #Finnish +il 100 Wiz
@@ -668,19 +691,12 @@ l - set the user limit to channel; TYPE C
 // ERR_NOSUCHCHANNEL
 // ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
-
 // ERR_UNKNOWNMODE
 // ERR_INVALIDKEY
 
 //MODE #finnish +itk param1 param2
 void CommandParser::change_mode(std::string const& message, unsigned int user_id)
 {
-    //TODO handle discarding of mode messages that arent for channels
-
-    (void)user_id;
-
-    // TODO handle invalid input
-
     std::stringstream stream(message);
     std::string channel_name;
     std::string modestring;
@@ -692,19 +708,23 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
     std::getline(stream, modestring, ' ');
     std::getline(stream, params, '\0');
 
+    if (channel_name.front() != '#')
+        return;
     if (channel_name.empty())
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE :Not enough parameters"});
         return;
     }
-    if (modestring.empty())
-    {
-        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " :" }); //TODO currently-set modes and mode arguments
+    if (modestring.front() != '+' || modestring.front() != '-')
         return;
-    }
     if (!m_channel_database.is_channel(channel_name))
     {
         m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
+        return;
+    }
+    if (modestring.empty())
+    {
+        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " ", get_current_modes(channel_name)});
         return;
     }
     if (!m_channel_database.is_user_on_channel(channel_name, user_id))
@@ -717,7 +737,6 @@ void CommandParser::change_mode(std::string const& message, unsigned int user_id
         m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
         return;
     }
-    //TODO +- at the beginning of modestring
 
     stream.str(params);
     stream.clear();
