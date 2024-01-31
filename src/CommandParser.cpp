@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 19:32:18 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/30 14:57:23 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,7 +364,6 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
         return;
     }
     std::string nick = arguments;
-    std::cout << "nick:[" << nick << "]\n";
     if (nick.empty())
     {
         m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {":No nickname given"});
@@ -438,10 +437,6 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
         pos = args.find(" ");
     }
     vec.push_back(args);
-    for (unsigned int i = 0; i < vec.size(); i++)
-    {
-        std::cout << "arg " << i << ":[" << vec[i] << "]\n"; //delete
-    }
     if (vec.size() < 4)
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"USER :Not enough parameters"});
@@ -480,24 +475,12 @@ void CommandParser::connection_password(std::string const& arguments, unsigned i
 
 void CommandParser::quit_server(std::string const& arguments, unsigned int user_id)
 {
-    std::string reason = arguments;
-    for (auto channel = m_channel_database.get_channels().begin(), ite = m_channel_database.get_channels().end(); channel != ite;)
-    {
-        if (channel->second.is_subscribed(user_id))
-        {
-            channel->second.leave_channel(user_id);
-            for (unsigned int user : channel->second.get_users())
-            {
-                m_client_database.get_client(user).add_message(":" + m_client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
-            }
-            //TODO error reply to quitter
-            //TODO remove use for db and close socket
-            if (channel->second.get_users().empty())
-                channel = m_channel_database.get_channels().erase(channel);
-            else
-                ++channel;
-        }
-    }
+    m_channel_database.remove_user(user_id, arguments, m_client_database);
+    Client& client = m_client_database.get_client(user_id);
+    client.quit();
+    while (client.has_message())
+        client.remove_message();
+    client.add_message("ERROR :Client quit");
 }
 
 // ERR_NEEDMOREPARAMS
@@ -696,76 +679,8 @@ l - set the user limit to channel;
 // RPL_ENDOFINVITELIST
 void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
-    //TODO handle discarding of mode messages that arent for channels
+    (void)arguments;
     (void)user_id;
-    std::string::size_type pos = arguments.find(" ");
-    std::string split = arguments.substr(pos + 1, arguments.length() - (pos + 1));
-    pos = split.find(" ");
-    std::string channel = split.substr(0, pos);
-    std::cout << "CHANNEL:[" << channel << "]\n";
-    split.erase(0, split.find(" ") + 1);
-    pos = split.find(" ");
-    std::string flags = split.substr(0, pos);
-    std::cout << "FLAGS:[" << flags << "]\n"; 
-    split.erase(0, split.find(" ") + 1);
-    std::vector<std::string> vec;
-    pos = split.find(" ");
-    while (pos != std::string::npos)
-    {
-        vec.push_back(split.substr(0, pos));
-        split.erase(0, split.find(" ") + 1);
-        pos = split.find(" ");
-    }
-    vec.push_back(split.substr(0, pos));
-    for (unsigned int i = 0; i < vec.size(); i++)
-        std::cout << "ARG" << i << ":[" << vec[i] << "]\n";
-    if (1 || m_channel_database.is_channel(channel))
-    {
-        Channel& ref = m_channel_database.get_channel(channel);
-        (void)ref; //delete
-        int mode = 0;
-        for (unsigned int i = 0; i < flags.size(); i++)
-        {
-            switch (flags[i])
-            {
-                case '+':
-                    mode = 1;
-                    std::cout << "SETTING MODE TO 1\n";
-                    break;
-                case '-':
-                    mode = -1;
-                    std::cout << "SETTING MODE TO -1\n";
-                    break;
-                case 'i':
-                    // ref.set_invite_only(user_id, mode);
-                    std::cout << "SETTING INVITE ONLY TO MODE:" << mode << '\n';
-                    break;
-                case 't':
-                    // ref.set_op_topic(user_id, mode);
-                    std::cout << "SETTING OP_TOPIC TO MODE:" << mode << '\n';
-                    break;
-                case 'k':
-                    std::cout << "SETTING KEY MODE TO:" << mode << "\nKEY WILL BE:" << vec[i - 1] << '\n';
-                    // ref.set_password(user_id, mode, vec[i]);
-                    break;
-                case 'o':
-                    std::cout << "SETTING OPERATOR TO:" << vec[i - 1] << '\n';
-                    // ref.set_op(user_id, mode, vec[i]); //affect_id instead of vec[i]
-                    break;
-                case 'l':
-                {
-                    std::stringstream ss;
-                    unsigned int user_limit;
-                    ss << vec[i - 1];
-                    ss >> user_limit;
-                    std::cout << "SETTING USER LIMIT MODE:" << mode << "\nLIMIT:" << user_limit << "\n";
-                    //check limit is int
-                    // ref.set_user_limit(user_id, mode, user_limit);
-                    break;
-                }
-            }
-        }
-    }
 }
 
 // ERR_NOORIGIN

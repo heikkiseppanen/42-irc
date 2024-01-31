@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/22 10:05:27 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/30 14:53:07 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,4 +101,5 @@ void EventSystem::handle(EventHandler& handler)
             std::cerr << "ircserv: " << e.what() << '\n';
         }
     }
+    handler.cleanup();
 }

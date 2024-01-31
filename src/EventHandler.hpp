@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/16 13:30:06 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/30 14:52:58 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class EventHandler
         void on_client_disconnected(Socket const& socket);
         void on_client_readable(Socket const& socket);
         void on_client_writeable(Socket const& socket);
+        void cleanup();
 
     private:
         std::map<int, unsigned int> m_socket_client_table;

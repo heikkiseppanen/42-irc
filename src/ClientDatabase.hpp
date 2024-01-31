@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:11 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/30 14:31:41 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,14 @@ class ClientDatabase
         inline unsigned int count_clients() const { return m_clients.size(); }
         unsigned int count_unknown_clients() const;
 
+        inline void add_to_cleanup(int socket_id) { m_cleanup_socket_ids.push_back(socket_id); }
+        inline std::vector<int> get_cleanup() { return m_cleanup_socket_ids; }
+        inline void empty_cleanup() { m_cleanup_socket_ids.clear(); }
 
     private:
         std::vector<Client> m_clients;
         std::stack<unsigned int> m_free_ids;
+        std::vector<int> m_cleanup_socket_ids;
 
         void empty_client(Client& client);
 };

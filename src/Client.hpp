@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:01 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/30 14:53:39 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class Client
 {
     public:
-        inline Client() : m_sent_count(0), m_registered(0) {}
+        inline Client() : m_sent_count(0), m_registered(0), m_quitting(false) {}
 
         inline bool is_empty() const { return m_nickname.empty(); }
 
@@ -51,6 +51,9 @@ class Client
         inline bool has_nick() const { return m_registered & 0x1; }
         inline bool has_user() const { return m_registered & 0x2; }
         inline bool has_password() const { return m_registered & 0x4; }
+        
+        inline void quit() { m_quitting = true; }
+        inline bool is_quitting() const { return m_quitting; }
 
         void print_messages() const;
 
@@ -60,4 +63,5 @@ class Client
         std::string m_buffer;
         unsigned int m_sent_count;
         int m_registered;
+        bool m_quitting;
 };

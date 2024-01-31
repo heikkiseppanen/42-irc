@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ChannelDatabase.cpp                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/05 17:31:20 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/30 14:54:00 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ChannelDatabase.hpp"
+#include "ClientDatabase.hpp"
+
 #include <algorithm>
 #include <iostream>
 
@@ -31,13 +33,17 @@ void ChannelDatabase::print_all_channels()
     }
 }
 
-void ChannelDatabase::remove_user(unsigned int user_id)
+void ChannelDatabase::remove_user(unsigned int user_id, std::string const& reason, ClientDatabase& client_database)
 {
     for (auto& channel : m_channels)
     {
         if (channel.second.is_subscribed(user_id))
         {
             channel.second.leave_channel(user_id);
+            for (unsigned int user : channel.second.get_users())
+            {
+                client_database.get_client(user).add_message(":" + client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
+            }
         }
     }
     for (auto it = m_channels.begin(), ite = m_channels.end(); it != ite;)
