@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:31:03 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:39:42 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ enum ReplyEnum
     ERR_USERONCHANNEL = 443, // "<user> <channel> :is already on channel"
     ERR_NEEDMOREPARAMS = 461, // "<command> :Not enough parameters"
     ERR_ALREADYREGISTRED = 462, //":Unauthorized command (already registered)"
+    ERR_KEYSET = 467, // "<channel> :Channel key already set"
     ERR_CHANNELISFULL = 471, //  "<channel> :Cannot join channel (+l)"
     ERR_UNKNOWNMODE = 472, // "<char> :is unknown mode char to me for <channel>"
     ERR_INVITEONLYCHAN = 473, // "<channel> :Cannot join channel (+i)"

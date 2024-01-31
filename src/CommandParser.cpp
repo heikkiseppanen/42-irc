@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:36:13 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:47:04by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -622,7 +622,7 @@ void CommandParser::change_topic(std::string const& arguments, unsigned int user
         }
         return;
     }
-    if (channel.is_topic_op_mode_on())
+    if (channel.is_topic_op_only())
     {
         if (!channel.is_operator(user_id))
         {
@@ -680,13 +680,11 @@ l - set the user limit to channel; TYPE C
 //MODE #finnish +itk
 void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
-    std::stringstream stream(message);
+    std::stringstream stream(arguments);
     std::string channel_name;
     std::string modestring;
     std::string params;
 
-    std::getline(stream, channel_name, ' '); // Discard command prefix
-    channel_name.clear();
     std::getline(stream, channel_name, ' ');
     std::getline(stream, modestring, ' ');
     std::getline(stream, params, '\0');
@@ -802,7 +800,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
                 break;
             }
             default :
-                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {modestring[i], " :is unknown mode char to me for" + channel_name});
+                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {static_cast<unsigned char>(modestring[i]), " :is unknown mode char to me for" + channel_name});
         }
     }
     if (!events_list.empty())
