@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:39:04 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:25:09 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ class Reply
     public:
 
         Reply() = delete;
-        Reply(ClientDatabase& clients) : m_clients(clients) {}
+        Reply(ClientDatabase& clients, std::string const& start_time) : m_clients(clients), m_start_time(start_time) {}
 
         std::stringstream create_start(ReplyEnum rpl, unsigned int user_id);
         std::string create_string(ReplyEnum rpl, unsigned int user_id, std::vector<std::string> const& params);
@@ -81,6 +81,7 @@ class Reply
         void reply_to_other(ReplyEnum reply, unsigned int user_id, unsigned int sender, std::vector<std::string> const& params);
 
     private:
+        std::string const m_start_time;
 
         ClientDatabase& m_clients;
 };

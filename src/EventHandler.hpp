@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 14:52:58 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:21:57 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 class EventHandler
 {
     public:
-        inline EventHandler(ClientDatabase& clients, ChannelDatabase& channels)
-            : m_parser(clients, channels),
+        inline EventHandler(ClientDatabase& clients, ChannelDatabase& channels, std::string const& start_time)
+            : m_parser(clients, channels, start_time),
               m_clients(clients),
               m_channels(channels)
         {}

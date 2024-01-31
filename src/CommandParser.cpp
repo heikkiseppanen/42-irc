@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 14:57:23 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:24:06 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,25 +16,9 @@
 #include <sstream>
 #include <vector>
 
-// CommandParser::CommandParser()
-// {
-//     m_commands["PRIVMSG"] = PRIVMSG;
-//     m_commands["JOIN"] = JOIN;
-//     m_commands["NICK"] = NICK;
-//     m_commands["USER"] = USER;
-//     m_commands["PASS"] = PASS;
-//     m_commands["QUIT"] = QUIT;
-//     m_commands["KICK"] = KICK;
-//     m_commands["INVITE"] = INVITE;
-//     m_commands["TOPIC"] = TOPIC;
-//     m_commands["MODE"] = MODE;
-//     m_commands["PING"] = PING;
-//     m_commands["PONG"] = PONG;
-// }
-
-CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData) 
+CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time) 
 : m_client_database(ClData), m_channel_database(ChData),
-  m_reply(m_client_database)
+  m_reply(m_client_database, start_time)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;

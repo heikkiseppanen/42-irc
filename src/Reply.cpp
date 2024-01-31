@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:39:22 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 14:27:59 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ void Reply::reply_welcome(unsigned int user_id, unsigned int channel_count)
     std::string nick = m_clients.get_client(user_id).get_nickname();
     reply_to_sender(RPL_WELCOME, user_id, {":Welcome to the Internet Relay Network ", nick});
     reply_to_sender(RPL_YOURHOST, user_id, {":Your host is ", "localhost ", ", running version ", "1.0.1"});
-    reply_to_sender(RPL_CREATED, user_id, {":This server was created ", "<date>"});
+    reply_to_sender(RPL_CREATED, user_id, {":This server was created ", m_start_time});
     reply_to_sender(RPL_MYINFO, user_id, {"localhost", " ", "1.0.1", " * ", "iklot"});
     reply_to_sender(RPL_ISUPPORT, user_id, {"CHANMODES=,o,kl,it", " MODES=3", " :are supported by this server"});
     reply_to_sender(RPL_LUSERCLIENT, user_id, {":There are ", std::to_string(m_clients.count_clients()), " users and 0 invisible on 1 servers"});
