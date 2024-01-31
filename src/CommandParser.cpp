@@ -779,7 +779,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             {
                 if (param_list.size() <= param_count)
                     break;
-                channel_ref.set_op(user_id, mode_value, m_client_database.get_user_id(param_list[param_count]));
+                channel_ref.set_op(mode_value, m_client_database.get_user_id(param_list[param_count]));
                 if (mode_value == ADD)
                     events_list.emplace_back("gave operator priviledges for " + param_list[param_count++] + " in channel " + channel_name);
                 else
