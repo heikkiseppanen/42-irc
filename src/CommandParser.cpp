@@ -696,8 +696,6 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE :Not enough parameters"});
         return;
     }
-    if (modestring.front() != '+' || modestring.front() != '-')
-        return;
     if (!m_channel_database.is_channel(channel_name))
     {
         m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
@@ -708,6 +706,8 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
         m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " ", get_current_modes(channel_name)});
         return;
     }
+    if (modestring.front() != '+' && modestring.front() != '-')
+        return;
     if (!m_channel_database.is_user_on_channel(channel_name, user_id))
     {
         m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
@@ -745,62 +745,69 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             {
                 channel_ref.set_invite_only(user_id, mode_value);
                 if (mode_value == ADD)
-                    events_list.emplace_back("set the #" + channel_name + " to invite-only");
+                    events_list.emplace_back("set the " + channel_name + " to invite-only");
                 else
-                    events_list.emplace_back("removed the invite-only of #" + channel_name);
+                    events_list.emplace_back("removed the invite-only of " + channel_name);
                 break;
             }
             case 't':
             {
                 channel_ref.set_op_topic(user_id, mode_value);
                 if (mode_value == ADD)
-                    events_list.emplace_back("set the topic of #" + channel_name + " to operator-only");
+                    events_list.emplace_back("set the topic of " + channel_name + " to operator-only");
                 else
-                    events_list.emplace_back("set the topic of #" + channel_name + " to be set by anyone");
+                    events_list.emplace_back("set the topic of " + channel_name + " to be set by anyone");
                 break;
             }
             case 'k':
             {
                 if (mode_value == ADD)
                 {
-                    if (param_list[param_count].empty())
+                    if (param_list.size() <= param_count)
                         break;
-                    channel_ref.set_password(user_id, mode_value, param_list[param_count]);
-                    events_list.emplace_back("changed/added the password for channel #" + channel_name);
+                    channel_ref.set_password(user_id, mode_value, param_list[param_count++]);
+                    events_list.emplace_back("changed/added the password for channel " + channel_name);
                 }
                 else
                 {
                     channel_ref.set_password(user_id, mode_value, "");
-                    events_list.emplace_back("removed the password for channel #" + channel_name);
+                    events_list.emplace_back("removed the password for channel " + channel_name);
                 }
-            }
                 break;
+            }
             case 'o':
             {
-                if (param_list[param_count].empty())
+                if (param_list.size() <= param_count)
                     break;
                 channel_ref.set_op(user_id, mode_value, m_client_database.get_user_id(param_list[param_count]));
-                events_list.emplace_back("added/changed the password for channel #" + channel_name);
+                if (mode_value == ADD)
+                    events_list.emplace_back("gave operator priviledges for " + param_list[param_count++] + " in channel " + channel_name);
+                else
+                    events_list.emplace_back("removed operator priviledges for " + param_list[param_count++] + " in channel " + channel_name);
                 break;
             }
             case 'l':
             {
                 if (mode_value == ADD)
                 {
-                    if (param_list[param_count].empty() || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
+                    if (param_list.size() <= param_count || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
                         break;
-                    channel_ref.set_user_limit(user_id, mode_value, std::stoul(param_list[param_count]));
-                    events_list.emplace_back("added/changed the user limit for channel #" + channel_name);
+                    channel_ref.set_user_limit(user_id, mode_value, std::stoul(param_list[param_count++]));
+                    events_list.emplace_back("added/changed the user limit for channel " + channel_name);
                 }
                 else 
                 {
                     channel_ref.set_user_limit(user_id, mode_value, 0);
-                    events_list.emplace_back("removed the user limit for channel #" + channel_name);
+                    events_list.emplace_back("removed the user limit for channel " + channel_name);
                 }
                 break;
             }
             default :
-                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {static_cast<unsigned char>(modestring[i]), " :is unknown mode char to me for" + channel_name});
+            {
+                std::string unknown_char = {modestring[i], '\0'};
+                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {unknown_char, " :is unknown mode char to me for ", channel_name});
+                break;
+            }
         }
     }
     if (!events_list.empty())
