@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:31:11 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:34:35 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,4 +70,6 @@ class CommandParser
         void receive_pong(std::string const& arguments, unsigned int user_id);
         void answer_cap(std::string const& arguments, unsigned int user_id);
         void part_command(std::string const& arguments, unsigned int user_id);
+
+        std::string get_current_modes(std::string channel_name)
 };

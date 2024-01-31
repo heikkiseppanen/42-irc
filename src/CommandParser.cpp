@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:32:00 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:36:13 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -637,6 +637,29 @@ void CommandParser::change_topic(std::string const& arguments, unsigned int user
     }
 }
 
+std::string CommandParser::get_current_modes(std::string channel_name)
+{
+    std::string modestring;
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+
+    if (channel_ref.is_invite_only())
+        modestring += 'i';
+    if (channel_ref.is_topic_op_only())
+        modestring += 't';
+    if (channel_ref.has_password())
+        modestring += 'k';
+    if (channel_ref.has_user_limit())
+        modestring += 'l';
+    modestring += " ";
+    if (channel_ref.has_password())
+        modestring += channel_ref.get_password();
+    if (channel_ref.has_password() && channel_ref.has_user_limit())
+        modestring += ", ";
+    if (channel_ref.has_user_limit())
+        modestring += channel_ref.get_user_limit(); 
+    return (modestring);
+}
+
 //MODE #Finnish +il 100 Wiz
 /* 
 i - invite-only channel flag; TYPE D
@@ -651,19 +674,12 @@ l - set the user limit to channel; TYPE C
 // ERR_NOSUCHCHANNEL
 // ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
-
 // ERR_UNKNOWNMODE
 // ERR_INVALIDKEY
 
 //MODE #finnish +itk
 void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
-    //TODO handle discarding of mode messages that arent for channels
-
-    (void)user_id;
-
-    // TODO handle invalid input
-
     std::stringstream stream(message);
     std::string channel_name;
     std::string modestring;
@@ -675,19 +691,23 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     std::getline(stream, modestring, ' ');
     std::getline(stream, params, '\0');
 
+    if (channel_name.front() != '#')
+        return;
     if (channel_name.empty())
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE :Not enough parameters"});
         return;
     }
-    if (modestring.empty())
-    {
-        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " :" }); //TODO currently-set modes and mode arguments
+    if (modestring.front() != '+' || modestring.front() != '-')
         return;
-    }
     if (!m_channel_database.is_channel(channel_name))
     {
         m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
+        return;
+    }
+    if (modestring.empty())
+    {
+        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " ", get_current_modes(channel_name)});
         return;
     }
     if (!m_channel_database.is_user_on_channel(channel_name, user_id))
@@ -700,7 +720,6 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
         m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
         return;
     }
-    //TODO +- at the beginning of modestring
 
     stream.str(params);
     stream.clear();
