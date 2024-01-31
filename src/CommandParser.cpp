@@ -265,7 +265,7 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
             auto& channel = m_channel_database.get_channel(channel_name);
             if (has_password_provided)
             {
-                channel.set_password(user_id, ADD, password);
+                channel.set_password(ADD, password);
             }
             m_reply.reply_to_sender(RPL_NOTOPIC, user_id, {channel_name,  " :No topic set"});
             m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :@", client.get_nickname()});
@@ -729,50 +729,50 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     }
 
     Channel& channel_ref = m_channel_database.get_channel(channel_name);
-    std::vector<std::string> events_list;
+    std::vector<std::string> passed_params_list;
+    std::string events;
     bool mode_value;
     for (unsigned int i = 0, param_count = 0; modestring[i]; i++)
     {
         switch (modestring[i])
         {
             case '+':
+            {
                 mode_value = ADD;
+                events += "+";
                 break;
+            }
             case '-':
+            {
                 mode_value = REMOVE;
+                events += "-";
                 break;
+            }
             case 'i':
             {
-                channel_ref.set_invite_only(user_id, mode_value);
-                if (mode_value == ADD)
-                    events_list.emplace_back("set the " + channel_name + " to invite-only");
-                else
-                    events_list.emplace_back("removed the invite-only of " + channel_name);
+                channel_ref.set_invite_only(mode_value);
+                events += "i";
                 break;
             }
             case 't':
             {
-                channel_ref.set_op_topic(user_id, mode_value);
-                if (mode_value == ADD)
-                    events_list.emplace_back("set the topic of " + channel_name + " to operator-only");
-                else
-                    events_list.emplace_back("set the topic of " + channel_name + " to be set by anyone");
+                channel_ref.set_op_topic(mode_value);
+                events += "t";
                 break;
             }
             case 'k':
             {
+                //TODO? check valid keyset
                 if (mode_value == ADD)
                 {
                     if (param_list.size() <= param_count)
                         break;
-                    channel_ref.set_password(user_id, mode_value, param_list[param_count++]);
-                    events_list.emplace_back("changed/added the password for channel " + channel_name);
+                    channel_ref.set_password(mode_value, param_list[param_count]);
+                    passed_params_list.emplace_back(param_list[param_count++]);
                 }
                 else
-                {
-                    channel_ref.set_password(user_id, mode_value, "");
-                    events_list.emplace_back("removed the password for channel " + channel_name);
-                }
+                    channel_ref.set_password(mode_value, "");
+                events += "k";
                 break;
             }
             case 'o':
@@ -780,10 +780,8 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
                 if (param_list.size() <= param_count)
                     break;
                 channel_ref.set_op(mode_value, m_client_database.get_user_id(param_list[param_count]));
-                if (mode_value == ADD)
-                    events_list.emplace_back("gave operator priviledges for " + param_list[param_count++] + " in channel " + channel_name);
-                else
-                    events_list.emplace_back("removed operator priviledges for " + param_list[param_count++] + " in channel " + channel_name);
+                passed_params_list.emplace_back(param_list[param_count++]);
+                events += "o";
                 break;
             }
             case 'l':
@@ -792,14 +790,12 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
                 {
                     if (param_list.size() <= param_count || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
                         break;
-                    channel_ref.set_user_limit(user_id, mode_value, std::stoul(param_list[param_count++]));
-                    events_list.emplace_back("added/changed the user limit for channel " + channel_name);
+                    channel_ref.set_user_limit(mode_value, std::stoul(param_list[param_count]));
+                    passed_params_list.emplace_back(param_list[param_count++]);
                 }
                 else 
-                {
-                    channel_ref.set_user_limit(user_id, mode_value, 0);
-                    events_list.emplace_back("removed the user limit for channel " + channel_name);
-                }
+                    channel_ref.set_user_limit(mode_value, 0);
+                events += "l";
                 break;
             }
             default :
@@ -810,16 +806,17 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
         }
     }
-    if (!events_list.empty())
+    if (!events.empty())
     {
-        std::string event_message = m_client_database.get_client(user_id).get_nickname() + " ";
-
-        for (auto& event : events_list)
+        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + " MODE " + channel_name + " " + events;
+        for (auto& arg : passed_params_list)
         {
-            event_message += event + ", ";
+            if (&arg == &passed_params_list.front())
+                event_message += " ";
+            event_message += arg;
+            if (&arg != &passed_params_list.back())
+                event_message += ",";
         }
-
-        event_message.replace(event_message.size() - 2, 2, ".");
 
         for (unsigned int channel_user_id : channel_ref.get_users())
         {
