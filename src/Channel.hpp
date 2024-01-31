@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:36:45 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 18:32:55 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class Channel
         ReplyEnum set_invite_only(unsigned int op_id, bool mode);
         ReplyEnum set_op_topic(unsigned int op_id, bool mode);
         ReplyEnum set_password(unsigned int op_id, bool mode, std::string const& pass);
-        ReplyEnum set_op(unsigned int op_id, bool mode, unsigned int affect_id);
+        void set_op(unsigned int op_id, bool mode, unsigned int affect_id);
         ReplyEnum set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit);
 
         //Getters
