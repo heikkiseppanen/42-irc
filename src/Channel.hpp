@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:32:11 by jole             ###   ########.fr       */
+/*   Updated: 2024/01/31 16:32:45 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ class Channel
         inline bool is_invite_only() const { return m_has_invite_only; }
         inline bool is_topic_op_only() const { return m_has_op_topic; }
         inline bool has_password() const { return m_has_password; }
+        inline bool has_user_limit() const { return m_user_limit; }
 
     private: 
 
