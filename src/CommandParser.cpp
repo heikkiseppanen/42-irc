@@ -279,17 +279,17 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
         {
             if (!channel.is_invited(user_id))
             {
-                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {":Cannot join channel (+i)"});
+                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {channel_name, " :Cannot join channel (+i)"});
                 continue;
             }
             if (!channel.is_valid_password(password))
             {
-                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {":Cannot join channel (+k)"});
+                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {channel_name, " :Cannot join channel (+k)"});
                 continue;
             }
             if (!channel.is_not_full())
             {
-                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {":Cannot join channel (+l)"});
+                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {channel_name, " :Cannot join channel (+l)"});
                 continue;
             }
             channel.join_channel(user_id);
@@ -431,7 +431,6 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
 
 // ERR_NEEDMOREPARAMS
 // ERR_ALREADYREGISTRED
-
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
