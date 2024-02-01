@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Reply.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 14:45:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 16:39:42 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ enum ReplyEnum
     ERR_INVITEONLYCHAN = 473, // "<channel> :Cannot join channel (+i)"
     ERR_BADCHANNELKEY = 475, // "<channel> :Cannot join channel (+k)"
     ERR_CHANOPRIVSNEEDED = 482, // "<channel> :You're not channel operator"
+
+    ERR_INVALIDKEY = 525,  // "<client> <channel> :Key is not well-formed"
 };
 
 class Reply

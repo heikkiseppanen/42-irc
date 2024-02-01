@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/23 16:21:06 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/01 12:42:20 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,9 @@ unsigned int ClientDatabase::get_user_id(std::string const& nick)
 
 bool ClientDatabase::is_nick_in_use(std::string const& nick)
 {
-    for (std::vector<Client>::iterator it = m_clients.begin(); it != m_clients.end(); it++)
+    for (auto& client : m_clients)
     {
-        if (it->get_nickname() == nick)
+        if (client.get_nickname() == nick)
             return (true);
     }
     return (false);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:34:01 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 19:28:46 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,59 +88,27 @@ ReplyEnum Channel::invite(unsigned int user_id, unsigned int invite_id)
     return RPL_INVITING;
 }
 
-ReplyEnum Channel::set_invite_only(unsigned int op_id, bool mode)
+void Channel::set_password(bool mode, std::string const& pass)
 {
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-    m_has_invite_only = mode;
-    return RPL_CHANNELMODEIS;
-}
-
-ReplyEnum Channel::set_op_topic(unsigned int op_id, bool mode)
-{
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-    m_has_op_topic = mode;
-    return RPL_CHANNELMODEIS;
-}
-
-ReplyEnum Channel::set_password(unsigned int op_id, bool mode, std::string const& pass)
-{
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-
     m_has_password = mode;
     if (mode == ADD)
     {
-        if (!m_password.empty())
-            return ERR_KEYSET;
         m_password = pass;
     }
     else
     {
         m_password.clear();
     }
-    return RPL_CHANNELMODEIS;
 }
 
-ReplyEnum Channel::set_op(unsigned int op_id, bool mode, unsigned int affect_id)
+void Channel::set_op(bool mode, unsigned int affect_id)
 {
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-
-    if (!is_subscribed(affect_id))
-        return ERR_USERNOTINCHANNEL;
-
     std::vector<unsigned int>::iterator it = std::find(m_operators.begin(), m_operators.end(), affect_id);
     if (mode == ADD)
     {
         if (it == m_operators.end())
         {
             m_operators.push_back(affect_id);
-        }
-        else
-        {
-            return IGNORE;
         }
     }
     else
@@ -149,19 +117,10 @@ ReplyEnum Channel::set_op(unsigned int op_id, bool mode, unsigned int affect_id)
         {
             m_operators.erase(it);
         }
-        else
-        {
-            return IGNORE;
-        }
     }
-    return RPL_NAMREPLY;
 }
-
-ReplyEnum Channel::set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit)
+void Channel::set_user_limit(bool mode, unsigned int user_limit)
 {
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-
     if (mode == ADD)
     {
         m_user_limit = user_limit;
@@ -170,7 +129,6 @@ ReplyEnum Channel::set_user_limit(unsigned int op_id, bool mode, unsigned int us
     {
         m_user_limit = 0;
     }
-    return RPL_CHANNELMODEIS;
 }
 
 void Channel::print_channel()

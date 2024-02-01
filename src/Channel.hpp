@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/26 17:36:24 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 18:48:26 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,18 @@ class Channel
         ReplyEnum invite(unsigned int op_id, unsigned int invite_id);
 
         //Channel modes
-        ReplyEnum set_invite_only(unsigned int op_id, bool mode);
-        ReplyEnum set_op_topic(unsigned int op_id, bool mode);
-        ReplyEnum set_password(unsigned int op_id, bool mode, std::string const& pass);
-        ReplyEnum set_op(unsigned int op_id, bool mode, unsigned int affect_id);
-        ReplyEnum set_user_limit(unsigned int op_id, bool mode, unsigned int user_limit);
+        inline void set_invite_only(bool mode) { m_has_invite_only = mode; }
+        inline void set_op_topic(bool mode) { m_has_op_topic = mode; }
+        void set_password(bool mode, std::string const& pass);
+        void set_op(bool mode, unsigned int affect_id);
+        void set_user_limit(bool mode, unsigned int user_limit);
 
         //Getters
         inline std::vector<unsigned int> const& get_users() const { return m_users; }
         inline std::vector<unsigned int> const& get_operators() const { return m_operators; }
         inline std::string const& get_topic() const { return m_topic; }
+        inline std::string const& get_password() const { return m_password; }
+        inline unsigned int get_user_limit() const { return m_user_limit; }
 
         void print_channel();
 
@@ -59,7 +61,10 @@ class Channel
         bool is_not_full() const;
         bool is_subscribed(unsigned int user_id) const;
         inline bool is_channel_topic_empty() const { return m_topic.empty(); }
-        inline bool is_topic_op_mode_on() const { return m_has_op_topic; }
+        inline bool is_invite_only() const { return m_has_invite_only; }
+        inline bool is_topic_op_only() const { return m_has_op_topic; }
+        inline bool has_password() const { return m_has_password; }
+        inline bool has_user_limit() const { return m_user_limit != 0; }
 
     private: 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 15:10:54 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/01/31 16:47:04by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,23 +137,11 @@ std::vector<std::string> get_targets(std::string const& message, unsigned int sk
     return (vec);
 }
 
-int create_text(std::string const& message, std::string &text)
-{
-    std::string::size_type pos = message.find(" ");
-    text = message.substr(pos + 1, message.length() - pos);
-    pos = text.find(" ");
-    text = text.substr(pos + 1, text.length() - pos);
-    if (text[0] == ':')
-        text = text.substr(1, text.length() - 1);
-    if (text[0] == '\0')
-        return (0);
-    return (1);
-}
-
 std::vector<std::string> split_string_to_vector(std::string string, std::string delim)
 {
     std::vector<std::string> vec;
     std::string::size_type pos = string.find(delim);
+
     while (pos != std::string::npos)
     {
         vec.push_back(string.substr(0, pos));
@@ -268,8 +256,8 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
             continue;
         }
 
-        const bool has_password_provided = (key != key_list.end());
-        const std::string& password = (has_password_provided) ? *(key++) : "";
+        bool const has_password_provided = (key != key_list.end());
+        std::string const& password = (has_password_provided) ? *(key++) : "";
 
         if (!m_channel_database.is_channel(channel_name))
         {
@@ -277,7 +265,7 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
             auto& channel = m_channel_database.get_channel(channel_name);
             if (has_password_provided)
             {
-                channel.set_password(user_id, ADD, password);
+                channel.set_password(ADD, password);
             }
             m_reply.reply_to_sender(RPL_NOTOPIC, user_id, {channel_name,  " :No topic set"});
             m_reply.reply_to_sender(RPL_NAMREPLY, user_id, {"= ", channel_name, " :@", client.get_nickname()});
@@ -291,17 +279,17 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
         {
             if (!channel.is_invited(user_id))
             {
-                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {" :Cannot join channel (+i)"});
+                m_reply.reply_to_sender(ERR_INVITEONLYCHAN, user_id, {channel_name, " :Cannot join channel (+i)"});
                 continue;
             }
             if (!channel.is_valid_password(password))
             {
-                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {" :Cannot join channel (+k)"});
+                m_reply.reply_to_sender(ERR_BADCHANNELKEY, user_id, {channel_name, " :Cannot join channel (+k)"});
                 continue;
             }
             if (!channel.is_not_full())
             {
-                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {" :Cannot join channel (+l)"});
+                m_reply.reply_to_sender(ERR_CHANNELISFULL, user_id, {channel_name, " :Cannot join channel (+l)"});
                 continue;
             }
             channel.join_channel(user_id);
@@ -443,7 +431,6 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
 
 // ERR_NEEDMOREPARAMS
 // ERR_ALREADYREGISTRED
-
 //NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
@@ -634,7 +621,7 @@ void CommandParser::change_topic(std::string const& arguments, unsigned int user
         }
         return;
     }
-    if (channel.is_topic_op_mode_on())
+    if (channel.is_topic_op_only())
     {
         if (!channel.is_operator(user_id))
         {
@@ -649,32 +636,196 @@ void CommandParser::change_topic(std::string const& arguments, unsigned int user
     }
 }
 
+std::string CommandParser::get_current_modes(std::string channel_name)
+{
+    std::string modestring;
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+
+    if (channel_ref.is_invite_only())
+        modestring += 'i';
+    if (channel_ref.is_topic_op_only())
+        modestring += 't';
+    if (channel_ref.has_password())
+        modestring += 'k';
+    if (channel_ref.has_user_limit())
+        modestring += 'l';
+    modestring += " ";
+    if (channel_ref.has_password())
+        modestring += channel_ref.get_password();
+    if (channel_ref.has_password() && channel_ref.has_user_limit())
+        modestring += ", ";
+    if (channel_ref.has_user_limit())
+        modestring += channel_ref.get_user_limit(); 
+    return (modestring);
+}
+
 //MODE #Finnish +il 100 Wiz
 /* 
-i - invite-only channel flag;
-t - topic settable by channel operator only flag;
-k - set a channel key (password).
-o - give/take channel operator privileges
-l - set the user limit to channel;
+i - invite-only channel flag; TYPE D
+t - topic settable by channel operator only flag; TYPE D
+k - set a channel key (password). TYPE C
+o - give/take channel operator privileges TYPE B
+l - set the user limit to channel; TYPE C
 */
 
 // ERR_NEEDMOREPPARAMS
-// ERR_NOCHANMODES
-// ERR_USERNOTINCHANNEL
-// ERR_KEYSET
+// RPL_CHANMODEIS
+// ERR_NOSUCHCHANNEL
+// ERR_NOTONCHANNEL
 // ERR_CHANOPRIVSNEEDED
 // ERR_UNKNOWNMODE
-// RPL_BANLIST
-// RPL_EXCEPTLIST
-// RPL_INVITELIST
-// RPL_UNIQOPIS
-// RPL_ENDOFBANLIST
-// RPL_ENDOFEXCEPTLIST
-// RPL_ENDOFINVITELIST
+// ERR_INVALIDKEY
+
+//MODE #finnish +itk
 void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
-    (void)arguments;
-    (void)user_id;
+    std::stringstream stream(arguments);
+    std::string channel_name;
+    std::string modestring;
+    std::string params;
+
+    std::getline(stream, channel_name, ' ');
+    std::getline(stream, modestring, ' ');
+    std::getline(stream, params, '\0');
+
+    if (channel_name.front() != '#')
+        return;
+    if (channel_name.empty())
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"MODE :Not enough parameters"});
+        return;
+    }
+    if (!m_channel_database.is_channel(channel_name))
+    {
+        m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
+        return;
+    }
+    if (modestring.empty())
+    {
+        m_reply.reply_to_sender(RPL_CHANNELMODEIS, user_id, {channel_name, " ", get_current_modes(channel_name)});
+        return;
+    }
+    if (modestring.front() != '+' && modestring.front() != '-')
+        return;
+    if (!m_channel_database.is_user_on_channel(channel_name, user_id))
+    {
+        m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
+        return;
+    }
+    if (!m_channel_database.get_channel(channel_name).is_operator(user_id))
+    {
+        m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
+        return;
+    }
+
+    stream.str(params);
+    stream.clear();
+    std::vector<std::string> param_list;
+
+    while (std::getline(stream, params, ','))
+    {
+        param_list.emplace_back(std::move(params));
+    }
+
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+    std::vector<std::string> passed_params_list;
+    std::string events;
+    bool mode_value;
+    for (unsigned int i = 0, param_count = 0; modestring[i]; i++)
+    {
+        switch (modestring[i])
+        {
+            case '+':
+            {
+                mode_value = ADD;
+                events += "+";
+                break;
+            }
+            case '-':
+            {
+                mode_value = REMOVE;
+                events += "-";
+                break;
+            }
+            case 'i':
+            {
+                channel_ref.set_invite_only(mode_value);
+                events += "i";
+                break;
+            }
+            case 't':
+            {
+                channel_ref.set_op_topic(mode_value);
+                events += "t";
+                break;
+            }
+            case 'k':
+            {
+                //TODO? check valid keyset
+                if (mode_value == ADD)
+                {
+                    if (param_count < param_list.size())
+                        break;
+                    channel_ref.set_password(mode_value, param_list[param_count]);
+                    passed_params_list.emplace_back(param_list[param_count++]);
+                }
+                else
+                    channel_ref.set_password(mode_value, "");
+                events += "k";
+                break;
+            }
+            case 'o':
+            {
+                if (param_count < param_list.size())
+                    break;
+                std::string const nick = param_list[param_count++];
+                if (!m_client_database.is_nick_in_use(nick))
+                    break;
+                channel_ref.set_op(mode_value, m_client_database.get_user_id(nick));
+                passed_params_list.emplace_back(nick);
+                events += "o";
+                break;
+            }
+            case 'l':
+            {
+                if (mode_value == ADD)
+                {
+                    if (param_count < param_list.size() || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
+                        break;
+                    channel_ref.set_user_limit(mode_value, std::stoul(param_list[param_count]));
+                    passed_params_list.emplace_back(param_list[param_count++]);
+                }
+                else 
+                    channel_ref.set_user_limit(mode_value, 0);
+                events += "l";
+                break;
+            }
+            default :
+            {
+                std::string unknown_char = {modestring[i], '\0'};
+                m_reply.reply_to_sender(ERR_UNKNOWNMODE, user_id, {unknown_char, " :is unknown mode char to me for ", channel_name});
+                break;
+            }
+        }
+    }
+    if (!events.empty())
+    {
+        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + " MODE " + channel_name + " " + events;
+        for (auto& arg : passed_params_list)
+        {
+            if (&arg == &passed_params_list.front())
+                event_message += " ";
+            event_message += arg;
+            if (&arg != &passed_params_list.back())
+                event_message += ",";
+        }
+
+        for (unsigned int channel_user_id : channel_ref.get_users())
+        {
+            auto& channel_client = m_client_database.get_client(channel_user_id);
+            channel_client.add_message(event_message);
+        }
+    } 
 }
 
 // ERR_NOORIGIN
@@ -717,19 +868,21 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
     std::string::size_type pos = args.find(' ');
     std::string channel_args = args.substr(0, pos);
     std::string reason;
+
     if (pos != std::string::npos)
         reason = args.substr(pos + 1);
 
     std::vector<std::string> channels;
-
     std::stringstream ss(channel_args);
     std::string channel_name;
+
     while(getline(ss, channel_name, ','))
     {
         channels.emplace_back(std::move(channel_name));
     }
 
     std::string nick = m_client_database.get_client(user_id).get_nickname();
+
     for (auto& channel_name : channels)
     {
         if (!m_channel_database.is_channel(channel_name))
@@ -737,7 +890,9 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
             m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
             continue;
         }
+
         Channel& channel = m_channel_database.get_channel(channel_name);
+
         if (!channel.is_subscribed(user_id))
         {
             m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
