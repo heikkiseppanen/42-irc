@@ -722,7 +722,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     stream.clear();
     std::vector<std::string> param_list;
 
-    while (getline(stream, params, ','))
+    while (std::getline(stream, params, ','))
     {
         param_list.emplace_back(std::move(params));
     }
@@ -764,7 +764,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
                 //TODO? check valid keyset
                 if (mode_value == ADD)
                 {
-                    if (param_list.size() <= param_count)
+                    if (param_count < param_list.size())
                         break;
                     channel_ref.set_password(mode_value, param_list[param_count]);
                     passed_params_list.emplace_back(param_list[param_count++]);
@@ -776,10 +776,13 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
             case 'o':
             {
-                if (param_list.size() <= param_count)
+                if (param_count < param_list.size())
                     break;
-                channel_ref.set_op(mode_value, m_client_database.get_user_id(param_list[param_count]));
-                passed_params_list.emplace_back(param_list[param_count++]);
+                std::string const nick = param_list[param_count++];
+                if (!m_client_database.is_nick_in_use(nick))
+                    break;
+                channel_ref.set_op(mode_value, m_client_database.get_user_id(nick));
+                passed_params_list.emplace_back(nick);
                 events += "o";
                 break;
             }
@@ -787,7 +790,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             {
                 if (mode_value == ADD)
                 {
-                    if (param_list.size() <= param_count || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
+                    if (param_count < param_list.size() || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
                         break;
                     channel_ref.set_user_limit(mode_value, std::stoul(param_list[param_count]));
                     passed_params_list.emplace_back(param_list[param_count++]);
