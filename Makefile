@@ -60,3 +60,6 @@ test:
 	@echo "------------RUNNING TESTS------------"
 	@./testsrc/test
 	@make fclean -C testsrc
+
+fuzz:
+	c++ fuzz.cpp -std=c++17 -o fuzzer
