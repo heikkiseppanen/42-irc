@@ -29,7 +29,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void add_fuzz(std::vector<std::string> fuzz)
+void add_fuzz(std::vector<std::string>& fuzz)
 {
     std::vector<std::string> starts = {"PRIVMSG",
     "JOIN",
@@ -60,7 +60,6 @@ void add_fuzz(std::vector<std::string> fuzz)
             a++;
         }
     }
-    constexpr int e = 126 - 32;
 
     std::string fuzz_str;
 
