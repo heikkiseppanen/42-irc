@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/02/06 17:00:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/08 12:40:48 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,8 @@ void EventSystem::handle(EventHandler& handler)
                     {
                         for (auto connection_count = it->data; connection_count > 0; --connection_count)
                         {
-                            Socket new_client = m_listener.accept();
+                            std::string address;
+                            Socket new_client = m_listener.accept(address);
 
                             struct kevent client_event = {};
 

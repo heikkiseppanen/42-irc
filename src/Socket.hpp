@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 12:07:46 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/12 12:35:14 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/01/30 12:21:56 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <unistd.h>
 #include <sys/socket.h>
+#include <string>
 
 constexpr int SOCKET_LISTEN_BACKLOG_SIZE = 32;
 
@@ -36,7 +37,7 @@ class Socket
 
         ssize_t receive(void* destination, size_t size) const; 
 
-        Socket accept() const;
+        Socket accept(std::string& address_out) const;
 
         inline bool operator == (const Socket rhs) { return m_file_descriptor == rhs.get_file_descriptor(); };
 
