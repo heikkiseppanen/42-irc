@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/01/30 14:53:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/05 16:09:50 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include <array>
+#include <algorithm>
 
 EventSystem::EventSystem(const char* port)
     : m_kqueue(kqueue())
@@ -46,9 +47,13 @@ void EventSystem::handle(EventHandler& handler)
 
     m_changelist.clear();
 
+    std::vector<unsigned int> disconnect_list;
     auto end = m_eventbuffer.begin() + events_polled;
+    
     for (auto it = m_eventbuffer.begin(); it != end; ++it)
     {
+        if (std::find(disconnect_list.begin(), disconnect_list.end(), it->ident) != disconnect_list.end())
+            continue;
         try
         {
             Socket client{ static_cast<int>(it->ident) };
@@ -56,6 +61,7 @@ void EventSystem::handle(EventHandler& handler)
             // TODO if multiple events trigger at once for single socket, issues most likely
             if (it->flags & EV_EOF)
             {
+                disconnect_list.push_back(it->ident);
                 handler.on_client_disconnected(client);
                 client.close();
                 continue;
@@ -101,5 +107,6 @@ void EventSystem::handle(EventHandler& handler)
             std::cerr << "ircserv: " << e.what() << '\n';
         }
     }
+    disconnect_list.clear();
     handler.cleanup();
 }
