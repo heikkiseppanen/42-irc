@@ -535,14 +535,6 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
     }
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_NOSUCHCHANNEL
-
-// ERR_NOTONCHANNEL
-// ERR_CHANOPRIVSNEEDED
-// ERR_NOSUCHNICK
-// ERR_USERONCHANNEL
-// RPL_INVITING
 void CommandParser::invite_user(std::string const& arguments, unsigned int user_id)
 {
     std::stringstream stream(arguments);
@@ -589,7 +581,7 @@ void CommandParser::invite_user(std::string const& arguments, unsigned int user_
         return;
     }
     channel_ref.invite(invited_id);
-    m_reply.reply_to_sender(RPL_INVITING, user_id, {nickname, " ", channel_name}); //Check if channel nick or nick channel
+    m_reply.reply_to_sender(RPL_INVITING, user_id, {nickname, " ", channel_name});
 
     Client& invited_ref = m_client_database.get_client(invited_id);
     Client& inviter_ref = m_client_database.get_client(user_id);
