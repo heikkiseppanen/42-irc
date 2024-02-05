@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 16:07:57 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/05 17:44:16 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Channel
         void remove_invite(unsigned int user_id);
 
         //Operator only
-        ReplyEnum kick(unsigned int op_id, unsigned int kick_id);
+        void kick(unsigned int kick_id);
         void invite(unsigned int invite_id);
 
         //Channel modes

@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 16:06:30 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/05 17:43:56 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,11 @@ void Channel::remove_invite(unsigned int user_id)
     }
 }
 
-ReplyEnum Channel::kick(unsigned int op_id, unsigned int kick_id)
+void Channel::kick(unsigned int kick_id)
 {
-    if (!is_subscribed(op_id))
-        return ERR_NOTONCHANNEL;
-    if (!is_operator(op_id))
-        return ERR_CHANOPRIVSNEEDED;
-
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), kick_id);
     if (it == m_users.end())
-        return ERR_USERNOTINCHANNEL;
+        return;
 
     m_users.erase(it);
     it = std::find(m_operators.begin(), m_operators.end(), kick_id);
@@ -69,7 +64,6 @@ ReplyEnum Channel::kick(unsigned int op_id, unsigned int kick_id)
     }
     //TODO return RPL_NAMREPLY?
     //TODO remove channel if empty
-    return RPL_NAMREPLY;
 }
 
 void Channel::invite(unsigned int invite_id)
