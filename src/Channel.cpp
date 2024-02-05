@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 19:28:46 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/05 16:06:30 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,20 +72,13 @@ ReplyEnum Channel::kick(unsigned int op_id, unsigned int kick_id)
     return RPL_NAMREPLY;
 }
 
-ReplyEnum Channel::invite(unsigned int user_id, unsigned int invite_id)
+void Channel::invite(unsigned int invite_id)
 {
-    if (!is_subscribed(user_id))
-        return ERR_NOTONCHANNEL;
-    if (m_has_invite_only == true && !is_operator(user_id))
-        return ERR_CHANOPRIVSNEEDED;
-    if (is_subscribed(invite_id))
-        return ERR_USERONCHANNEL;
     std::vector<unsigned int>::iterator it = std::find(m_invited.begin(), m_invited.end(), invite_id);
     if (it == m_invited.end())
     {
         m_invited.push_back(invite_id);
     }
-    return RPL_INVITING;
 }
 
 void Channel::set_password(bool mode, std::string const& pass)

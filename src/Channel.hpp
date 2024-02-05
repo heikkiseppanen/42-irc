@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 18:48:26 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/05 16:07:57 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class Channel
 
         //Operator only
         ReplyEnum kick(unsigned int op_id, unsigned int kick_id);
-        ReplyEnum invite(unsigned int op_id, unsigned int invite_id);
+        void invite(unsigned int invite_id);
 
         //Channel modes
         inline void set_invite_only(bool mode) { m_has_invite_only = mode; }
