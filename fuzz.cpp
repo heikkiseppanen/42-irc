@@ -31,9 +31,9 @@ void *get_in_addr(struct sockaddr *sa)
 
 void add_fuzz(std::vector<std::string>& fuzz)
 {
-    std::vector<std::string> starts = {"PRIVMSG",
+    std::vector<std::string> starts = {
+    "PRIVMSG",
     "JOIN",
-    "QUIT",
     "KICK",
     "INVITE",
     "TOPIC",
@@ -65,7 +65,7 @@ void add_fuzz(std::vector<std::string>& fuzz)
 
     for (int i = 0; i < 5; i++)
     {
-        fuzz_str = starts[std::rand() % 14];
+        fuzz_str = starts[std::rand() % 13];
         for (int j = 0; j < 120; j++)
         {
             fuzz_str += letter_set[std::rand() % 94];
@@ -135,13 +135,13 @@ int main(int argc, char *argv[])
     fuzz_strings.push_back("USER a a a a\r\n");
 
     unsigned int total = std::stoul(argv[1]);
+    unsigned int fuzz_count = 0;
 
-    for (unsigned int fuzz_count = 0; fuzz_count < total; fuzz_count++)
+    for (;;)
     {
-        if (fuzz_strings.empty())
-        {
-            add_fuzz(fuzz_strings);
-        }
+        if (fuzz_count < total)
+            if (fuzz_strings.empty())
+                add_fuzz(fuzz_strings);
 
         int poll_count = poll(pfds, 1, 1000);
         assert(poll_count != -1);
@@ -154,12 +154,13 @@ int main(int argc, char *argv[])
             buf[recv(pfds[0].fd, buf, 1024, 0)] = '\0';
             std::cout << "recv: " << buf << "\n";
         }
-        else if (pfds[0].revents & POLLOUT)
+        else if (!fuzz_strings.empty() && pfds[0].revents & POLLOUT)
         {
             std::string msg = fuzz_strings.back();
             fuzz_strings.pop_back();
             send(pfds[0].fd, msg.c_str(), msg.length(), 0);
-            std::cout << "sent: " << msg << "\n";
+            std::cout << fuzz_count << " sent: " << msg << "\n";
+            fuzz_count++;
         }
     }
     close(sockfd);
