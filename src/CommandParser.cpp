@@ -479,7 +479,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
     stream.str(targets);
     stream.clear();
 
-    if (reason.size() == 1)
+    if (reason.size() == 1) //Irssi sends ":" as default kick, so default kick message is set here
     {
         reason = ":Get rekt kiddo"; //Default kick message
     }
