@@ -459,12 +459,6 @@ void CommandParser::quit_server(std::string const& arguments, unsigned int user_
     client.add_message("ERROR :Client quit");
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_NOSUCHCHANNEL
-// ERR_NOTONCHANNEL
-// ERR_CHANOPRIVSNEEDED
-// ERR_USERNOTINCHANNEL
-// "KICK #finnish,#english heikki,crisplake :Bye noobs"
 void CommandParser::kick_user(std::string const& arguments, unsigned int user_id)
 {
     std::stringstream stream(arguments);
