@@ -476,7 +476,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
     std::getline(stream, targets, ' ');
     std::getline(stream, reason, '\0');
 
-    if (reason.size() == 1) //Irssi sends ":" as default kick, so default kick message is set here
+    if (reason == ":" || reason.size() == 0) //Irssi sends ":" as default kick, so default kick message is set here
     {
         reason = ":Get rekt kiddo"; //Default kick message
     }
@@ -516,11 +516,9 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
 
     auto& kicker_ref = m_client_database.get_client(user_id);
 
-    for (unsigned int i = 0; i < target_list.size(); i++)
+    for (unsigned int i = 0; i < target_list.size(); i++) // Not necessary to do multi targets but its working
     {
-        std::cout << "i:" << i << '\n';
         unsigned int kicked_id = m_client_database.get_user_id(target_list[i]);
-        // auto& client = m_client_database.get_client(kicked_id);
 
         if (!channel_ref.is_subscribed(kicked_id))
         {
