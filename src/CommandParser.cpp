@@ -535,45 +535,58 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
     }
 }
 
-// RPL_INVITING "<channel> <nick>"
-// ERR_NOSUCHNICK
-// ERR_NEEDMOREPARAMS
-// ERR_NOTONCHANNEL
-// ERR_CHANOPRIVSNEEDED
-// ERR_USERONCHANNEL
 void CommandParser::invite_user(std::string const& arguments, unsigned int user_id)
 {
-    user_id++; //delete
-    user_id--; //delete
-    if (arguments.length() <= 4)
+    std::stringstream stream(arguments);
+    std::string nickname;
+    std::string channel_name;
+
+    std::getline(stream, nickname, ' ');
+    std::getline(stream, channel_name, '\0');
+
+    if (channel_name.empty())
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
-        return;
-    }
-    std::string args = remove_prefix(arguments, 6);
-    std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !arguments[pos + 1] || arguments.empty())
-    {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
-        return;
-    }
-    std::string nick = args.substr(0, pos);
-    std::string channel_name = args.substr(pos + 1, args.size() - pos - 1);
-    // std::cout << "nick:[" << nick << "]\n";
-    // std::cout << "channel:[" << channel_name << "]\n";
-    if (!m_client_database.is_nick_in_use(nick))
-    {
-        std::cout << "Invited doesn't exist\n"; //TODO ERR_NOSUCHNICK
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"INVITE :Not enough parameters"});
         return;
     }
     if (!m_channel_database.is_channel(channel_name))
     {
-        std::cout << "Channel doesn't exist, adding channel and inviting user\n"; //TODO?
-        m_channel_database.add_channel(channel_name, user_id);
+        m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
+        return;
     }
-    Channel& channel = m_channel_database.get_channel(channel_name);
-    channel.invite(user_id, m_client_database.get_user_id(nick));
-    //TODO check invite return value
+    if (!m_channel_database.is_user_on_channel(channel_name, user_id))
+    {
+        m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
+        return;
+    }
+
+    Channel& channel_ref = m_channel_database.get_channel(channel_name);
+
+    if (channel_ref.is_invite_only() == true && !channel_ref.is_operator(user_id))
+    {
+        m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
+        return;
+    }
+    if (!m_client_database.is_nick_in_use(nickname))
+    {
+        m_reply.reply_to_sender(ERR_NOSUCHNICK, user_id, {nickname, " :No such nick/channel"});
+        return;
+    }
+
+    unsigned int invited_id = m_client_database.get_user_id(nickname);    
+
+    if (channel_ref.is_subscribed(invited_id))
+    {
+        m_reply.reply_to_sender(ERR_USERONCHANNEL, user_id, {nickname, " ", channel_name ," :is already on channel"});
+        return;
+    }
+    channel_ref.invite(invited_id);
+    m_reply.reply_to_sender(RPL_INVITING, user_id, {nickname, " ", channel_name});
+
+    Client& invited_ref = m_client_database.get_client(invited_id);
+    Client& inviter_ref = m_client_database.get_client(user_id);
+
+    invited_ref.add_message(inviter_ref.get_nickname() + " INVITE " + nickname + " " + channel_name);
 }
 
 void CommandParser::change_topic(std::string const& arguments, unsigned int user_id)
