@@ -518,15 +518,20 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
 
     for (unsigned int i = 0; i < target_list.size(); i++)
     {
+        std::cout << "i:" << i << '\n';
         unsigned int kicked_id = m_client_database.get_user_id(target_list[i]);
-        auto& client = m_client_database.get_client(kicked_id);
+        // auto& client = m_client_database.get_client(kicked_id);
 
         if (!channel_ref.is_subscribed(kicked_id))
         {
-            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {target_list[i++], " ", channel_name, " :They aren't on that channel"});
+            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {target_list[i], " ", channel_name, " :They aren't on that channel"});
             continue;
         }
-        client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + target_list[i++] + " " + reason);
+        for (unsigned int channel_user_id : channel_ref.get_users())
+        {
+            auto& channel_client = m_client_database.get_client(channel_user_id);
+            channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + target_list[i] + " " + reason);
+        }
         channel_ref.kick(kicked_id);
     }
 }
