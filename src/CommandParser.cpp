@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:47:04by jole             ###   ########.fr       */
+/*   Updated: 2024/02/06 13:48:28 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -510,19 +510,25 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
 
     auto& kicker_ref = m_client_database.get_client(user_id);
 
-    for (unsigned int i = 0; i < target_list.size(); i++) // Not necessary to do multi targets but its working
+    for (auto const& nick : target_list) // Not necessary to do multi targets but its working
     {
-        unsigned int kicked_id = m_client_database.get_user_id(target_list[i]);
+        if (!m_client_database.is_nick_in_use(nick))
+        {
+            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {nick, " ", channel_name, " :They aren't on that channel"});
+            continue;
+        }
+
+        unsigned int kicked_id = m_client_database.get_user_id(nick);
 
         if (!channel_ref.is_subscribed(kicked_id))
         {
-            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {target_list[i], " ", channel_name, " :They aren't on that channel"});
+            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {nick, " ", channel_name, " :They aren't on that channel"});
             continue;
         }
         for (unsigned int channel_user_id : channel_ref.get_users())
         {
             auto& channel_client = m_client_database.get_client(channel_user_id);
-            channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + target_list[i] + " " + reason);
+            channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
         }
         channel_ref.kick(kicked_id);
     }
