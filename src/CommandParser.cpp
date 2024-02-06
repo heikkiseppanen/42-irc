@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 16:49:06 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:51:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,21 +208,20 @@ void CommandParser::send_privmsg(std::string const& arguments, unsigned int user
     }
 }
 
-// ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
-// ERR_NOSUCHCHANNEL "<channel> :No such channel" 
-// ERR_CHANNELISFULL  "<channel> :Cannot join channel (+l)"
-// ERR_INVITEONLYCHAN "<channel> :Cannot join channel (+i)"
-// ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
-// RPL_TOPIC
 void CommandParser::join_channel(std::string const& arguments, unsigned int user_id)
 {
-    // TODO handle invalid inputs LATERRRR
     std::stringstream stream(arguments);
     std::string channel_argument;
     std::string key_argument;
 
     std::getline(stream, channel_argument, ' ');
     std::getline(stream, key_argument, '\0');
+
+    if (channel_argument.empty())
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"JOIN ", arguments, " :Not enough parameters"});
+        return;
+    }
 
     stream.str(channel_argument);
     stream.clear();
