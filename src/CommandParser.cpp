@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 13:48:28 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/06 16:59:53 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void CommandParser::parser(std::string const& message, unsigned int user_id)
     switch (cmd)
     {
         case ERR_NO_CMD:
-            //TODO
             break;
         case PRIVMSG:
             send_privmsg(args, user_id);
@@ -204,28 +203,25 @@ void CommandParser::send_privmsg(std::string const& arguments, unsigned int user
         }
         else
         {
-            //TODO remove multiple targets
-            //TODO change to nosuchnick
-            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+            m_reply.reply_to_sender(ERR_NOSUCHNICK, user_id, {target, " :No such nick/channel"});
         }
     }
 }
 
-// ERR_NEEDMOREPARAMS "<command> :Not enough parameters"
-// ERR_NOSUCHCHANNEL "<channel> :No such channel" 
-// ERR_CHANNELISFULL  "<channel> :Cannot join channel (+l)"
-// ERR_INVITEONLYCHAN "<channel> :Cannot join channel (+i)"
-// ERR_BADCHANNELKEY "<channel> :Cannot join channel (+k)"
-// RPL_TOPIC
 void CommandParser::join_channel(std::string const& arguments, unsigned int user_id)
 {
-    // TODO handle invalid inputs LATERRRR
     std::stringstream stream(arguments);
     std::string channel_argument;
     std::string key_argument;
 
     std::getline(stream, channel_argument, ' ');
     std::getline(stream, key_argument, '\0');
+
+    if (channel_argument.empty())
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"JOIN ", arguments, " :Not enough parameters"});
+        return;
+    }
 
     stream.str(channel_argument);
     stream.clear();
@@ -428,19 +424,16 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
     client.user_received();
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTRED
-//NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
     if (arguments.empty())
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"PASS :Not enough parameters"});
         return;
     }
     if (m_client_database.is_client(user_id))
     {
-        std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
         return;
     }
     //TODO CHECK IF SERVER HAS PASSWORD
@@ -509,7 +502,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
 
     auto& kicker_ref = m_client_database.get_client(user_id);
 
-    for (auto const& nick : target_list) // Not necessary to do multi targets but its working
+    for (auto const& nick : target_list)
     {
         if (!m_client_database.is_nick_in_use(nick))
         {
@@ -530,6 +523,10 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
             channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
         }
         channel_ref.kick(kicked_id);
+    }
+    if (channel_ref.get_users().empty())
+    {
+        m_channel_database.remove_channel(channel_name);
     }
 }
 
@@ -589,7 +586,6 @@ void CommandParser::invite_user(std::string const& arguments, unsigned int user_
 
 void CommandParser::change_topic(std::string const& arguments, unsigned int user_id)
 {
-    //TODO topicwhotime reply
     std::stringstream stream(arguments);
     std::string channel_name;
     std::string topic;
