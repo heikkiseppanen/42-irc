@@ -50,6 +50,7 @@ clean:
 
 fclean: clean
 	/bin/rm -f $(NAME)
+	/bin/rm -f fuzzer
 
 re: fclean all
 
@@ -61,5 +62,5 @@ test:
 	@./testsrc/test
 	@make fclean -C testsrc
 
-fuzz:
+fuzzer:
 	c++ fuzz.cpp -std=c++17 -o fuzzer
