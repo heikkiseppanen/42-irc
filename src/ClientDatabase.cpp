@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/01 12:42:20 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:55:32 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,17 +60,16 @@ void ClientDatabase::print_clients() const
     std::cout << "\n";
 }
 
-//To use: First check if nick is in use or it segfaults
-unsigned int ClientDatabase::get_user_id(std::string const& nick)
+//To use: First check if nick is in use or get underflow
+unsigned int ClientDatabase::get_user_id(std::string const& nick) const
 {
-    //TODO Update to find_if
-    std::vector<Client>::iterator it = m_clients.begin();
-    while (it->get_nickname() != nick)
-        it++;
-    return (it - m_clients.begin());
+    auto const pos = std::find_if(m_clients.begin(), m_clients.end(), [&](Client const& client) { return client.get_nickname() == nick; });
+    if (pos != m_clients.end())
+        return pos - m_clients.begin();
+    return -1;
 }
 
-bool ClientDatabase::is_nick_in_use(std::string const& nick)
+bool ClientDatabase::is_nick_in_use(std::string const& nick) const
 {
     for (auto& client : m_clients)
     {

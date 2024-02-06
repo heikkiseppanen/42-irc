@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 17:44:16 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/06 14:52:39 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class Channel
         inline void topic_change(std::string const& topic) { m_topic = topic; }
         inline void topic_clear() { m_topic.clear(); }
 
-        int leave_channel(unsigned int user_id);
+        void leave_channel(unsigned int user_id);
         void remove_invite(unsigned int user_id);
 
         //Operator only
