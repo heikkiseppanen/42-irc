@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:47:04by jole             ###   ########.fr       */
+/*   Updated: 2024/02/06 13:48:28 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -459,79 +459,78 @@ void CommandParser::quit_server(std::string const& arguments, unsigned int user_
     client.add_message("ERROR :Client quit");
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_NOTONCHANNEL
-// ERR_CHANOPRIVSNEEDED
-// ERR_NOSUCHCHANNEL
-// ERR_USERNOTINCHANNEL
-// "KICK #finnish,#english heikki,crisplake :Bye noobs"
 void CommandParser::kick_user(std::string const& arguments, unsigned int user_id)
 {
-    if (arguments.empty())
+    std::stringstream stream(arguments);
+    std::string channel_name;
+    std::string targets;
+    std::string reason;
+
+    std::getline(stream, channel_name, ' ');
+    std::getline(stream, targets, ' ');
+    std::getline(stream, reason, '\0');
+
+    if (reason == ":" || reason.size() == 0) //Irssi sends ":" as default kick, so default kick message is set here
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
+        reason = ":Get rekt kiddo"; //Default kick message
+    }
+
+    stream.str(targets);
+    stream.clear();
+
+    std::vector<std::string> target_list;
+    while (std::getline(stream, targets, ','))
+    {
+        target_list.emplace_back(std::move(targets));
+    }
+
+    if (target_list.empty())
+    {
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"KICK :Not enough parameters"});
         return;
     }
-    std::string args = remove_prefix(arguments, 4);
-    std::string::size_type pos = args.find(" ");
-    if (pos == std::string::npos || !arguments[pos + 1] || arguments.empty())
+    if (!m_channel_database.is_channel(channel_name))
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        m_reply.reply_to_sender(ERR_NOSUCHCHANNEL, user_id, {channel_name, " :No such channel"});
         return;
     }
-    std::string channels = args.substr(0, pos);
-    // std::cout << "Channels:[" << channels << "]\n"; // delete
-    args.erase(0, args.find(" ") + 1);
-    pos = args.find(" ");
-    std::string users = args.substr(0, pos);
-    // std::cout << "Users:[" << users << "]\n"; //delete
-    args.erase(0, args.find(" ") + 1);
-    // std::cout << "Args:[" << args << "]\n"; //delete
-    std::vector<std::string> channel_vec = split_string_to_vector(channels, ",");
-    std::vector<std::string> users_vec = split_string_to_vector(users, ",");
-    // for (unsigned int i = 0; i < channel_vec.size(); i++) //delete
-    //     std::cout << "channel " << i << ":[" << channel_vec[i] << "]\n";  //delete
-    // for (unsigned int i = 0; i < users_vec.size(); i++) //delete
-    //     std::cout << "user " << i << ":[" << users_vec[i] << "]\n";  //delete
-    if (channel_vec.size() > 1 && channel_vec.size() != users_vec.size())
+    if (!m_channel_database.is_user_on_channel(channel_name, user_id))
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n"; // TODO ERR
+        m_reply.reply_to_sender(ERR_NOTONCHANNEL, user_id, {channel_name, " :You're not on that channel"});
         return;
     }
-    if (channel_vec.size() == 1)
+
+    auto& channel_ref = m_channel_database.get_channel(channel_name);
+
+    if (!channel_ref.is_operator(user_id))
     {
-        if (!m_channel_database.is_channel(channel_vec[0])) 
-        {
-            std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
-            return;
-        }
-        Channel& channel_ref = m_channel_database.get_channel(channel_vec[0]);
-        for (std::vector<std::string>::iterator user = users_vec.begin(); user != users_vec.end(); ++user)
-        {
-            if (!m_client_database.is_client(m_client_database.get_user_id(*user)))
-            {
-                std::cout << *user << ":User doesn't exist\n"; //TODO ERR
-                continue;
-            }
-            std::cout << "Kicking:" << *user << " Reason:[" << args << "]\n";
-            channel_ref.kick(user_id, m_client_database.get_user_id(*user));
-            //TODO catch return value
-        }
+        m_reply.reply_to_sender(ERR_CHANOPRIVSNEEDED, user_id, {channel_name, " :You're not channel operator"});
+        return;
     }
-    else
+
+    auto& kicker_ref = m_client_database.get_client(user_id);
+
+    for (auto const& nick : target_list) // Not necessary to do multi targets but its working
     {
-        for (unsigned int i = 0; i < channel_vec.size(); i++)
+        if (!m_client_database.is_nick_in_use(nick))
         {
-            if (!m_channel_database.is_channel(channel_vec[i]))
-            {
-                std::cout << "ERR_NOSUCHCHANNEL\n"; //TODO ERR
-                continue;
-            }
-            Channel& channel_ref = m_channel_database.get_channel(channel_vec[i]);
-            std::cout << "Kicking:" << users_vec[i] << " | Reason:[" << args << "]\n";
-            channel_ref.kick(user_id, m_client_database.get_user_id(users_vec[i]));
-            //TODO get return value
+            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {nick, " ", channel_name, " :They aren't on that channel"});
+            continue;
         }
+
+        unsigned int kicked_id = m_client_database.get_user_id(nick);
+
+        if (!channel_ref.is_subscribed(kicked_id))
+        {
+            m_reply.reply_to_sender(ERR_USERNOTINCHANNEL, user_id, {nick, " ", channel_name, " :They aren't on that channel"});
+            continue;
+        }
+        for (unsigned int channel_user_id : channel_ref.get_users())
+        {
+            auto& channel_client = m_client_database.get_client(channel_user_id);
+            channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
+        }
+        channel_ref.kick(kicked_id);
     }
 }
 
