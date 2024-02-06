@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 14:54:00 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 12:46:31 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void ChannelDatabase::add_channel(std::string const& channel_name, unsigned int 
     Channel channel(user_id);
 
     m_channels[channel_name] = channel;
-    //TODO RPL_TOPIC
 }
 
 void ChannelDatabase::print_all_channels()

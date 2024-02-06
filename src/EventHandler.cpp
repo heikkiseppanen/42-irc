@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 15:00:51 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/05 16:00:28 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,13 @@ void EventHandler::on_client_connected(const Socket& socket)
 
 void EventHandler::on_client_disconnected(Socket const& socket)
 {
-    unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
+    auto it = m_socket_client_table.find(socket.get_file_descriptor());
+    if (it == m_socket_client_table.end())
+    {
+        std::cout << "No client\n";
+        return;
+    }
+    unsigned int id = it->second;
 
     m_socket_client_table.erase(socket.get_file_descriptor());
     m_channels.remove_user(id, ":Connection timeout", m_clients);
@@ -51,7 +57,14 @@ bool find_command(std::string& command, Client& client)
 
 void EventHandler::on_client_readable(Socket const& socket)
 {
-    unsigned int id = m_socket_client_table[socket.get_file_descriptor()];
+    auto it = m_socket_client_table.find(socket.get_file_descriptor());
+    if (it == m_socket_client_table.end())
+    {
+        std::cout << "No client\n";
+        return;
+    }
+    unsigned int id = it->second;
+
     Client& client = m_clients.get_client(id);
 
     char buf[INPUT_BUFFER_SIZE + 1];
@@ -73,7 +86,15 @@ void EventHandler::on_client_readable(Socket const& socket)
 
 void EventHandler::on_client_writeable(Socket const& socket)
 {
-    Client& client = m_clients.get_client(m_socket_client_table[socket.get_file_descriptor()]);
+    auto it = m_socket_client_table.find(socket.get_file_descriptor());
+    if (it == m_socket_client_table.end())
+    {
+        std::cout << "No client\n";
+        return;
+    }
+    unsigned int id = it->second;
+
+    Client& client = m_clients.get_client(id);
     if (client.has_message())
     {
         std::string const& msg = client.get_message();

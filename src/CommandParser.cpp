@@ -386,10 +386,9 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
     client.nick_received();
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTERED
 void CommandParser::user_register(std::string const& arguments, unsigned int user_id)
 {
+    //TODO alreadyregistered
     Client& client = m_client_database.get_client(user_id);
     //if (server_has_no_password)
     client.password_received();

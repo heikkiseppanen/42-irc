@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 17:43:56 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/06 14:52:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void Channel::join_channel(unsigned int user_id)
     m_users.push_back(user_id);
 }
 
-int Channel::leave_channel(unsigned int leave_id)
+void Channel::leave_channel(unsigned int leave_id)
 {
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), leave_id);
     m_users.erase(it);
@@ -37,8 +37,6 @@ int Channel::leave_channel(unsigned int leave_id)
     it = std::find(m_operators.begin(), m_operators.end(), leave_id);
     if (it != m_operators.end())
         m_operators.erase(it);
-    //TODO return RPL_NAMREPLY
-    return m_users.size();
 }
 
 void Channel::remove_invite(unsigned int user_id)
