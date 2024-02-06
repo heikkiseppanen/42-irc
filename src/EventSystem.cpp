@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/02/05 16:09:50 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 17:00:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ void EventSystem::handle(EventHandler& handler)
         {
             Socket client{ static_cast<int>(it->ident) };
 
-            // TODO if multiple events trigger at once for single socket, issues most likely
             if (it->flags & EV_EOF)
             {
                 disconnect_list.push_back(it->ident);
