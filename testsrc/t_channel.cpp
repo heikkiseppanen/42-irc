@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 19:36:49 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/29 19:44:27 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 13:10:17 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void test4_channel()
 {
     Channel c(0);
 
-    c.set_invite_only(0, ADD);
+    c.set_invite_only(ADD);
     for (unsigned int i = 1; i < 6; i++)
     {
         c.invite(0, i);
@@ -99,12 +99,12 @@ void test5_channel()
     c.topic_change("topic");
     if (c.get_topic() != "topic")
         TEST_ERROR("Failed to set/get topic");
-    c.set_op_topic(0, ADD);
+    c.set_op_topic(ADD);
     if (c.is_operator(1))
         c.topic_change("good");
     if (c.get_topic() == "good")
         TEST_ERROR("Set topic without op");
-    c.set_op_topic(0, REMOVE);
+    c.set_op_topic(REMOVE);
     c.topic_change("good");
     if (c.get_topic() != "good")
         TEST_ERROR("Removing op only topic failed");
@@ -115,7 +115,7 @@ void test6_channel()
 {
     Channel c(0);
 
-    c.set_password(0, ADD, "pass123");
+    c.set_password(ADD, "pass123");
     if (c.is_valid_password(""))
         c.join_channel(1);
     if (c.is_subscribed(1))
@@ -124,7 +124,7 @@ void test6_channel()
         c.join_channel(1);
     if (!c.is_subscribed(1))
         TEST_ERROR("Failed to join with password");
-    c.set_password(0, REMOVE, "");
+    c.set_password(REMOVE, "");
     if (c.is_valid_password("123"))
         c.join_channel(2);
     if (!c.is_subscribed(2))
@@ -137,14 +137,16 @@ void test7_channel()
 {
     Channel c(0);
 
-    c.set_op(0, ADD, 1);
+    if (c.is_subscribed(1))
+        c.set_op(ADD, 1);
     if (c.is_operator(1))
         TEST_ERROR("Op without being on channel");
     c.join_channel(1);
-    c.set_op(0, ADD, 1);
+    if (c.is_subscribed(1))
+        c.set_op(ADD, 1);
     if (!c.is_operator(1))
         TEST_ERROR("Couldn't add operator");
-    c.set_op(0, REMOVE, 1);
+    c.set_op(REMOVE, 1);
     if (c.is_operator(1))
         TEST_ERROR("Couldn't remove operator");
     ok();
@@ -155,7 +157,7 @@ void test8_channel()
 {
     Channel c(0);
 
-    c.set_user_limit(0, ADD, 2);
+    c.set_user_limit(ADD, 2);
     c.join_channel(1);
     if (c.is_not_full())
         c.join_channel(2);
@@ -167,7 +169,7 @@ void test8_channel()
         TEST_ERROR("Joined with limit full");
     if (c.is_subscribed(3))
         TEST_ERROR("Joined with limit full");
-    c.set_user_limit(0, REMOVE, 0);
+    c.set_user_limit(REMOVE, 0);
     if (c.is_not_full())
         c.join_channel(2);
     if (c.is_not_full())
