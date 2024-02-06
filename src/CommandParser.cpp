@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 16:45:21 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:49:06 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ void CommandParser::parser(std::string const& message, unsigned int user_id)
     switch (cmd)
     {
         case ERR_NO_CMD:
-            //TODO
             break;
         case PRIVMSG:
             send_privmsg(args, user_id);
@@ -204,9 +203,7 @@ void CommandParser::send_privmsg(std::string const& arguments, unsigned int user
         }
         else
         {
-            //TODO remove multiple targets
-            //TODO change to nosuchnick
-            m_reply.reply_to_sender(ERR_NORECIPIENT, user_id, {":No recipient given (PRIVMSG)"});
+            m_reply.reply_to_sender(ERR_NOSUCHNICK, user_id, {target, " :No such nick/channel"});
         }
     }
 }
