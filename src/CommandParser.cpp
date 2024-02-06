@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 16:51:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:57:41 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,19 +424,16 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
     client.user_received();
 }
 
-// ERR_NEEDMOREPARAMS
-// ERR_ALREADYREGISTRED
-//NEEDS TO BE DONE BEFORE SENDING NICK/USER COMBINATION
 void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
     if (arguments.empty())
     {
-        std::cout << "ERR_NEEDMOREPARAMS\n";
+        m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"PASS :Not enough parameters"});
         return;
     }
     if (m_client_database.is_client(user_id))
     {
-        std::cout << "ERR_ALREADYREGISTRED\n"; //TODO ERR
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
         return;
     }
     //TODO CHECK IF SERVER HAS PASSWORD
