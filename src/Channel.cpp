@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 14:52:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/06 16:44:40 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,6 @@ void Channel::kick(unsigned int kick_id)
     {
         m_operators.erase(it);
     }
-    //TODO return RPL_NAMREPLY?
-    //TODO remove channel if empty
 }
 
 void Channel::invite(unsigned int invite_id)

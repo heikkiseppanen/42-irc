@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 13:48:28 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/06 16:45:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -509,7 +509,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
 
     auto& kicker_ref = m_client_database.get_client(user_id);
 
-    for (auto const& nick : target_list) // Not necessary to do multi targets but its working
+    for (auto const& nick : target_list)
     {
         if (!m_client_database.is_nick_in_use(nick))
         {
@@ -530,6 +530,10 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
             channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
         }
         channel_ref.kick(kicked_id);
+    }
+    if (channel_ref.get_users().empty())
+    {
+        m_channel_database.remove_channel(channel_name);
     }
 }
 
