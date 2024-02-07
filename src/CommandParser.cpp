@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 14:02:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 16:19:16 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -764,7 +764,6 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
             case 'k':
             {
-                //TODO? check valid keyset
                 if (mode_value == ADD)
                 {
                     if (param_count < param_list.size())
