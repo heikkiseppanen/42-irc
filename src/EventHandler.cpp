@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 16:00:28 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 16:15:42 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@ void EventHandler::on_client_disconnected(Socket const& socket)
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
     if (it == m_socket_client_table.end())
     {
-        std::cout << "No client\n";
         return;
     }
     unsigned int id = it->second;
 
+    std::cout << "Deleting client\n";
     m_socket_client_table.erase(socket.get_file_descriptor());
     m_channels.remove_user(id, ":Connection timeout", m_clients);
     m_clients.remove_client(id);
@@ -115,8 +115,8 @@ void EventHandler::cleanup()
 {
     for (int socket_id : m_clients.get_cleanup())
     {
-        m_socket_client_table.erase(socket_id);
         m_clients.remove_client(m_socket_client_table[socket_id]);
+        m_socket_client_table.erase(socket_id);
         Socket(socket_id).close();
     }
     m_clients.empty_cleanup();

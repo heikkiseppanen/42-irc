@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 14:00:22 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/07 14:35:46 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ class CommandParser
         ChannelDatabase& m_channel_database;
         Reply m_reply;
 
-        std::string const& m_password;
+        std::string const m_password;
         
 
         void send_privmsg(std::string const& arguments, unsigned int user_id);
