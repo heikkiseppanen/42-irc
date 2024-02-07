@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 14:30:42 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 12:15:31 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,12 @@ std::stringstream Reply::create_start(ReplyEnum reply, unsigned int user_id)
     msg << " ";
     msg << std::right << std::setfill('0') << std::setw(3) << std::to_string(reply);
     msg << " ";
-    msg << m_clients.get_client(user_id).get_nickname();
+
+    std::string nick = m_clients.get_client(user_id).get_nickname();
+    if (nick.empty())
+        nick = "*"; //For cases when nick is not yet set but need to reply error
+
+    msg << nick;
     return msg;
 }
 
