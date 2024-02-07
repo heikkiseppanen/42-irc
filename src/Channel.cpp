@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 16:11:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 16:44:40 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:29:56 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void Channel::join_channel(unsigned int user_id)
     m_users.push_back(user_id);
 }
 
-void Channel::leave_channel(unsigned int leave_id)
+void Channel::remove_user_from_channel(unsigned int leave_id)
 {
     std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), leave_id);
     m_users.erase(it);
@@ -45,20 +45,6 @@ void Channel::remove_invite(unsigned int user_id)
     if (it != m_invited.end())
     {
         m_invited.erase(it);
-    }
-}
-
-void Channel::kick(unsigned int kick_id)
-{
-    std::vector<unsigned int>::iterator it = std::find(m_users.begin(), m_users.end(), kick_id);
-    if (it == m_users.end())
-        return;
-
-    m_users.erase(it);
-    it = std::find(m_operators.begin(), m_operators.end(), kick_id);
-    if (it != m_operators.end())
-    {
-        m_operators.erase(it);
     }
 }
 

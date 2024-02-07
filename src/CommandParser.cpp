@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 16:59:53 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:30:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, st
     m_commands["TOPIC"] = TOPIC;
     m_commands["MODE"] = MODE;
     m_commands["PING"] = PING;
-    m_commands["PONG"] = PONG;
     m_commands["CAP"] = CAP;
 }
 
@@ -103,9 +102,6 @@ void CommandParser::parser(std::string const& message, unsigned int user_id)
             break;
         case PING:
             receive_ping(args, user_id);
-            break;
-        case PONG:
-            receive_pong(args, user_id);
             break;
         case CAP:
             answer_cap(args, user_id);
@@ -522,7 +518,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
             auto& channel_client = m_client_database.get_client(channel_user_id);
             channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
         }
-        channel_ref.kick(kicked_id);
+        channel_ref.remove_user_from_channel(kicked_id);
     }
     if (channel_ref.get_users().empty())
     {
@@ -846,17 +842,6 @@ void CommandParser::receive_ping(std::string const& arguments, unsigned int user
     m_client_database.get_client(user_id).add_message(":localhost PONG localhost :localhost");
 }
 
-void CommandParser::receive_pong(std::string const& arguments, unsigned int user_id)
-{
-    (void)arguments;
-    (void)user_id;
-    // std::string target = message.substr(5, message.length() - 5);
-    // std::cout << "TYPE:PONG | ORIGIN:" << user_id << " | " << "TARGET:" << target << "\n"; // delete
-    /*TODO IF TARGET EXISTS IN DATABASE*/
-    //ERR_NOORIGIN
-    //ERR_NOSUCHSERVER
-}
-
 void CommandParser::answer_cap(std::string const& arguments, unsigned int user_id)
 {
     //TODO sanitize
@@ -909,7 +894,7 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
         {
             m_client_database.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
         }
-        channel.leave_channel(user_id);
+        channel.remove_user_from_channel(user_id);
         if (channel.get_users().empty())
         {
             m_channel_database.get_channels().erase(channel_name);

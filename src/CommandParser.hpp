@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 16:37:24 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/07 13:25:44 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,10 @@
 
 #include "ClientDatabase.hpp"
 #include "ChannelDatabase.hpp"
+#include "Reply.hpp"
+
 #include <string>
 #include <map>
-#include "Reply.hpp"
 
 enum command
 {
@@ -34,7 +35,6 @@ enum command
     USER,
     PASS,
     PING,
-    PONG,
     CAP
 };
 

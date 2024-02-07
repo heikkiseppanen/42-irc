@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 19:36:49 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 13:10:17 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:30:20 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void test3_channel()
         c.join_channel(i);
         if (!c.is_subscribed(i))
             TEST_ERROR("Joining failed");
-        c.kick(0, i);
+        c.remove_user_from_channel(i);
         if (c.is_subscribed(i))
             TEST_ERROR("Kicking failed");
     }
@@ -191,8 +191,8 @@ void test9_channel()
     if (!c.is_subscribed(1))
         TEST_ERROR("Not on channel");
 
-    c.leave_channel(0);
-    c.leave_channel(1);
+    c.remove_user_from_channel(0);
+    c.remove_user_from_channel(1);
 
     if (c.is_subscribed(0))
         TEST_ERROR("On channel after leave");

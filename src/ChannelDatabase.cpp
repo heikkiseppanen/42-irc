@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 12:46:31 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:28:56 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void ChannelDatabase::remove_user(unsigned int user_id, std::string const& reaso
     {
         if (channel.second.is_subscribed(user_id))
         {
-            channel.second.leave_channel(user_id);
+            channel.second.remove_user_from_channel(user_id);
             for (unsigned int user : channel.second.get_users())
             {
                 client_database.get_client(user).add_message(":" + client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
