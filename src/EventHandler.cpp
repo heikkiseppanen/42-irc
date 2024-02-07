@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 16:15:42 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/07 17:03:10 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,15 @@ void EventHandler::on_client_connected(const Socket& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
     IRC_ASSERT_THROW(it != m_socket_client_table.end(), "Trying to override existing client with new connection");
-    it->second = m_clients.add_client();
+    m_socket_client_table.insert( {socket.get_file_descriptor(), m_clients.add_client()} );
 }
 
 void EventHandler::on_client_disconnected(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for disconnecting socket found");
     unsigned int id = it->second;
 
-    std::cout << "Deleting client\n";
     m_socket_client_table.erase(socket.get_file_descriptor());
     m_channels.remove_user(id, ":Connection timeout", m_clients);
     m_clients.remove_client(id);
@@ -58,7 +57,7 @@ bool find_command(std::string& command, Client& client)
 void EventHandler::on_client_readable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for readable socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
@@ -83,7 +82,7 @@ void EventHandler::on_client_readable(Socket const& socket)
 void EventHandler::on_client_writeable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for writeable socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
