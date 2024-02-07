@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 15:51:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 13:28:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:57:50 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,6 @@ class Channel
 
         void remove_user_from_channel(unsigned int user_id);
         void remove_invite(unsigned int user_id);
-
-        //Operator only
-        void kick(unsigned int kick_id);
         void invite(unsigned int invite_id);
 
         //Channel modes
