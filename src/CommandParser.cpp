@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 16:19:16 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/07 16:19:26 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,10 @@
 #include <vector>
 #include <ctime>
 
-CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time) 
+CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time, std::string const& password) 
 : m_client_database(ClData), m_channel_database(ChData),
-  m_reply(m_client_database, start_time)
+  m_reply(m_client_database, start_time),
+  m_password(password)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;

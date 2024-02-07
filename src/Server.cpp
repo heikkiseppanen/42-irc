@@ -21,7 +21,7 @@ static std::string get_start_time()
 
 void Server::run()
 {
-    EventHandler handler(m_clients, m_channels, get_start_time());
+    EventHandler handler(m_clients, m_channels, get_start_time(), m_password);
 
     while (1)
     {

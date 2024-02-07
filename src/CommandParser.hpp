@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 13:25:44 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 14:00:22 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class CommandParser
 {
     public:
         CommandParser() = delete;
-        CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time);
+        CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time, std::string const& password);
 
         command get_command_type(std::string const& message);
         void parser(std::string const& message, unsigned int user_id);
@@ -54,6 +54,8 @@ class CommandParser
         ClientDatabase& m_client_database;
         ChannelDatabase& m_channel_database;
         Reply m_reply;
+
+        std::string const& m_password;
         
 
         void send_privmsg(std::string const& arguments, unsigned int user_id);
