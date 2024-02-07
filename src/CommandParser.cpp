@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 14:02:07 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 16:20:02 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,10 @@
 #include <vector>
 #include <ctime>
 
-CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time) 
+CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time, std::string const& password) 
 : m_client_database(ClData), m_channel_database(ChData),
-  m_reply(m_client_database, start_time)
+  m_reply(m_client_database, start_time),
+  m_password(password)
 {
     m_commands["PRIVMSG"] = PRIVMSG;
     m_commands["JOIN"] = JOIN;
@@ -318,21 +319,21 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
     }
 }
 
-// ERR_NONICKNAMEGIVEN ":No nickname given"
-// ERR_ERRONEUSNICKNAME "<nick> :Erroneous nickname"
-// ERR_NICKNAMEINUSE "<nick> :Nickname is already in use"
 void CommandParser::change_nick(std::string const& arguments, unsigned int user_id)
 {
     Client& client = m_client_database.get_client(user_id);
-    //if (server_has_no_password)
-    client.password_received();
+
+    if (m_password.empty())
+    {
+        client.password_received();
+    }
     if (!client.has_password())
     {
-        std::cout << "User has not used PASS message\n";
-        //TODO ERR
         return;
     }
+
     std::string nick = arguments;
+
     if (nick.empty())
     {
         m_reply.reply_to_sender(ERR_NONICKNAMEGIVEN, user_id, {":No nickname given"});
@@ -348,9 +349,11 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
         m_reply.reply_to_sender(ERR_NICKNAMEINUSE, user_id, {nick, " :Nickname is already in use"});
         return;
     }
+
     std::string first_set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ[]\''_^{|}";
     std::string second_set = "-0123456789" + first_set;
     std::string::size_type pos;
+
     for (unsigned int i = 0; i < nick.size(); i++)
     {
         if (i == 0)
@@ -380,14 +383,19 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
 
 void CommandParser::user_register(std::string const& arguments, unsigned int user_id)
 {
-    //TODO alreadyregistered
     Client& client = m_client_database.get_client(user_id);
-    //if (server_has_no_password)
-    client.password_received();
+
+    if (client.is_registered())
+    {
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
+        return;
+    }
+    if (m_password.empty())
+    {
+        client.password_received();
+    }
     if (!client.has_password())
     {
-        std::cout << "User has not used PASS message\n";
-        //TODO ERR
         return;
     }
     if (arguments.empty())
@@ -422,18 +430,26 @@ void CommandParser::user_register(std::string const& arguments, unsigned int use
 
 void CommandParser::connection_password(std::string const& arguments, unsigned int user_id)
 {
+    Client& client = m_client_database.get_client(user_id);
+
+    if (client.is_registered())
+    {
+        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
+        return;
+    }
     if (arguments.empty())
     {
         m_reply.reply_to_sender(ERR_NEEDMOREPARAMS, user_id, {"PASS :Not enough parameters"});
         return;
     }
-    if (m_client_database.is_client(user_id))
+    if (!m_password.empty())
     {
-        m_reply.reply_to_sender(ERR_ALREADYREGISTRED, user_id, {":Unauthorized command (already registered)"});
-        return;
+        if (arguments != m_password)
+        {
+            m_reply.reply_to_sender(ERR_PASSWDMISMATCH, user_id, {":Password incorrect"});
+            return;
+        }
     }
-    //TODO CHECK IF SERVER HAS PASSWORD
-    //TODO CHECK IF PASSWORD MATCHES SERVER PASSWORD
     m_client_database.get_client(user_id).password_received();
 }
 
@@ -764,7 +780,6 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
             case 'k':
             {
-                //TODO? check valid keyset
                 if (mode_value == ADD)
                 {
                     if (param_count < param_list.size())

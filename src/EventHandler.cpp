@@ -3,30 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/05 16:00:28 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 17:03:10 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "EventHandler.hpp"
+#include "Debug.hpp"
 
 #include <iostream>
 
 void EventHandler::on_client_connected(const Socket& socket)
 {
-    m_socket_client_table[socket.get_file_descriptor()] = m_clients.add_client();
+    auto it = m_socket_client_table.find(socket.get_file_descriptor());
+    IRC_ASSERT_THROW(it != m_socket_client_table.end(), "Trying to override existing client with new connection");
+    m_socket_client_table.insert( {socket.get_file_descriptor(), m_clients.add_client()} );
 }
 
 void EventHandler::on_client_disconnected(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        std::cout << "No client\n";
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for disconnecting socket found");
     unsigned int id = it->second;
 
     m_socket_client_table.erase(socket.get_file_descriptor());
@@ -58,11 +57,7 @@ bool find_command(std::string& command, Client& client)
 void EventHandler::on_client_readable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        std::cout << "No client\n";
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for readable socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
@@ -87,11 +82,7 @@ void EventHandler::on_client_readable(Socket const& socket)
 void EventHandler::on_client_writeable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        std::cout << "No client\n";
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for writeable socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
@@ -115,8 +106,8 @@ void EventHandler::cleanup()
 {
     for (int socket_id : m_clients.get_cleanup())
     {
-        m_socket_client_table.erase(socket_id);
         m_clients.remove_client(m_socket_client_table[socket_id]);
+        m_socket_client_table.erase(socket_id);
         Socket(socket_id).close();
     }
     m_clients.empty_cleanup();

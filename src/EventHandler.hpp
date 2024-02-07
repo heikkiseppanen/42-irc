@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   EventHandler.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/31 14:21:57 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 14:21:35 by jole             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@
 class EventHandler
 {
     public:
-        inline EventHandler(ClientDatabase& clients, ChannelDatabase& channels, std::string const& start_time)
-            : m_parser(clients, channels, start_time),
+        inline EventHandler(ClientDatabase& clients, ChannelDatabase& channels, std::string const& start_time, std::string const& password)
+            : m_parser(clients, channels, start_time, password),
               m_clients(clients),
               m_channels(channels)
         {}
