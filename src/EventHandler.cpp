@@ -11,21 +11,21 @@
 /* ************************************************************************** */
 
 #include "EventHandler.hpp"
+#include "Debug.hpp"
 
 #include <iostream>
 
 void EventHandler::on_client_connected(const Socket& socket)
 {
-    m_socket_client_table[socket.get_file_descriptor()] = m_clients.add_client();
+    auto it = m_socket_client_table.find(socket.get_file_descriptor());
+    IRC_ASSERT_THROW(it != m_socket_client_table.end(), "Trying to override existing client with new connection");
+    it->second = m_clients.add_client();
 }
 
 void EventHandler::on_client_disconnected(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
     unsigned int id = it->second;
 
     std::cout << "Deleting client\n";
@@ -58,11 +58,7 @@ bool find_command(std::string& command, Client& client)
 void EventHandler::on_client_readable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        std::cout << "No client\n";
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
@@ -87,11 +83,7 @@ void EventHandler::on_client_readable(Socket const& socket)
 void EventHandler::on_client_writeable(Socket const& socket)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
-    if (it == m_socket_client_table.end())
-    {
-        std::cout << "No client\n";
-        return;
-    }
+    IRC_ASSERT_THROW(it == m_socket_client_table.end(), "No client for socket found");
     unsigned int id = it->second;
 
     Client& client = m_clients.get_client(id);
