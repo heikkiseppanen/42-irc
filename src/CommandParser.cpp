@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 13:25:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/07 13:30:34 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -518,7 +518,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
             auto& channel_client = m_client_database.get_client(channel_user_id);
             channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
         }
-        channel_ref.kick(kicked_id);
+        channel_ref.remove_user_from_channel(kicked_id);
     }
     if (channel_ref.get_users().empty())
     {
@@ -894,7 +894,7 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
         {
             m_client_database.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
         }
-        channel.leave_channel(user_id);
+        channel.remove_user_from_channel(user_id);
         if (channel.get_users().empty())
         {
             m_channel_database.get_channels().erase(channel_name);
