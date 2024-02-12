@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:17:19 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 14:21:35 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/12 13:04:42 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class EventHandler
               m_channels(channels)
         {}
 
-        void on_client_connected(Socket const& socket);
+        void on_client_connected(Socket const& socket, std::string const& address);
         void on_client_disconnected(Socket const& socket);
         void on_client_readable(Socket const& socket);
         void on_client_writeable(Socket const& socket);

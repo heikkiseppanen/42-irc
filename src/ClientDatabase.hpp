@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:27 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 12:55:26 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/12 13:05:50 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class ClientDatabase
 {
     public:
-        unsigned int add_client();
+        unsigned int add_client(std::string const& address);
         void remove_client(unsigned int id);
         void print_clients() const;
 

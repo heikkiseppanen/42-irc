@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/02/08 12:40:48 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:04:29 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void EventSystem::handle(EventHandler& handler)
                             EV_SET(&client_event, new_client.get_file_descriptor(), EVFILT_WRITE, EV_ADD, 0, 0, 0);
                             m_changelist.push_back(client_event);
 
-                            handler.on_client_connected(new_client);
+                            handler.on_client_connected(new_client, address);
                         }
                     }
                     else

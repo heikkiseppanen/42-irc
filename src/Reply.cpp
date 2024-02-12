@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 12:15:31 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/12 15:07:52 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 std::stringstream Reply::create_start(ReplyEnum reply, unsigned int user_id)
 {
     std::stringstream msg;
-    msg << ":localhost";
+    msg << ":ircserv";
     msg << " ";
     msg << std::right << std::setfill('0') << std::setw(3) << std::to_string(reply);
     msg << " ";

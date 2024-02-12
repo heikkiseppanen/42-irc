@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 16:20:02 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/12 15:06:14 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,14 +189,14 @@ void CommandParser::send_privmsg(std::string const& arguments, unsigned int user
                 if (channel_user_id != user_id)
                 {
                     auto& channel_client = m_client_database.get_client(channel_user_id);
-                    channel_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
+                    channel_client.add_message(":" + client.get_nickname() + '@' + client.get_address() + " PRIVMSG " + target + ' ' + content);
                 }
             }
         }
         else if (m_client_database.is_nick_in_use(target))
         {
             auto& receiver_client = m_client_database.get_client(m_client_database.get_user_id(target));
-            receiver_client.add_message(":" + client.get_nickname() + " PRIVMSG " + target + ' ' + content);
+            receiver_client.add_message(":" + client.get_nickname() + '@' + client.get_address() + " PRIVMSG " + target + ' ' + content);
         }
         else
         {
@@ -291,7 +291,7 @@ void CommandParser::join_channel(std::string const& arguments, unsigned int user
         for (unsigned int channel_user_id : channel.get_users())
         {
             auto& channel_client = m_client_database.get_client(channel_user_id);
-            channel_client.add_message(":" + client.get_nickname() + " JOIN " + channel_name);
+            channel_client.add_message(":" + client.get_nickname() + '@' + client.get_address() + " JOIN " + channel_name);
         }
 
         if (!channel.is_channel_topic_empty())
@@ -532,7 +532,7 @@ void CommandParser::kick_user(std::string const& arguments, unsigned int user_id
         for (unsigned int channel_user_id : channel_ref.get_users())
         {
             auto& channel_client = m_client_database.get_client(channel_user_id);
-            channel_client.add_message(":" + kicker_ref.get_nickname() + " KICK " + channel_name + " " + nick + " " + reason);
+            channel_client.add_message(':' + kicker_ref.get_nickname() + '@' + kicker_ref.get_address() + " KICK " + channel_name + " " + nick + " " + reason);
         }
         channel_ref.remove_user_from_channel(kicked_id);
     }
@@ -593,7 +593,7 @@ void CommandParser::invite_user(std::string const& arguments, unsigned int user_
     Client& invited_ref = m_client_database.get_client(invited_id);
     Client& inviter_ref = m_client_database.get_client(user_id);
 
-    invited_ref.add_message(inviter_ref.get_nickname() + " INVITE " + nickname + " " + channel_name);
+    invited_ref.add_message(':' + inviter_ref.get_nickname() + '@' + inviter_ref.get_address() + " INVITE " + nickname + " " + channel_name);
 }
 
 void CommandParser::change_topic(std::string const& arguments, unsigned int user_id)
@@ -888,7 +888,7 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
         channels.emplace_back(std::move(channel_name));
     }
 
-    std::string nick = m_client_database.get_client(user_id).get_nickname();
+    auto const& client = m_client_database.get_client(user_id);
 
     for (auto& channel_name : channels)
     {
@@ -907,7 +907,7 @@ void CommandParser::part_command(std::string const& arguments, unsigned int user
         }
         for (auto user : channel.get_users())
         {
-            m_client_database.get_client(user).add_message(":" + nick + " PART " + channel_name + " " + reason);
+            m_client_database.get_client(user).add_message(":" + client.get_nickname() + '@' + client.get_address() +  " PART " + channel_name + " " + reason);
         }
         channel.remove_user_from_channel(user_id);
         if (channel.get_users().empty())
