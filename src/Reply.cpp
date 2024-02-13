@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:52 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/13 12:41:34 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/13 13:04:01 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void Reply::reply_welcome(unsigned int user_id, unsigned int channel_count)
 {
     std::string nick = m_clients.get_client(user_id).get_nickname();
     reply_to_sender(RPL_WELCOME, user_id, {":Welcome to the Internet Relay Network ", nick});
-    reply_to_sender(RPL_YOURHOST, user_id, {":Your host is ircserv running version 1.0.1"});
+    reply_to_sender(RPL_YOURHOST, user_id, {":Your host is ircserv running version 1.0"});
     reply_to_sender(RPL_CREATED, user_id, {":This server was created ", m_start_time});
     reply_to_sender(RPL_MYINFO, user_id, {"ircserv 1.0 * iklot"});
     reply_to_sender(RPL_ISUPPORT, user_id, {"CHANMODES=,o,kl,it MODES=3 :are supported by this server"});
