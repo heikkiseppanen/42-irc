@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/12 15:06:14 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/13 12:30:12 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -846,20 +846,14 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     } 
 }
 
-// ERR_NOORIGIN
-// ERR_NOSUCHSERVER
 void CommandParser::receive_ping(std::string const& arguments, unsigned int user_id)
 {
     (void)arguments;
-    (void)user_id;
-    //TODO errors
-    //TODO hostname
-    m_client_database.get_client(user_id).add_message(":localhost PONG localhost :localhost");
+    m_client_database.get_client(user_id).add_message(":ircserv PONG ircserv :ircserv");
 }
 
 void CommandParser::answer_cap(std::string const& arguments, unsigned int user_id)
 {
-    //TODO sanitize
     if (arguments != "END")
         m_client_database.get_client(user_id).add_message("CAP * LS");
 }
