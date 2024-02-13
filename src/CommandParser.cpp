@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 12:39:21 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/16 12:39:40 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -821,7 +821,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     }
     if (!events.empty())
     {
-        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + " MODE " + channel_name + " " + events;
+        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + '@' + m_client_database.get_client(user_id).get_address() + " MODE " + channel_name + " " + events;
         for (auto& arg : passed_params_list)
         {
             if (&arg == &passed_params_list.front())
