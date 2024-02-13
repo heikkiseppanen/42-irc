@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 17:21:47 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 13:28:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/13 14:11:40 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void ChannelDatabase::print_all_channels()
 
 void ChannelDatabase::remove_user(unsigned int user_id, std::string const& reason, ClientDatabase& client_database)
 {
+    Client& client = client_database.get_client(user_id);
     for (auto& channel : m_channels)
     {
         if (channel.second.is_subscribed(user_id))
@@ -41,7 +42,7 @@ void ChannelDatabase::remove_user(unsigned int user_id, std::string const& reaso
             channel.second.remove_user_from_channel(user_id);
             for (unsigned int user : channel.second.get_users())
             {
-                client_database.get_client(user).add_message(":" + client_database.get_client(user_id).get_nickname() + " QUIT :Quit: " + reason);
+                client_database.get_client(user).add_message(":" + client.get_nickname() + '@' + client.get_address() + " QUIT :Quit: " + reason);
             }
         }
     }
