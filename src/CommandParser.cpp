@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 12:13:10 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/16 12:39:21 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,6 +379,17 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
     if (!client.has_nick() && client.has_user() && client.has_password())
         m_reply.reply_welcome(user_id, m_channel_database.count_channels());
     client.nick_received();
+    for (auto& channel : m_channel_database.get_channels())
+    {
+        if (channel.second.is_subscribed(user_id))
+        {
+            channel.second.remove_user_from_channel(user_id);
+            for (unsigned int user : channel.second.get_users())
+            {
+                m_client_database.get_client(user).add_message(":" + client.get_nickname() + '@' + client.get_address() + " NICK " + nick);
+            }
+        }
+    }
 }
 
 void CommandParser::user_register(std::string const& arguments, unsigned int user_id)
