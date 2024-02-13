@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 12:39:40 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/16 12:39:54 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,6 +375,7 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
             }
         }
     }
+    std::string old_nick = client.get_nickname();
     client.set_nickname(nick);
     if (!client.has_nick() && client.has_user() && client.has_password())
         m_reply.reply_welcome(user_id, m_channel_database.count_channels());
@@ -383,10 +384,9 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
     {
         if (channel.second.is_subscribed(user_id))
         {
-            channel.second.remove_user_from_channel(user_id);
             for (unsigned int user : channel.second.get_users())
             {
-                m_client_database.get_client(user).add_message(":" + client.get_nickname() + '@' + client.get_address() + " NICK " + nick);
+                m_client_database.get_client(user).add_message(":" + old_nick + '@' + client.get_address() + " NICK " + nick);
             }
         }
     }
