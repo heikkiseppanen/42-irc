@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/22 12:21:48 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 15:54:22 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/13 12:52:23 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,55 +20,55 @@
 
 enum ReplyEnum
 {
-    IGNORE, // Incase no reply is meant to be sent
-    RPL_WELCOME = 1, // "Welcome to the Internet Relay Network <nick>!<user>@<host>"
-    RPL_YOURHOST = 2, // "Your host is <servername>, running version <ver>"
-    RPL_CREATED = 3, // "This server was created <date>"
-    RPL_MYINFO = 4, // "<servername> <version> <available user modes> <available channel modes>"
-    RPL_ISUPPORT = 5, // "<client> <1-13 tokens> :are supported by this server"
+    IGNORE, 
+    RPL_WELCOME = 1, 
+    RPL_YOURHOST = 2, 
+    RPL_CREATED = 3, 
+    RPL_MYINFO = 4, 
+    RPL_ISUPPORT = 5, 
 
-    RPL_LUSERCLIENT = 251, // ":There are <integer> users and <integer> services on <integer> servers"
-    RPL_LUSEROP = 252, // "<integer> :operator(s) online"
-    RPL_LUSERUNKNOWN = 253, // "<integer> :unknown connection(s)"
-    RPL_LUSERCHANNELS = 254, // "<integer> :channels formed"
-    RPL_LUSERME = 255, // ":I have <integer> clients and <integer> servers"
+    RPL_LUSERCLIENT = 251, 
+    RPL_LUSEROP = 252, 
+    RPL_LUSERUNKNOWN = 253, 
+    RPL_LUSERCHANNELS = 254, 
+    RPL_LUSERME = 255, 
 
-    RPL_CHANNELMODEIS = 324, // "<channel> <mode> <mode params>"
-    RPL_NOTOPIC = 331, // "<channel> :No topic is set"
-    RPL_TOPIC = 332, // "<channel> :<topic>" 
-    RPL_TOPICWHOTIME = 333, // "<channel> <nick> <setat>" 
-    RPL_INVITING = 341, //"<channel> <nick>"
-    RPL_INVITELIST = 346, // "<channel> <invitemask>"
-    RPL_ENDOFINVITELIST = 347, // "<channel> :End of channel invite list"
-    RPL_NAMREPLY = 353, //"( "=" / "*" / "@" ) <channel>
-        //        :[ "@" / "+" ] <nick> *( " " [ "@" / "+" ] <nick> )
-        //  - "@" is used for secret channels, "*" for private
-        //    channels, and "=" for others (public channels).
-    RPL_ENDOFNAMES = 366, // <channel> :End of /NAMES list"
+    RPL_CHANNELMODEIS = 324, 
+    RPL_NOTOPIC = 331, 
+    RPL_TOPIC = 332, 
+    RPL_TOPICWHOTIME = 333, 
+    RPL_INVITING = 341, 
+    RPL_INVITELIST = 346, 
+    RPL_ENDOFINVITELIST = 347, 
+    RPL_NAMREPLY = 353, 
+        
+        
+        
+    RPL_ENDOFNAMES = 366, 
 
-    ERR_NOSUCHNICK = 401, // "<nickname> :No such nick/channel"
-    ERR_NOSUCHCHANNEL = 403, // "<channel> :No such channel" 
-    ERR_CANNOTSENDTOCHAN = 404, // "<channel name> :Cannot send to channel"
-    ERR_NORECIPIENT = 411, // ":No recipient given (<command>)"
-    ERR_NOTEXTTOSEND = 412, //":No text to send"
-    ERR_NOMOTD = 422, // "<client> :MOTD File is missing"
-    ERR_NONICKNAMEGIVEN = 431, // ":No nickname given"
-    ERR_ERRONEUSNICKNAME = 432, // "<nick> :Erroneous nickname"
-    ERR_NICKNAMEINUSE = 433, // "<nick> :Nickname is already in use"
-    ERR_USERNOTINCHANNEL = 441, // "<nick> <channel> :They aren't on that channel"
-    ERR_NOTONCHANNEL = 442, // "<channel> :You're not on that channel"
-    ERR_USERONCHANNEL = 443, // "<user> <channel> :is already on channel"
-    ERR_NEEDMOREPARAMS = 461, // "<command> :Not enough parameters"
-    ERR_ALREADYREGISTRED = 462, //":Unauthorized command (already registered)"
-    ERR_PASSWDMISMATCH = 464, // "<client> :Password incorrect"
-    ERR_KEYSET = 467, // "<channel> :Channel key already set"
-    ERR_CHANNELISFULL = 471, //  "<channel> :Cannot join channel (+l)"
-    ERR_UNKNOWNMODE = 472, // "<char> :is unknown mode char to me for <channel>"
-    ERR_INVITEONLYCHAN = 473, // "<channel> :Cannot join channel (+i)"
-    ERR_BADCHANNELKEY = 475, // "<channel> :Cannot join channel (+k)"
-    ERR_CHANOPRIVSNEEDED = 482, // "<channel> :You're not channel operator"
+    ERR_NOSUCHNICK = 401, 
+    ERR_NOSUCHCHANNEL = 403, 
+    ERR_CANNOTSENDTOCHAN = 404, 
+    ERR_NORECIPIENT = 411, 
+    ERR_NOTEXTTOSEND = 412, 
+    ERR_NOMOTD = 422, 
+    ERR_NONICKNAMEGIVEN = 431, 
+    ERR_ERRONEUSNICKNAME = 432, 
+    ERR_NICKNAMEINUSE = 433, 
+    ERR_USERNOTINCHANNEL = 441, 
+    ERR_NOTONCHANNEL = 442, 
+    ERR_USERONCHANNEL = 443, 
+    ERR_NEEDMOREPARAMS = 461, 
+    ERR_ALREADYREGISTRED = 462, 
+    ERR_PASSWDMISMATCH = 464, 
+    ERR_KEYSET = 467, 
+    ERR_CHANNELISFULL = 471, 
+    ERR_UNKNOWNMODE = 472, 
+    ERR_INVITEONLYCHAN = 473, 
+    ERR_BADCHANNELKEY = 475, 
+    ERR_CHANOPRIVSNEEDED = 482, 
 
-    ERR_INVALIDKEY = 525,  // "<client> <channel> :Key is not well-formed"
+    ERR_INVALIDKEY = 525,  
 };
 
 class Reply

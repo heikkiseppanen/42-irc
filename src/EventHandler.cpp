@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:43:21 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 17:03:10 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:05:38 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 
 #include <iostream>
 
-void EventHandler::on_client_connected(const Socket& socket)
+void EventHandler::on_client_connected(Socket const& socket, std::string const& address)
 {
     auto it = m_socket_client_table.find(socket.get_file_descriptor());
     IRC_ASSERT_THROW(it != m_socket_client_table.end(), "Trying to override existing client with new connection");
-    m_socket_client_table.insert( {socket.get_file_descriptor(), m_clients.add_client()} );
+    m_socket_client_table.insert( {socket.get_file_descriptor(), m_clients.add_client(address)} );
 }
 
 void EventHandler::on_client_disconnected(Socket const& socket)

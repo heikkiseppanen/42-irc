@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/16 13:47:22 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/06 12:55:32 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/12 13:49:57 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <iostream>
 #include <algorithm>
 
-unsigned int ClientDatabase::add_client()
+unsigned int ClientDatabase::add_client(std::string const& address)
 {
     int id;
     if (m_free_ids.empty())
@@ -28,6 +28,7 @@ unsigned int ClientDatabase::add_client()
         id = m_free_ids.top();
         m_free_ids.pop();
     }
+    m_clients[id].set_address(address);
     return id;
 }
 

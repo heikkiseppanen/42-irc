@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 15:39:37 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/07 14:35:46 by jole             ###   ########.fr       */
+/*   Updated: 2024/02/13 12:50:43 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ class CommandParser
 
         std::string const m_password;
         
-
         void send_privmsg(std::string const& arguments, unsigned int user_id);
         void join_channel(std::string const& arguments, unsigned int user_id);
         void change_nick(std::string const& arguments, unsigned int user_id);
@@ -69,7 +68,6 @@ class CommandParser
         void change_topic(std::string const& arguments, unsigned int user_id);
         void change_mode(std::string const& arguments, unsigned int user_id);
         void receive_ping(std::string const& arguments, unsigned int user_id);
-        void receive_pong(std::string const& arguments, unsigned int user_id);
         void answer_cap(std::string const& arguments, unsigned int user_id);
         void part_command(std::string const& arguments, unsigned int user_id);
 

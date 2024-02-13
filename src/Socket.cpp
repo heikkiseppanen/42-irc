@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Socket.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hseppane <marvin@42.ft>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/02/12 13:00:36 by hseppane          #+#    #+#             */
+/*   Updated: 2024/02/12 15:07:52 by hseppane         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Socket.hpp"
 
 #include "Debug.hpp"
@@ -5,6 +17,7 @@
 #include <string>
 #include <netdb.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 
 static int create_listener_socket(struct addrinfo const* address)
 {
@@ -43,34 +56,14 @@ Socket::Socket(char const* ip, char const* port)
 
     IRC_ASSERT_THROW(error != 0, std::string("Getaddrinfo failed: ") + gai_strerror(error));
 
-    struct addrinfo* ipv4 = NULL;
-    struct addrinfo* ipv6 = NULL;
     for(struct addrinfo* it = address_list; it != NULL; it = it->ai_next)
     {
-        if (ipv4 == NULL && it->ai_family == AF_INET)
+        if (it->ai_family == AF_INET)
         {
-            ipv4 = it;
-        }
-        else if (ipv6 == NULL && it->ai_family == AF_INET6)
-        {
-            ipv6 = it;
-        }
-        if (ipv4 && ipv6)
-        {
+            std::cout << "Attempting to create IPv4 socket...\n";
+            m_file_descriptor = create_listener_socket(it);
             break;
         }
-    }
-
-    Socket listener;
-    if (ipv6 != NULL)
-    {
-        std::cout << "Attempting to create IPv6 socket...\n";
-        m_file_descriptor = create_listener_socket(ipv6);
-    }
-    if (ipv4 != NULL && !is_valid())
-    {
-        std::cout << "Attempting to create IPv4 socket...\n";
-        m_file_descriptor = create_listener_socket(ipv4);
     }
 
     freeaddrinfo(address_list);
@@ -84,7 +77,7 @@ ssize_t Socket::send(void const* source, size_t size) const
 {
     ssize_t sent = ::send(m_file_descriptor, source, size, 0);
 
-    IRC_ASSERT_THROW(sent == -1, std::string("Send error: ") + std::strerror(errno));
+    IRC_ASSERT_THROW(sent == -1, "Socket " + std::to_string(m_file_descriptor) + std::string(" send error: ") + std::strerror(errno));
 
     return sent;
 }
@@ -93,23 +86,31 @@ ssize_t Socket::receive(void* destination, size_t size) const
 {
     ssize_t received = ::recv(m_file_descriptor, destination, size, 0);
 
-    IRC_ASSERT_THROW(received == -1, std::string("Recv error: ") + std::strerror(errno));
+    IRC_ASSERT_THROW(received == -1, "Socket " + std::to_string(m_file_descriptor) + std::string(" recv error: ") + std::strerror(errno));
 
     return received;
 }
 
-Socket Socket::accept() const
+Socket Socket::accept(std::string& address_out) const
 {
-    //struct sockaddr_storage address;
-    //socklen_t address_size = sizeof(address);
+    struct sockaddr_storage address {};
+    socklen_t address_size = sizeof(address);
 
-    std::cout << m_file_descriptor << " accepting inbound connection.\n";
-
-    Socket client(::accept(m_file_descriptor, NULL, NULL));
-
-    fcntl(client.get_file_descriptor(), F_SETFL, O_NONBLOCK);
+    Socket client(::accept(m_file_descriptor, (struct sockaddr *)(&address), &address_size));
 
     IRC_ASSERT_THROW(!client.is_valid(), std::string("Accepting incoming connection failed: ") + std::strerror(errno) + '\n');
+
+    if (address.ss_family != AF_INET)
+    {
+        client.close();
+        IRC_ASSERT_THROW(!client.is_valid(), "Rejected incoming connection: Only IPv4 connections supported since IPv6 string conversion is too advanced for subject to allow :)");
+    }
+    
+    fcntl(client.get_file_descriptor(), F_SETFL, O_NONBLOCK);
+
+    address_out = std::string(inet_ntoa(((struct sockaddr_in *)(&address))->sin_addr));
+
+    std::cout << "Socket " << m_file_descriptor << " accepted inbound connection from: " << address_out << '\n';
 
     return client;
 }

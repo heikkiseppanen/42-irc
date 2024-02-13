@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/29 12:54:10 by emajuri           #+#    #+#             */
-/*   Updated: 2024/01/30 14:53:39 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/12 13:11:35 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,9 @@ class Client
 
         inline std::string const& get_nickname() const { return m_nickname; }
         inline void set_nickname(std::string const& nick) { m_nickname = nick; }
+
+        inline std::string const& get_address() const { return m_address; }
+        inline void set_address(std::string const& address) { m_address = address; }
 
         //messages
         inline void add_message(std::string const& msg) { m_message_queue.push_back(msg + "\r\n"); }
@@ -59,8 +62,11 @@ class Client
 
     private:
         std::string m_nickname;
-        std::vector<std::string> m_message_queue;
+        std::string m_address;
         std::string m_buffer;
+
+        std::vector<std::string> m_message_queue;
+
         unsigned int m_sent_count;
         int m_registered;
         bool m_quitting;

@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/23 09:33:23 by hseppane          #+#    #+#             */
-/*   Updated: 2024/02/06 17:00:34 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/12 13:04:29 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,8 @@ void EventSystem::handle(EventHandler& handler)
                     {
                         for (auto connection_count = it->data; connection_count > 0; --connection_count)
                         {
-                            Socket new_client = m_listener.accept();
+                            std::string address;
+                            Socket new_client = m_listener.accept(address);
 
                             struct kevent client_event = {};
 
@@ -84,7 +85,7 @@ void EventSystem::handle(EventHandler& handler)
                             EV_SET(&client_event, new_client.get_file_descriptor(), EVFILT_WRITE, EV_ADD, 0, 0, 0);
                             m_changelist.push_back(client_event);
 
-                            handler.on_client_connected(new_client);
+                            handler.on_client_connected(new_client, address);
                         }
                     }
                     else
