@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/13 12:30:12 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/13 12:44:05 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -678,24 +678,6 @@ std::string CommandParser::get_current_modes(std::string channel_name)
     return (modestring);
 }
 
-//MODE #Finnish +il 100 Wiz
-/* 
-i - invite-only channel flag; TYPE D
-t - topic settable by channel operator only flag; TYPE D
-k - set a channel key (password). TYPE C
-o - give/take channel operator privileges TYPE B
-l - set the user limit to channel; TYPE C
-*/
-
-// ERR_NEEDMOREPPARAMS
-// RPL_CHANMODEIS
-// ERR_NOSUCHCHANNEL
-// ERR_NOTONCHANNEL
-// ERR_CHANOPRIVSNEEDED
-// ERR_UNKNOWNMODE
-// ERR_INVALIDKEY
-
-//MODE #finnish +itk
 void CommandParser::change_mode(std::string const& arguments, unsigned int user_id)
 {
     std::stringstream stream(arguments);
