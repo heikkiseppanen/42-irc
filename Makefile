@@ -24,8 +24,8 @@ DEP := $(OBJ:%.o=%.d)
 # Compilation 
 
 CPP := c++
-CPPFLAGS := -Wall -Werror -Wextra -std=c++17 -fsanitize=address,undefined -g
-LDFLAGS := -std=c++17 -fsanitize=address,undefined -g
+CPPFLAGS := -Wall -Werror -Wextra -std=c++17
+LDFLAGS := -std=c++17
 
 # Rules
 
