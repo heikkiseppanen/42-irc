@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 13:15:45 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/16 13:16:56 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -384,7 +384,7 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
 
     std::unordered_map<int, char> uniq_ids;
 
-    for (auto& [_ ,channel] : m_channel_database.get_channels())
+    for (auto& [_, channel] : m_channel_database.get_channels())
     {
         if (channel.is_subscribed(user_id))
         {
