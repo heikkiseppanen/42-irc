@@ -6,7 +6,7 @@
 /*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/13 12:44:05 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/16 12:13:10 by hseppane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,7 +179,7 @@ void CommandParser::send_privmsg(std::string const& arguments, unsigned int user
     {
         if (target[0] == '#')
         {
-            if (!m_channel_database.is_channel(target))
+            if (!m_channel_database.is_channel(target) || !m_channel_database.is_user_on_channel(target, user_id))
             {
                 m_reply.reply_to_sender(ERR_CANNOTSENDTOCHAN, user_id, {target, " :Cannot sent to channel"});
                 continue;
