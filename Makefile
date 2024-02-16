@@ -29,7 +29,10 @@ LDFLAGS := -std=c++17
 
 # Rules
 
-all: $(NAME) 
+all: release $(NAME) 
+
+release: CPPFLAGS+= -O3
+release: $(NAME)
 
 debug: CPPFLAGS+= -g -fsanitize=address,undefined
 debug: LDFLAGS+= -g -fsanitize=address,undefined
