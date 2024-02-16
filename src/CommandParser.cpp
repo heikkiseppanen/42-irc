@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 12:39:54 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/16 13:09:40 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <ctime>
+#include <unordered_map>
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time, std::string const& password) 
 : m_client_database(ClData), m_channel_database(ChData),
@@ -380,15 +381,22 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
     if (!client.has_nick() && client.has_user() && client.has_password())
         m_reply.reply_welcome(user_id, m_channel_database.count_channels());
     client.nick_received();
+
+    std::unordered_map<int, char> uniq_ids;
+
     for (auto& channel : m_channel_database.get_channels())
     {
         if (channel.second.is_subscribed(user_id))
         {
             for (unsigned int user : channel.second.get_users())
             {
-                m_client_database.get_client(user).add_message(":" + old_nick + '@' + client.get_address() + " NICK " + nick);
+                uniq_ids[user];
             }
         }
+    }
+    for (auto& [id, _] : uniq_ids)
+    {
+        m_client_database.get_client(id).add_message(":" + old_nick + '@' + client.get_address() + " NICK " + nick);
     }
 }
 
