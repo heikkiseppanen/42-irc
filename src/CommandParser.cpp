@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jole <jole@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 12:13:10 by hseppane         ###   ########.fr       */
+/*   Updated: 2024/02/16 13:16:56 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <ctime>
+#include <unordered_map>
 
 CommandParser::CommandParser(ClientDatabase& ClData, ChannelDatabase& ChData, std::string const& start_time, std::string const& password) 
 : m_client_database(ClData), m_channel_database(ChData),
@@ -375,10 +376,28 @@ void CommandParser::change_nick(std::string const& arguments, unsigned int user_
             }
         }
     }
+    std::string old_nick = client.get_nickname();
     client.set_nickname(nick);
     if (!client.has_nick() && client.has_user() && client.has_password())
         m_reply.reply_welcome(user_id, m_channel_database.count_channels());
     client.nick_received();
+
+    std::unordered_map<int, char> uniq_ids;
+
+    for (auto& [_, channel] : m_channel_database.get_channels())
+    {
+        if (channel.is_subscribed(user_id))
+        {
+            for (unsigned int user : channel.get_users())
+            {
+                uniq_ids[user];
+            }
+        }
+    }
+    for (auto& [id, _] : uniq_ids)
+    {
+        m_client_database.get_client(id).add_message(":" + old_nick + '@' + client.get_address() + " NICK " + nick);
+    }
 }
 
 void CommandParser::user_register(std::string const& arguments, unsigned int user_id)
@@ -810,7 +829,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
     }
     if (!events.empty())
     {
-        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + " MODE " + channel_name + " " + events;
+        std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + '@' + m_client_database.get_client(user_id).get_address() + " MODE " + channel_name + " " + events;
         for (auto& arg : passed_params_list)
         {
             if (&arg == &passed_params_list.front())
