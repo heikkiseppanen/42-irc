@@ -6,7 +6,7 @@
 /*   By: emajuri <emajuri@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/17 12:04:54 by emajuri           #+#    #+#             */
-/*   Updated: 2024/02/16 13:16:56 by emajuri          ###   ########.fr       */
+/*   Updated: 2024/02/21 17:34:17 by emajuri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -783,7 +783,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             {
                 if (mode_value == ADD)
                 {
-                    if (param_count < param_list.size())
+                    if (param_list.size() <= param_count)
                         break;
                     channel_ref.set_password(mode_value, param_list[param_count]);
                     passed_params_list.emplace_back(param_list[param_count++]);
@@ -795,7 +795,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
             case 'o':
             {
-                if (param_count < param_list.size())
+                if (param_list.size() <= param_count)
                     break;
                 std::string const nick = param_list[param_count++];
                 if (!m_client_database.is_nick_in_use(nick))
@@ -809,7 +809,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             {
                 if (mode_value == ADD)
                 {
-                    if (param_count < param_list.size() || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
+                    if (param_list.size() <= param_count || param_list[param_count].find_first_not_of("0123456789") != std::string::npos)
                         break;
                     channel_ref.set_user_limit(mode_value, std::stoul(param_list[param_count]));
                     passed_params_list.emplace_back(param_list[param_count++]);
@@ -827,7 +827,7 @@ void CommandParser::change_mode(std::string const& arguments, unsigned int user_
             }
         }
     }
-    if (!events.empty())
+    if (!events.empty() && events != "+" && events != "-")
     {
         std::string event_message = ":" + m_client_database.get_client(user_id).get_nickname() + '@' + m_client_database.get_client(user_id).get_address() + " MODE " + channel_name + " " + events;
         for (auto& arg : passed_params_list)
